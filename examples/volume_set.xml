@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<emotivaControl>
+  <set_volume value="-15" ack="yes" />
+</emotivaControl>
