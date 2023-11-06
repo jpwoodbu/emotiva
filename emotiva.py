@@ -83,7 +83,7 @@ class Device:
         s.bind(('', self.control_port))
         while True:
           data, _ = s.recvfrom(4096)
-          print('control port: ', data.decode('utf-8'))
+          print('control port:\n', data.decode('utf-8'))
     t = threading.Thread(target=listen, name='control listener')
     self._threads.append(t)
     t.start()
@@ -96,7 +96,7 @@ class Device:
         s.bind(('', self.notify_port))
         while True:
           data, _ = s.recvfrom(4096)
-          print('notify port: ', data.decode('utf-8'))
+          print('notify port:\n', data.decode('utf-8'))
     t = threading.Thread(target=listen, name='notify listener')
     self._threads.append(t)
     t.start()
