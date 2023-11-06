@@ -11,12 +11,12 @@ _LISTENING_PORT = 7001
 _XML_HEADER = '<?xml version="1.0" encoding="utf-8"?>'
 
 
-def format_command(command: str) -> bytes:
+def _format_command(command: str) -> bytes:
   return (_XML_HEADER + command).encode(encoding='utf-8')
 
 
 def ping():
-  data = format_command('<emotivaPing />')
+  data = _format_command('<emotivaPing />')
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
     s.sendto(data, ('<broadcast>', _PING_PORT))
