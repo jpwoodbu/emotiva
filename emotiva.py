@@ -52,7 +52,6 @@ class Device:
   _write_lock: threading.Lock = dataclasses.field(
     default_factory=threading.Lock)
 
-
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
       logging.debug('sending: %s', data.decode('utf-8'))
@@ -111,7 +110,6 @@ class Device:
       elif name == 'volume':
         self.volume = float(value)
       
-  
   def _dispatch_data(self, data: str) -> None:
     root = xml.etree.ElementTree.fromstring(data)
     # An push notification related to a subscription.
