@@ -122,12 +122,6 @@ def broadcast_ping():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
     s.sendto(data, ('<broadcast>', _PING_PORT))
 
-def unicast_ping(ip_address: str):
-  address = ipaddress.IPv4Address(ip_address)  # Validates IP address
-  data = _format_command('<emotivaPing />')
-  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.sendto(data, (str(address), _PING_PORT))
-
 
 def parseTransponder(data: str) -> Device:
   root = xml.etree.ElementTree.fromstring(data)
@@ -144,14 +138,11 @@ def parseTransponder(data: str) -> Device:
       _int_from_element(root, './control/setupPortTCP'))
 
 
-def _listen_for_transponder(timeout: float, ip_address: str) -> Device:
+def _listen_for_transponder(timeout: float) -> Device:
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind(('', TRANSPONDER_PORT))
     s.settimeout(timeout)
-    if ip_address:
-      unicast_ping(ip_address)
-    else:
-      broadcast_ping()
+    broadcast_ping()
     data, address = s.recvfrom(4096)
     device = parseTransponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
