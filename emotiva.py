@@ -44,13 +44,13 @@ class Device:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
       s.sendto(data, (str(self.address), self.control_port))
 
-  def _command(self, command: str, value: str = '0', ack: bool = False) -> None:
+  def command(self, command: str, value: str = '0', ack: bool = False) -> None:
     data = _format_command(
         '<emotivaControl><{} value="{}" ack="{}" /></emotivaControl>'.format(
             command, value, 'yes' if ack else 'no'))
     self._send(data)
 
-  def _subscribe(self, fields: list[str]) -> None:
+  def subscribe(self, fields: list[str]) -> None:
     data = _format_command(
       '<emotivaSubscription>{}</emotivaSubscription>'.format(
         _fields_to_xml(fields)))
@@ -59,7 +59,7 @@ class Device:
     for f in fields:
       self._subscribed_fields.add(f)
 
-  def _unsubscribe(self, fields: list[str]) -> None:
+  def unsubscribe(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUnsubscribe>{}</emotivaUnsubscribe>'.format(
            _fields_to_xml(fields)))
@@ -68,10 +68,10 @@ class Device:
     for f in fields:
       self._subscribed_fields.remove(f)
 
-  def _unsubscribe_all(self):
-    self._unsubscribe(list(self._subscribed_fields))
+  def unsubscribe_all(self):
+    self.unsubscribe(list(self._subscribed_fields))
 
-  def _update(self, fields: list[str]) -> None:
+  def update(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUpdate>{}</emotivaUpdate>'.format(_fields_to_xml(fields)))
     print(data.decode('utf-8'))
@@ -100,6 +100,10 @@ class Device:
     t = threading.Thread(target=listen, name='notify listener')
     self._threads.append(t)
     t.start()
+  
+  def start_listeners(self):
+    self.start_control_listener()
+    self.start_notification_listener()
 
 
 def _text_from_element(tree: xml.etree.ElementTree.Element, xpath: str) -> str:
@@ -156,34 +160,30 @@ class Devices(threading.Thread):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
       s.bind(('', _TRANSPONDER_PORT))
       while True:
-        data, address = s.recvfrom(1024)
+        data, address = s.recvfrom(4096)
         device = _parseTransponder(data.decode('utf-8'))
         device.address = ipaddress.ip_address(address[0])  # type:ignore
         self._upsert_device(device)
 
-  def single_device(self) -> Device:
-    """Returns a Device object if only one was found on the network.
 
-    It is most likely only a single Emotiva device is on the network. The
-    protocol also makes it difficult for a remote to talk to more than one
-    Emotiva device at a time.
-
-    Raises:
-      RuntimeError: No devices have been discovered.
-      RuntimeError: More than one device has been discovered.
-    """
-    if not self.devices:
-      raise RuntimeError('No devices have been discovered.')
-    if len(self.devices) > 1:
-      raise RuntimeError('More than one device found.')
-    return next(iter(self.devices.values()))
+def _listen_for_transponder(timeout: float) -> Device:
+  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+    s.bind(('', _TRANSPONDER_PORT))
+    s.settimeout(timeout)
+    ping()
+    data, address = s.recvfrom(4096)
+    device = _parseTransponder(data.decode('utf-8'))
+    device.address = ipaddress.ip_address(address[0])  # type:ignore
+    return device
 
 
-def main():
-  devices = Devices()
-  devices.start()
-  ping()
-
-
-if __name__ == '__main__':
-  main()
+def discovery(timeout_sec: float = 1.0) -> Device | None:
+  """This provides a simpler interface for getting a device.
+  
+  This function should be avoided if there is more than one Emotiva device you
+  wish to control on the network.
+  """
+  try:
+    return _listen_for_transponder(timeout_sec)
+  except socket.timeout:
+    return None
