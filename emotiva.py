@@ -43,12 +43,14 @@ class Device:
   info_port: int
   setup_port_tcp: int
   address: ipaddress.IPv4Address | None = None
-  _threads: list = dataclasses.field(default_factory=list)
-  _subscribed_fields: set = dataclasses.field(default_factory=set)
-  power: bool = False
+  power: str = ''
   source: str = ''
   mode: str = ''
-  volume: int = 0
+  volume: float = 0.0
+  _threads: list = dataclasses.field(default_factory=list)
+  _subscribed_fields: set = dataclasses.field(default_factory=set)
+  _write_lock: threading.Lock = dataclasses.field(
+    default_factory=threading.Lock)
 
 
   def _send(self, data: bytes) -> None:
@@ -86,19 +88,63 @@ class Device:
         '<emotivaUpdate>{}</emotivaUpdate>'.format(_fields_to_xml(fields)))
     self._send(data)
 
+  def update_all(self) -> None:
+    """Requests an update for all fields this object can track."""
+    self.update(['power', 'source', 'mode', 'volume'])
+
+  def _parse_update(self, tree: xml.etree.ElementTree.Element) -> None:
+    for child in tree:
+      name = child.tag
+      try:
+        value = child.attrib['value']
+      except KeyError:
+        raise ValueError(
+          'Could not parse update data. No "value" attribute in {}'.format(
+            child.attrib))
+
+      if name == 'power':
+        self.power = value
+      elif name == 'source':
+        self.source = value
+      elif name == 'mode':
+        self.mode = value
+      elif name == 'volume':
+        self.volume = float(value)
+      
+  
+  def _dispatch_data(self, data: str) -> None:
+    root = xml.etree.ElementTree.fromstring(data)
+    # An push notification related to a subscription.
+    if root.tag == 'emotivaNotify':
+      pass
+    # An acknowledgement of a control request.
+    elif root.tag == 'emotivaAck':
+      pass
+    # A response to a subscription request.
+    elif root.tag == 'emotivaSubscription':
+      pass
+    # An acknowledgement of an unsubscribe request.
+    elif root.tag == 'emotivaUnsubscribe':
+      pass
+    # A response to an update request.
+    elif root.tag == 'emotivaUpdate':
+      self._parse_update(root)
+
   def _start_listener(self, name: str, port: int):
     def listen():
       with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('', port))
         while True:
           data, address = s.recvfrom(4096)
-          logging.debug('received by %s:\n %s', name, data.decode('utf-8'))
           if address[0] != str(self.address):
             logging.warn(
               'Ignoring unexpected packets from %s to port %s.',
               address[0], port) 
             continue 
-    t = threading.Thread(target=listen, name=name)
+          decoded_data = data.decode('utf-8')
+          logging.debug('received by %s:\n %s', name, decoded_data)
+          self._dispatch_data(decoded_data)
+    t = threading.Thread(target=listen, name=name, daemon=True)
     self._threads.append(t)
     t.start()
 
@@ -160,10 +206,14 @@ def main(argv: list[str]) -> None:
   del argv  # unused
   console = code.InteractiveConsole()
   console.push('import emotiva')
+  console.push('d = emotiva.discovery()')
+  console.push('d.start_listeners()')
+  console.push('d.update_all()')
   console.interact(
     banner=(
       'The emotiva module has been imported. '
-      'Try `device = emotiva.discovery()`'))
+      'An object named "d" has been created which represents a local Emotiva '
+      'device.'))
 
 
 if __name__ == '__main__':
