@@ -149,14 +149,14 @@ def _listen_for_transponder(timeout: float) -> Device:
     return device
 
 
-def discovery(timeout_sec: float = 1.0, ip_address: str = '') -> Device | None:
+def discovery(timeout_sec: float = 1.0) -> Device | None:
   """This provides a simpler interface for getting a device.
   
   This function should be avoided if there is more than one Emotiva device you
   wish to control on the network. See the multi_device module.
   """
   try:
-    return _listen_for_transponder(timeout_sec, ip_address)
+    return _listen_for_transponder(timeout_sec)
   except socket.timeout:
     return None
 
@@ -165,7 +165,10 @@ def main(argv: list[str]) -> None:
   del argv  # unused
   console = code.InteractiveConsole()
   console.push('import emotiva')
-  console.interact()
+  console.interact(
+    banner=(
+      'The emotiva module has been imported. '
+      'Try `device = emotiva.discovery()`'))
 
 
 if __name__ == '__main__':
