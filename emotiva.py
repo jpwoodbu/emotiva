@@ -6,6 +6,7 @@ import threading
 import xml.etree.ElementTree
 
 from absl import app
+from absl import logging
 
 
 TRANSPONDER_PORT = 7001
@@ -52,6 +53,7 @@ class Device:
 
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+      logging.debug('sending: %s', data.decode('utf-8'))
       s.sendto(data, (str(self.address), self.control_port))
 
   def command(self, command: str, value: str = '0', ack: bool = False) -> None:
@@ -64,7 +66,6 @@ class Device:
     data = _format_command(
       '<emotivaSubscription>{}</emotivaSubscription>'.format(
         _fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
     for f in fields:
       self._subscribed_fields.add(f)
@@ -73,7 +74,6 @@ class Device:
     data = _format_command(
         '<emotivaUnsubscribe>{}</emotivaUnsubscribe>'.format(
            _fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
     for f in fields:
       self._subscribed_fields.remove(f)
@@ -84,42 +84,36 @@ class Device:
   def update(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUpdate>{}</emotivaUpdate>'.format(_fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
 
-  def start_control_listener(self):
+  def _start_listener(self, name: str, port: int):
     def listen():
       with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind(('', self.control_port))
+        s.bind(('', port))
         while True:
-          data, _ = s.recvfrom(4096)
-          print('control port:\n', data.decode('utf-8'))
-    t = threading.Thread(target=listen, name='control listener')
+          data, address = s.recvfrom(4096)
+          logging.debug('received by %s:\n %s', name, data.decode('utf-8'))
+          if address[0] != str(self.address):
+            logging.warn(
+              'Ignoring unexpected packets from %s to port %s.',
+              address[0], port) 
+            continue 
+    t = threading.Thread(target=listen, name=name)
     self._threads.append(t)
     t.start()
 
-  # It seems that some messages come back to the remove on the control port.
-  # E.g. acks for control messages, like a subscription request.
-  def start_notification_listener(self):
-    def listen():
-      with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind(('', self.notify_port))
-        while True:
-          data, _ = s.recvfrom(4096)
-          print('notify port:\n', data.decode('utf-8'))
-    t = threading.Thread(target=listen, name='notify listener')
-    self._threads.append(t)
-    t.start()
-  
   def start_listeners(self):
-    self.start_control_listener()
-    self.start_notification_listener()
+    self._start_listener('control', self.control_port)
+    # It seems that some messages come back to the remote on the control port.
+    # E.g. acks for control messages, like a subscription request.
+    self._start_listener('notify', self.notify_port)
 
 
 def broadcast_ping():
   data = _format_command('<emotivaPing />')
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
+    logging.debug('broadcasting: %s', data.decode('utf-8'))
     s.sendto(data, ('<broadcast>', _PING_PORT))
 
 
@@ -144,6 +138,7 @@ def _listen_for_transponder(timeout: float) -> Device:
     s.settimeout(timeout)
     broadcast_ping()
     data, address = s.recvfrom(4096)
+    logging.debug('transponder port: \n%s', data.decode('utf-8'))
     device = parseTransponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
     return device
