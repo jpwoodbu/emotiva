@@ -1,8 +1,11 @@
+import code
 import dataclasses
 import ipaddress
 import socket
 import threading
 import xml.etree.ElementTree
+
+from absl import app
 
 
 TRANSPONDER_PORT = 7001
@@ -41,6 +44,11 @@ class Device:
   address: ipaddress.IPv4Address | None = None
   _threads: list = dataclasses.field(default_factory=list)
   _subscribed_fields: set = dataclasses.field(default_factory=set)
+  power: bool = False
+  source: str = ''
+  mode: str = ''
+  volume: int = 0
+
 
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -108,11 +116,17 @@ class Device:
     self.start_notification_listener()
 
 
-def ping():
+def broadcast_ping():
   data = _format_command('<emotivaPing />')
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
     s.sendto(data, ('<broadcast>', _PING_PORT))
+
+def unicast_ping(ip_address: str):
+  address = ipaddress.IPv4Address(ip_address)  # Validates IP address
+  data = _format_command('<emotivaPing />')
+  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+    s.sendto(data, (str(address), _PING_PORT))
 
 
 def parseTransponder(data: str) -> Device:
@@ -130,24 +144,38 @@ def parseTransponder(data: str) -> Device:
       _int_from_element(root, './control/setupPortTCP'))
 
 
-def _listen_for_transponder(timeout: float) -> Device:
+def _listen_for_transponder(timeout: float, ip_address: str) -> Device:
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind(('', TRANSPONDER_PORT))
     s.settimeout(timeout)
-    ping()
+    if ip_address:
+      unicast_ping(ip_address)
+    else:
+      broadcast_ping()
     data, address = s.recvfrom(4096)
     device = parseTransponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
     return device
 
 
-def discovery(timeout_sec: float = 1.0) -> Device | None:
+def discovery(timeout_sec: float = 1.0, ip_address: str = '') -> Device | None:
   """This provides a simpler interface for getting a device.
   
   This function should be avoided if there is more than one Emotiva device you
-  wish to control on the network.
+  wish to control on the network. See the multi_device module.
   """
   try:
-    return _listen_for_transponder(timeout_sec)
+    return _listen_for_transponder(timeout_sec, ip_address)
   except socket.timeout:
     return None
+
+
+def main(argv: list[str]) -> None:
+  del argv  # unused
+  console = code.InteractiveConsole()
+  console.push('import emotiva')
+  console.interact()
+
+
+if __name__ == '__main__':
+  app.run(main)

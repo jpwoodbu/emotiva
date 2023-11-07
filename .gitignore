@@ -1,1 +1,3 @@
 *.pyc
+# Ignore Bazel symlink.
+/bazel-*
