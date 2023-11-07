@@ -1,13 +1,12 @@
 import dataclasses
-from datetime import datetime
 import ipaddress
 import socket
 import threading
 import xml.etree.ElementTree
 
 
+TRANSPONDER_PORT = 7001
 _PING_PORT = 7000
-_TRANSPONDER_PORT = 7001
 _XML_HEADER = '<?xml version="1.0" encoding="utf-8"?>'
 
 
@@ -15,15 +14,19 @@ def _format_command(command: str) -> bytes:
   return (_XML_HEADER + command).encode(encoding='utf-8')
 
 
-def ping():
-  data = _format_command('<emotivaPing />')
-  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
-    s.sendto(data, ('<broadcast>', _PING_PORT))
-
-
 def _fields_to_xml(fields: list[str]) -> str:
   return ''.join(['<{} />'.format(f) for f in fields])
+
+
+def _text_from_element(tree: xml.etree.ElementTree.Element, xpath: str) -> str:
+  e = tree.find(xpath)
+  if e is None:
+    raise ValueError('{} not found while parsing XML'.format(xpath))
+  return e.text  # type: ignore
+
+
+def _int_from_element(*args, **kwargs) -> int:
+  return int(_text_from_element(*args, **kwargs))
 
 
 @dataclasses.dataclass
@@ -35,7 +38,6 @@ class Device:
   notify_port: int
   info_port: int
   setup_port_tcp: int
-  last_seen: datetime
   address: ipaddress.IPv4Address | None = None
   _threads: list = dataclasses.field(default_factory=list)
   _subscribed_fields: set = dataclasses.field(default_factory=set)
@@ -106,18 +108,14 @@ class Device:
     self.start_notification_listener()
 
 
-def _text_from_element(tree: xml.etree.ElementTree.Element, xpath: str) -> str:
-  e = tree.find(xpath)
-  if e is None:
-    raise ValueError('{} not found while parsing XML'.format(xpath))
-  return e.text  # type: ignore
+def ping():
+  data = _format_command('<emotivaPing />')
+  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
+    s.sendto(data, ('<broadcast>', _PING_PORT))
 
 
-def _int_from_element(*args, **kwargs) -> int:
-  return int(_text_from_element(*args, **kwargs))
-
-
-def _parseTransponder(data: str) -> Device:
+def parseTransponder(data: str) -> Device:
   root = xml.etree.ElementTree.fromstring(data)
   if root.tag != 'emotivaTransponder':
     raise ValueError(
@@ -129,50 +127,16 @@ def _parseTransponder(data: str) -> Device:
       _int_from_element(root, './control/controlPort'),
       _int_from_element(root, './control/notifyPort'),
       _int_from_element(root, './control/infoPort'),
-      _int_from_element(root, './control/setupPortTCP'),
-      last_seen=datetime.now())
-
-
-class Devices(threading.Thread):
-
-  devices: dict[str, Device]
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.devices = dict()
-
-  def _upsert_device(self, device) -> None:
-    address = str(device.address)
-    if address in self.devices:
-      d = self.devices[address]
-      d.model = device.model
-      d.name = device.name
-      d.control_version = device.control_version
-      d.control_port = device.control_port
-      d.notify_port = device.notify_port
-      d.info_port = device.info_port
-      d.setup_port_tcp = device.setup_port_tcp
-      d.last_seen = datetime.now()
-    else:
-      self.devices[address] = device
-
-  def run(self):
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-      s.bind(('', _TRANSPONDER_PORT))
-      while True:
-        data, address = s.recvfrom(4096)
-        device = _parseTransponder(data.decode('utf-8'))
-        device.address = ipaddress.ip_address(address[0])  # type:ignore
-        self._upsert_device(device)
+      _int_from_element(root, './control/setupPortTCP'))
 
 
 def _listen_for_transponder(timeout: float) -> Device:
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.bind(('', _TRANSPONDER_PORT))
+    s.bind(('', TRANSPONDER_PORT))
     s.settimeout(timeout)
     ping()
     data, address = s.recvfrom(4096)
-    device = _parseTransponder(data.decode('utf-8'))
+    device = parseTransponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
     return device
 
