@@ -170,7 +170,7 @@ def broadcast_ping():
     s.sendto(data, ('<broadcast>', _PING_PORT))
 
 
-def parseTransponder(data: str) -> Device:
+def parse_transponder(data: str) -> Device:
   root = xml.etree.ElementTree.fromstring(data)
   if root.tag != 'emotivaTransponder':
     raise ValueError(
@@ -192,7 +192,7 @@ def _listen_for_transponder(timeout: float) -> Device:
     broadcast_ping()
     data, address = s.recvfrom(4096)
     logging.debug('transponder port: \n%s', data.decode('utf-8'))
-    device = parseTransponder(data.decode('utf-8'))
+    device = parse_transponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
     return device
 
