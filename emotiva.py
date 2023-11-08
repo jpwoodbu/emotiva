@@ -1,6 +1,7 @@
 import code
 import dataclasses
 import ipaddress
+import pprint
 import socket
 import threading
 import xml.etree.ElementTree
@@ -64,6 +65,9 @@ class Device:
       'audio_input', 'audio_bitstream', 'audio_bits',
       'video_input', 'video_format', 'video_space'
   )
+
+  def pprint(self):
+    pprint.pprint(self)
 
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -212,6 +216,7 @@ class Device:
 
   def display_info(self) -> None:
     self.command('info')
+
 
 def broadcast_ping():
   data = _format_command('<emotivaPing />')
