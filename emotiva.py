@@ -47,13 +47,23 @@ class Device:
   source: str = ''
   mode: str = ''
   volume: float = 0.0
+  audio_input: str = ''
+  audio_bitstream: str = ''
+  audio_bits: str = ''
+  video_input: str = ''
+  video_format: str = ''
+  video_space: str = ''
   _threads: list = dataclasses.field(default_factory=list)
   _subscribed_fields: set = dataclasses.field(default_factory=set)
   _write_lock: threading.Lock = dataclasses.field(
     default_factory=threading.Lock)
 
   # List of tracked fields. Used for *_all() convenience functions.
-  _FIELDS = ('power', 'source', 'mode', 'volume')
+  _FIELDS = (
+      'power', 'source', 'mode', 'volume',
+      'audio_input', 'audio_bitstream', 'audio_bits',
+      'video_input', 'video_format', 'video_space'
+  )
 
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -122,6 +132,18 @@ class Device:
           self.mode = value
         elif name == 'volume':
           self.volume = float(value)
+        elif name == 'audio_input':
+          self.audio_input = value
+        elif name == 'audio_bitstream':
+          self.audio_bitstream = value
+        elif name == 'audio_bits':
+          self.audio_bits = value
+        elif name == 'video_input':
+          self.video_input = value
+        elif name == 'video_format':
+          self.video_format = value
+        elif name == 'video_space':
+          self.video_space = value
       
   def _dispatch_data(self, data: str) -> None:
     root = xml.etree.ElementTree.fromstring(data)
@@ -185,6 +207,11 @@ class Device:
   def set_mode_stereo(self) -> None:
     self.command('stereo')
 
+  def toggle_loudness(self) -> None:
+    self.command('loudness')
+
+  def display_info(self) -> None:
+    self.command('info')
 
 def broadcast_ping():
   data = _format_command('<emotivaPing />')
