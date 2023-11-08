@@ -161,6 +161,30 @@ class Device:
     # E.g. acks for control messages, like a subscription request.
     self._start_listener('notify', self.notify_port)
 
+  def power_on(self) -> None:
+    self.command('power_on')
+
+  def power_off(self) -> None:
+    self.command('power_off')
+
+  def set_volume(self, value: int) -> None:
+    if value < -96 or value > 11:
+      raise ValueError(
+        'Invalid volume value: {} is not between -96 and 11'.format(value))
+    self.command('set_volume', str(value))
+
+  def set_input_optical1(self) -> None:
+    self.command('optical1')
+
+  def set_mode_auto(self) -> None:
+    self.command('auto')
+
+  def set_mode_direct(self) -> None:
+    self.command('direct')
+
+  def set_mode_stereo(self) -> None:
+    self.command('stereo')
+
 
 def broadcast_ping():
   data = _format_command('<emotivaPing />')
