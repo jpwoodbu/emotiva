@@ -52,6 +52,9 @@ class Device:
   _write_lock: threading.Lock = dataclasses.field(
     default_factory=threading.Lock)
 
+  # List of tracked fields. Used for *_all() convenience functions.
+  _FIELDS = ('power', 'source', 'mode', 'volume')
+
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
       logging.debug('sending: %s', data.decode('utf-8'))
@@ -71,13 +74,21 @@ class Device:
     for f in fields:
       self._subscribed_fields.add(f)
 
+  def subscribe_all(self) -> None:
+    self.subscribe(list(self._FIELDS))
+
   def unsubscribe(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUnsubscribe>{}</emotivaUnsubscribe>'.format(
            _fields_to_xml(fields)))
     self._send(data)
     for f in fields:
-      self._subscribed_fields.remove(f)
+      try:
+        self._subscribed_fields.remove(f)
+      except KeyError:
+        # We may be unsubscribing with a new instance, perhaps to clean up state
+        # on the Emotiva device.
+        pass
 
   def unsubscribe_all(self):
     self.unsubscribe(list(self._subscribed_fields))
@@ -89,44 +100,42 @@ class Device:
 
   def update_all(self) -> None:
     """Requests an update for all fields this object can track."""
-    self.update(['power', 'source', 'mode', 'volume'])
+    self.update(list(self._FIELDS))
 
-  def _parse_update(self, tree: xml.etree.ElementTree.Element) -> None:
+  def _parse_data(
+      self, tree: xml.etree.ElementTree.Element) -> None:
     for child in tree:
       name = child.tag
       try:
         value = child.attrib['value']
       except KeyError:
         raise ValueError(
-          'Could not parse update data. No "value" attribute in {}'.format(
-            child.attrib))
+          'Could not parse update/notify/subscription data. '
+          'No "value" attribute in {}'.format(child.attrib))
 
-      if name == 'power':
-        self.power = value
-      elif name == 'source':
-        self.source = value
-      elif name == 'mode':
-        self.mode = value
-      elif name == 'volume':
-        self.volume = float(value)
+      with self._write_lock:
+        if name == 'power':
+          self.power = value
+        elif name == 'source':
+          self.source = value
+        elif name == 'mode':
+          self.mode = value
+        elif name == 'volume':
+          self.volume = float(value)
       
   def _dispatch_data(self, data: str) -> None:
     root = xml.etree.ElementTree.fromstring(data)
-    # An push notification related to a subscription.
-    if root.tag == 'emotivaNotify':
-      pass
+    # emotivaUpdate: A push notification related to a subscription.
+    # emotivaNotify: A response to an update request.
+    # emotivaSubscription: A response to a subscription request.
+    if root.tag in ('emotivaNotify', 'emotivaUpdate', 'emotivaSubscription'):
+      self._parse_data(root)
     # An acknowledgement of a control request.
     elif root.tag == 'emotivaAck':
-      pass
-    # A response to a subscription request.
-    elif root.tag == 'emotivaSubscription':
-      pass
-    # An acknowledgement of an unsubscribe request.
+      logging.info('received ack: %s', data)
+    # An acknowledgement of an unsubscribe request().
     elif root.tag == 'emotivaUnsubscribe':
-      pass
-    # A response to an update request.
-    elif root.tag == 'emotivaUpdate':
-      self._parse_update(root)
+      logging.info('received unscubscribe ack: %s', data)
 
   def _start_listener(self, name: str, port: int):
     def listen():
