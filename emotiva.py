@@ -48,6 +48,7 @@ class Device:
   source: str = ''
   mode: str = ''
   volume: float = 0.0
+  loudness: str = ''
   audio_input: str = ''
   audio_bitstream: str = ''
   audio_bits: str = ''
@@ -61,7 +62,7 @@ class Device:
 
   # List of tracked fields. Used for *_all() convenience functions.
   _FIELDS = (
-      'power', 'source', 'mode', 'volume',
+      'power', 'source', 'mode', 'volume', 'loudness',
       'audio_input', 'audio_bitstream', 'audio_bits',
       'video_input', 'video_format', 'video_space'
   )
@@ -74,7 +75,13 @@ class Device:
       logging.debug('sending: %s', data.decode('utf-8'))
       s.sendto(data, (str(self.address), self.control_port))
 
-  def command(self, command: str, value: str = '0', ack: bool = False) -> None:
+  def command(
+      self, command: str, value: str = '0', ack: bool = False,
+      override: bool = False) -> None:
+    if not override and command == 'set_volume':
+      raise ValueError(
+          'For safety, setting the volume can only be done with the '
+          'set_volume() method.')
     data = _format_command(
         '<emotivaControl><{} value="{}" ack="{}" /></emotivaControl>'.format(
             command, value, 'yes' if ack else 'no'))
@@ -136,6 +143,8 @@ class Device:
           self.mode = value
         elif name == 'volume':
           self.volume = float(value)
+        elif name == 'loudness':
+          self.loudness = value
         elif name == 'audio_input':
           self.audio_input = value
         elif name == 'audio_bitstream':
@@ -193,11 +202,15 @@ class Device:
   def power_off(self) -> None:
     self.command('power_off')
 
-  def set_volume(self, value: int) -> None:
+  def set_volume(
+      self, value: int, i_know_what_i_am_doing: bool = False) -> None:
+    if value > -10 and not i_know_what_i_am_doing:
+      raise ValueError(
+          'Volume levels higher than -10 require knowing what you are doing.')
     if value < -96 or value > 11:
       raise ValueError(
         'Invalid volume value: {} is not between -96 and 11'.format(value))
-    self.command('set_volume', str(value))
+    self.command('set_volume', str(value), override=True)
 
   def set_input_optical1(self) -> None:
     self.command('optical1')
