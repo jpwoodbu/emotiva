@@ -235,7 +235,13 @@ def discovery(timeout_sec: float = 1.0) -> Device | None:
 
 def main(argv: list[str]) -> None:
   del argv  # unused
-  console = code.InteractiveConsole()
+  import readline
+  import rlcompleter
+  vars = globals()
+  vars.update(locals())
+  readline.set_completer(rlcompleter.Completer(vars).complete)
+  readline.parse_and_bind('tab: complete')
+  console = code.InteractiveConsole(vars)
   console.push('import emotiva')
   console.push('d = emotiva.discovery()')
   console.push('d.start_listeners()')
