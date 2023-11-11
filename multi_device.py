@@ -39,6 +39,6 @@ class Devices(threading.Thread):
       s.bind(('', emotiva.TRANSPONDER_PORT))
       while True:
         data, address = s.recvfrom(4096)
-        device = emotiva.parseTransponder(data.decode('utf-8'))
+        device = emotiva.parse_transponder(data.decode('utf-8'))
         device.address = ipaddress.ip_address(address[0])  # type:ignore
         self._upsert_device(device)

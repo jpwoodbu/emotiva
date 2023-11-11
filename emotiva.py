@@ -1,11 +1,13 @@
 import code
 import dataclasses
 import ipaddress
+import pprint
 import socket
 import threading
 import xml.etree.ElementTree
 
 from absl import app
+from absl import logging
 
 
 TRANSPONDER_PORT = 7001
@@ -42,19 +44,44 @@ class Device:
   info_port: int
   setup_port_tcp: int
   address: ipaddress.IPv4Address | None = None
-  _threads: list = dataclasses.field(default_factory=list)
-  _subscribed_fields: set = dataclasses.field(default_factory=set)
-  power: bool = False
+  power: str = ''
   source: str = ''
   mode: str = ''
-  volume: int = 0
+  volume: float = 0.0
+  loudness: str = ''
+  audio_input: str = ''
+  audio_bitstream: str = ''
+  audio_bits: str = ''
+  video_input: str = ''
+  video_format: str = ''
+  video_space: str = ''
+  _threads: list = dataclasses.field(default_factory=list)
+  _subscribed_fields: set = dataclasses.field(default_factory=set)
+  _write_lock: threading.Lock = dataclasses.field(
+    default_factory=threading.Lock)
 
+  # List of tracked fields. Used for *_all() convenience functions.
+  _FIELDS = (
+      'power', 'source', 'mode', 'volume', 'loudness',
+      'audio_input', 'audio_bitstream', 'audio_bits',
+      'video_input', 'video_format', 'video_space'
+  )
+
+  def pprint(self):
+    pprint.pprint(self)
 
   def _send(self, data: bytes) -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+      logging.debug('sending: %s', data.decode('utf-8'))
       s.sendto(data, (str(self.address), self.control_port))
 
-  def command(self, command: str, value: str = '0', ack: bool = False) -> None:
+  def command(
+      self, command: str, value: str = '0', ack: bool = False,
+      override: bool = False) -> None:
+    if not override and command == 'set_volume':
+      raise ValueError(
+          'For safety, setting the volume can only be done with the '
+          'set_volume() method.')
     data = _format_command(
         '<emotivaControl><{} value="{}" ack="{}" /></emotivaControl>'.format(
             command, value, 'yes' if ack else 'no'))
@@ -64,19 +91,25 @@ class Device:
     data = _format_command(
       '<emotivaSubscription>{}</emotivaSubscription>'.format(
         _fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
     for f in fields:
       self._subscribed_fields.add(f)
+
+  def subscribe_all(self) -> None:
+    self.subscribe(list(self._FIELDS))
 
   def unsubscribe(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUnsubscribe>{}</emotivaUnsubscribe>'.format(
            _fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
     for f in fields:
-      self._subscribed_fields.remove(f)
+      try:
+        self._subscribed_fields.remove(f)
+      except KeyError:
+        # We may be unsubscribing with a new instance, perhaps to clean up state
+        # on the Emotiva device.
+        pass
 
   def unsubscribe_all(self):
     self.unsubscribe(list(self._subscribed_fields))
@@ -84,52 +117,129 @@ class Device:
   def update(self, fields: list[str]) -> None:
     data = _format_command(
         '<emotivaUpdate>{}</emotivaUpdate>'.format(_fields_to_xml(fields)))
-    print(data.decode('utf-8'))
     self._send(data)
 
-  def start_control_listener(self):
+  def update_all(self) -> None:
+    """Requests an update for all fields this object can track."""
+    self.update(list(self._FIELDS))
+
+  def _parse_data(
+      self, tree: xml.etree.ElementTree.Element) -> None:
+    for child in tree:
+      name = child.tag
+      try:
+        value = child.attrib['value']
+      except KeyError:
+        raise ValueError(
+          'Could not parse update/notify/subscription data. '
+          'No "value" attribute in {}'.format(child.attrib))
+
+      with self._write_lock:
+        if name == 'power':
+          self.power = value
+        elif name == 'source':
+          self.source = value
+        elif name == 'mode':
+          self.mode = value
+        elif name == 'volume':
+          self.volume = float(value)
+        elif name == 'loudness':
+          self.loudness = value
+        elif name == 'audio_input':
+          self.audio_input = value
+        elif name == 'audio_bitstream':
+          self.audio_bitstream = value
+        elif name == 'audio_bits':
+          self.audio_bits = value
+        elif name == 'video_input':
+          self.video_input = value
+        elif name == 'video_format':
+          self.video_format = value
+        elif name == 'video_space':
+          self.video_space = value
+      
+  def _dispatch_data(self, data: str) -> None:
+    root = xml.etree.ElementTree.fromstring(data)
+    # emotivaUpdate: A push notification related to a subscription.
+    # emotivaNotify: A response to an update request.
+    # emotivaSubscription: A response to a subscription request.
+    if root.tag in ('emotivaNotify', 'emotivaUpdate', 'emotivaSubscription'):
+      self._parse_data(root)
+    # An acknowledgement of a control request.
+    elif root.tag == 'emotivaAck':
+      logging.info('received ack: %s', data)
+    # An acknowledgement of an unsubscribe request().
+    elif root.tag == 'emotivaUnsubscribe':
+      logging.info('received unscubscribe ack: %s', data)
+
+  def _start_listener(self, name: str, port: int):
     def listen():
       with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind(('', self.control_port))
+        s.bind(('', port))
         while True:
-          data, _ = s.recvfrom(4096)
-          print('control port:\n', data.decode('utf-8'))
-    t = threading.Thread(target=listen, name='control listener')
+          data, address = s.recvfrom(4096)
+          if address[0] != str(self.address):
+            logging.warn(
+              'Ignoring unexpected packets from %s to port %s.',
+              address[0], port) 
+            continue 
+          decoded_data = data.decode('utf-8')
+          logging.debug('received by %s:\n %s', name, decoded_data)
+          self._dispatch_data(decoded_data)
+    t = threading.Thread(target=listen, name=name, daemon=True)
     self._threads.append(t)
     t.start()
 
-  # It seems that some messages come back to the remove on the control port.
-  # E.g. acks for control messages, like a subscription request.
-  def start_notification_listener(self):
-    def listen():
-      with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind(('', self.notify_port))
-        while True:
-          data, _ = s.recvfrom(4096)
-          print('notify port:\n', data.decode('utf-8'))
-    t = threading.Thread(target=listen, name='notify listener')
-    self._threads.append(t)
-    t.start()
-  
   def start_listeners(self):
-    self.start_control_listener()
-    self.start_notification_listener()
+    self._start_listener('control', self.control_port)
+    # It seems that some messages come back to the remote on the control port.
+    # E.g. acks for control messages, like a subscription request.
+    self._start_listener('notify', self.notify_port)
+
+  def power_on(self) -> None:
+    self.command('power_on')
+
+  def power_off(self) -> None:
+    self.command('power_off')
+
+  def set_volume(
+      self, value: int, i_know_what_i_am_doing: bool = False) -> None:
+    if value > -10 and not i_know_what_i_am_doing:
+      raise ValueError(
+          'Volume levels higher than -10 require knowing what you are doing.')
+    if value < -96 or value > 11:
+      raise ValueError(
+        'Invalid volume value: {} is not between -96 and 11'.format(value))
+    self.command('set_volume', str(value), override=True)
+
+  def set_input_optical1(self) -> None:
+    self.command('optical1')
+
+  def set_mode_auto(self) -> None:
+    self.command('auto')
+
+  def set_mode_direct(self) -> None:
+    self.command('direct')
+
+  def set_mode_stereo(self) -> None:
+    self.command('stereo')
+
+  def toggle_loudness(self) -> None:
+    self.command('loudness')
+
+  def display_info(self) -> None:
+    self.command('info')
 
 
 def broadcast_ping():
   data = _format_command('<emotivaPing />')
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
+    logging.debug('broadcasting: %s', data.decode('utf-8'))
     s.sendto(data, ('<broadcast>', _PING_PORT))
 
-def unicast_ping(ip_address: str):
-  address = ipaddress.IPv4Address(ip_address)  # Validates IP address
-  data = _format_command('<emotivaPing />')
-  with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-    s.sendto(data, (str(address), _PING_PORT))
 
-
-def parseTransponder(data: str) -> Device:
+def parse_transponder(data: str) -> Device:
   root = xml.etree.ElementTree.fromstring(data)
   if root.tag != 'emotivaTransponder':
     raise ValueError(
@@ -144,37 +254,48 @@ def parseTransponder(data: str) -> Device:
       _int_from_element(root, './control/setupPortTCP'))
 
 
-def _listen_for_transponder(timeout: float, ip_address: str) -> Device:
+def _listen_for_transponder(timeout: float) -> Device:
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind(('', TRANSPONDER_PORT))
     s.settimeout(timeout)
-    if ip_address:
-      unicast_ping(ip_address)
-    else:
-      broadcast_ping()
+    broadcast_ping()
     data, address = s.recvfrom(4096)
-    device = parseTransponder(data.decode('utf-8'))
+    logging.debug('transponder port: \n%s', data.decode('utf-8'))
+    device = parse_transponder(data.decode('utf-8'))
     device.address = ipaddress.ip_address(address[0])  # type:ignore
     return device
 
 
-def discovery(timeout_sec: float = 1.0, ip_address: str = '') -> Device | None:
+def discovery(timeout_sec: float = 1.0) -> Device | None:
   """This provides a simpler interface for getting a device.
   
   This function should be avoided if there is more than one Emotiva device you
   wish to control on the network. See the multi_device module.
   """
   try:
-    return _listen_for_transponder(timeout_sec, ip_address)
+    return _listen_for_transponder(timeout_sec)
   except socket.timeout:
     return None
 
 
 def main(argv: list[str]) -> None:
   del argv  # unused
-  console = code.InteractiveConsole()
+  import readline
+  import rlcompleter
+  vars = globals()
+  vars.update(locals())
+  readline.set_completer(rlcompleter.Completer(vars).complete)
+  readline.parse_and_bind('tab: complete')
+  console = code.InteractiveConsole(vars)
   console.push('import emotiva')
-  console.interact()
+  console.push('d = emotiva.discovery()')
+  console.push('d.start_listeners()')
+  console.push('d.update_all()')
+  console.interact(
+    banner=(
+      'The emotiva module has been imported. '
+      'An object named "d" has been created which represents a local Emotiva '
+      'device.'))
 
 
 if __name__ == '__main__':
