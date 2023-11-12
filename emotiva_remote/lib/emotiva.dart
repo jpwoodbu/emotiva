@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -8,7 +9,7 @@ const transponderPort = 7001;
 InternetAddress broadcastAddress = InternetAddress('255.255.255.255');
 
 void main() async {
-  await listForTransponder();
+  await listForTransponder(1);
 }
 
 Future<void> broadcastPing() async {
@@ -19,18 +20,20 @@ Future<void> broadcastPing() async {
   if (socket.send(data, broadcastAddress, pingPort) == 0) {
     throw 'Unable to send broadcast ping.';
   }
+  print('Sent broadcast ping.');
   socket.close();
 }
 
-Future<void> listForTransponder() async {
+Future<void> listForTransponder(int timeoutSec) async {
   final stream =
       await RawDatagramSocket.bind(InternetAddress.anyIPv4, transponderPort);
   stream.writeEventsEnabled = false;
+  final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
   await broadcastPing();
-  await for (final event in stream) {
+  await for (final event in streamWithTimeout) {
     switch (event) {
       case RawSocketEvent.read:
-        final Datagram? datagram = stream.receive();
+        final datagram = stream.receive();
         print(datagram!.address);
         print(String.fromCharCodes(datagram.data));
         stream.close();
