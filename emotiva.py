@@ -5,7 +5,6 @@ import socket
 import threading
 import xml.etree.ElementTree
 
-from absl import app
 from absl import logging
 
 
