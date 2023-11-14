@@ -29,4 +29,10 @@ py_library(
 py_interactive(
     name = "emotiva_interactive",
     deps = [":emotiva"],
+    pushes = [
+        "import emotiva",
+        "d = emotiva.discovery()",
+        "d.start_listeners()",
+        "d.update_all()",
+    ],
 )
