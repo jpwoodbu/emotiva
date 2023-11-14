@@ -5,7 +5,6 @@ import rlcompleter
 
 def main():
   vars = globals()
-  vars.update(locals())
   readline.set_completer(rlcompleter.Completer(vars).complete)
   readline.parse_and_bind('tab: complete')
   console = code.InteractiveConsole(vars)
