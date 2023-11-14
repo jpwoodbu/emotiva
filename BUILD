@@ -8,7 +8,7 @@ compile_pip_requirements(
     requirements_txt = "requirements_lock.txt",
 )
 
-py_binary(
+py_library(
     name = "emotiva",
     srcs = ["emotiva.py"],
     deps = [
@@ -21,5 +21,11 @@ py_library(
     srcs = ["multi_device.py"],
     deps = [
         ":emotiva",
-    ]
+    ],
+)
+
+py_binary(
+    name = "cli",
+    srcs = ["cli.py"],
+    deps = [":emotiva"],
 )
