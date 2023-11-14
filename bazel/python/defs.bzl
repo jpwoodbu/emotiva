@@ -19,24 +19,24 @@ if __name__ == '__main__':
   main()
 """
 
-def _cli_impl(ctx):
-  out = ctx.actions.declare_file('cli.py')
+def _interactive_impl(ctx):
+  out = ctx.actions.declare_file('_interactive.py')
   ctx.actions.write(
     output = out,
     content = _SCRIPT,
   )
   return [DefaultInfo(files = depset([out]))]
 
-_cli = rule(
-    implementation = _cli_impl,
+_interactive = rule(
+    implementation = _interactive_impl,
 )
 
 def py_interactive(name, deps, **kwargs):
-  _cli(name="_cli")
+  _interactive(name="_interactive")
   native.py_binary(
     name = name,
-    srcs = [":_cli"],
-    main = "cli.py",
+    srcs = [":_interactive"],
+    main = "_interactive.py",
     deps = deps,
     **kwargs,
   )
