@@ -1,11 +1,13 @@
 """Macro to create an interactive Python shell for a py_library."""
 
+
 def _quote_args(args):
   """Wrap Pyhton statements in quotes.
 
-  This prevents statements with whitespace from being broken up within sys.argv
+  This prevents statements with whitespace from being broken up within sys.argv.
   """
   return ['"{}"'.format(a) for a in args]
+
 
 def py_interactive(name, deps, pushes, **kwargs):
   """Create a py_binary target to run an interactive Python shell.
