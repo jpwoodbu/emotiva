@@ -1,6 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@requirements//:requirements.bzl", "requirement")
+load(":py_interactive.bzl", "py_interactive")
 
 compile_pip_requirements(
     name = "requirements",
@@ -24,8 +25,8 @@ py_library(
     ],
 )
 
-py_binary(
+
+py_interactive(
     name = "cli",
-    srcs = ["cli.py"],
     deps = [":emotiva"],
 )
