@@ -27,6 +27,6 @@ py_library(
 
 
 py_interactive(
-    name = "cli",
+    name = "emotiva_interactive",
     deps = [":emotiva"],
 )
