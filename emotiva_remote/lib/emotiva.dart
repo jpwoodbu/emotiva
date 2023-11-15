@@ -129,6 +129,9 @@ class Device {
 
     // Set the source port to the controlPort since no matter what our source
     // port is, the device will send the response to the controlPort.
+    // WARNING: This approach won't work if we want to listen for changes to
+    // subscribed fields as those messages will also arrive on the controlPort
+    // and we'll need to have a long running lister on that port to catch them.
     final stream =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
     final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
@@ -152,4 +155,6 @@ class Device {
       }
     }
   }
+
+  void parseData() {}
 }
