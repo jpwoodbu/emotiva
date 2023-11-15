@@ -15,6 +15,7 @@ void main() async {
   var device = await listForTransponder(1);
   print(device.address);
   print(device.name);
+  await device.update();
 }
 
 Future<void> broadcastPing() async {
@@ -60,8 +61,8 @@ String _textFromElement(XmlNode node, String xpath) {
     return node.xpath(xpath).first.innerText;
   } catch (e) {
     print('Error trying to fetch $xpath: $e');
-    return '';
   }
+  return '';
 }
 
 int _intFromElement(XmlNode node, String xpath) {
@@ -117,4 +118,38 @@ class Device {
   String videoInput = '';
   String videoFormat = '';
   String videoSpace = '';
+
+  Future<void> update({int timeoutSec = 1}) async {
+    // TODO - use the xml builder instead.
+    var text = ('<?xml version="1.0" encoding="utf-8"?>'
+        '<emotivaUpdate>'
+        '<power />'
+        '<volume />'
+        '</emotivaUpdate>');
+
+    // Set the source port to the controlPort since no matter what our source
+    // port is, the device will send the response to the controlPort.
+    final stream =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
+    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
+    await for (final event in streamWithTimeout) {
+      switch (event) {
+        case RawSocketEvent.write:
+          stream.send(text.codeUnits, address!, controlPort);
+          break;
+        case RawSocketEvent.read:
+          final datagram = stream.receive();
+          stream.close();
+          final data = String.fromCharCodes(datagram!.data);
+          print(data);
+          return;
+        case RawSocketEvent.closed:
+          break;
+        case RawSocketEvent.readClosed:
+          break;
+        default:
+          throw 'Unexpected event $event';
+      }
+    }
+  }
 }
