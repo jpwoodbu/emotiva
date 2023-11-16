@@ -69,9 +69,9 @@ class _InfoState extends State<Info> {
 
   Device device = Device();
 
-  void discovery() async {
+  void findDevice() async {
     try {
-      device = await listenForTransponder(1);
+      device = await discovery(1);
     } catch (e) {
       print('Error: $e');
     }
@@ -91,7 +91,7 @@ class _InfoState extends State<Info> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(onPressed: discovery, child: Text('Discover')),
+            child: ElevatedButton(onPressed: findDevice, child: Text('Discover')),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
