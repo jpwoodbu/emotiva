@@ -1,3 +1,4 @@
+import 'package:emotiva_remote/emotiva.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -30,7 +31,7 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: const Center(child: Text('Emotiva Remote')),
         ),
-        body: const Remote(),
+        body: const Info(),
         bottomNavigationBar: const MyBottomNavigation(),
       ),
     );
@@ -57,16 +58,40 @@ class MyBottomNavigation extends StatelessWidget {
   }
 }
 
-class Info extends StatelessWidget {
+class Info extends StatefulWidget {
   const Info({super.key});
+
+  @override
+  State<Info> createState() => _InfoState();
+}
+
+class _InfoState extends State<Info> {
+
+  Device device = Device();
+
+  void discovery() async {
+    try {
+      device = await listForTransponder(1);
+    } catch (e) {
+      print('Error: $e');
+    }
+    setState(() {});
+  }
+
+  void updateAll() async {
+    await device.updateAll();
+    setState(() { });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15),
       child: ListView(
-        children: const [
-          Text('Name: RMC-1'),
+        children: [
+          ElevatedButton(onPressed: discovery, child: Text('Discover')),
+          ElevatedButton(onPressed: updateAll, child: Text('Update')),
+          Text('Name: ${device.name}'),
           Text('Power: Off'),
           Text('Volume: -31db'),
           Text('Source: HDMI 1'),

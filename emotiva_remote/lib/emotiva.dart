@@ -87,7 +87,6 @@ int _intFromElement(XmlNode node, String xpath) {
 }
 
 Device parseTransponder(String data) {
-  // TODO - handle XmlException.
   final document = XmlDocument.parse(data);
   var root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
