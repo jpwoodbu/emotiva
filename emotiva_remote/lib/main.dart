@@ -72,6 +72,7 @@ class _InfoState extends State<Info> {
   void findDevice() async {
     try {
       device = await discovery(1);
+      await device.updateAll();
     } catch (e) {
       print('Error: $e');
     }
