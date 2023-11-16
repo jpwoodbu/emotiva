@@ -71,7 +71,7 @@ class _InfoState extends State<Info> {
 
   void discovery() async {
     try {
-      device = await listForTransponder(1);
+      device = await listenForTransponder(1);
     } catch (e) {
       print('Error: $e');
     }

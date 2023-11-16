@@ -12,7 +12,7 @@ const transponderPort = 7001;
 InternetAddress broadcastAddress = InternetAddress('255.255.255.255');
 
 void main() async {
-  var device = await listForTransponder(1);
+  var device = await listenForTransponder(1);
   print('address: ${device.address}');
   print('name: ${device.name}');
   await device.updateAll();
@@ -30,18 +30,20 @@ void main() async {
 }
 
 Future<void> broadcastPing() async {
+  // TODO - Use the XML builder to form this request.
   var data = Uint8List.fromList(
       '<?xml version="1.0" encoding="utf-8"?><emotivaPing />'.codeUnits);
+  // TODO - refactor listenForTransponder and this function into a single socket
+  // form where the source port is set to the transponder port.
   final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
   socket.broadcastEnabled = true;
   if (socket.send(data, broadcastAddress, pingPort) == 0) {
     throw 'Unable to send broadcast ping.';
   }
-  print('Sent broadcast ping.');
   socket.close();
 }
 
-Future<Device> listForTransponder(int timeoutSec) async {
+Future<Device> listenForTransponder(int timeoutSec) async {
   final stream =
       await RawDatagramSocket.bind(InternetAddress.anyIPv4, transponderPort);
   stream.writeEventsEnabled = false;
