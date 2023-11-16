@@ -1,4 +1,4 @@
-import 'package:emotiva_remote/emotiva.dart';
+import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -67,11 +67,11 @@ class Info extends StatefulWidget {
 
 class _InfoState extends State<Info> {
 
-  Device device = Device();
+  emotiva.Device device = emotiva.Device();
 
-  void findDevice() async {
+  void discovery() async {
     try {
-      device = await discovery(1);
+      device = await emotiva.discovery(1);
       await device.updateAll();
     } catch (e) {
       print('Error: $e');
@@ -92,7 +92,7 @@ class _InfoState extends State<Info> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(onPressed: findDevice, child: Text('Discover')),
+            child: ElevatedButton(onPressed: discovery, child: Text('Discover')),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
