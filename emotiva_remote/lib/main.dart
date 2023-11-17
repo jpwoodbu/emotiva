@@ -21,19 +21,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatefulWidget {
+class MainView extends StatefulWidget {
   final emotiva.Device device;
-  const HomePage(this.device, {super.key});
+  const MainView(this.device, {super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainView> createState() => _MainViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainViewState extends State<MainView> {
   int currentPageIndex = 0;
-  emotiva.Device device = emotiva.Device();
-
-  _HomePageState();
+  _MainViewState();
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +40,10 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Center(child: Text('Emotiva Remote')),
         ),
-        body: <Widget>[Info(widget.device), Remote()][currentPageIndex],
+        body: <Widget>[
+          Info(widget.device),
+          Remote(widget.device)
+        ][currentPageIndex],
         bottomNavigationBar: NavigationBar(
           destinations: [
             NavigationDestination(
@@ -75,7 +76,6 @@ class Info extends StatefulWidget {
 }
 
 class _InfoState extends State<Info> {
-
   void updateAll() async {
     await widget.device.updateAll();
     setState(() {});
@@ -116,7 +116,8 @@ class _InfoState extends State<Info> {
 }
 
 class Remote extends StatelessWidget {
-  const Remote({super.key});
+  final emotiva.Device device;
+  const Remote(this.device, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +146,36 @@ class _DiscoveryState extends State<Discovery> {
     }
   }
 
+  Widget _futureBuilder(
+      BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
+    if (snapshot.hasData) {
+      return MainView(snapshot.data!);
+    } else if (snapshot.hasError) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('No Emotiva devices were found.'),
+          SizedBox(height: 25.0),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Discovery()));
+              },
+              child: Text('Try again')),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Scanning for Emotiva devices...'),
+          SizedBox(height: 25.0),
+          CircularProgressIndicator(),
+        ],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -152,37 +183,7 @@ class _DiscoveryState extends State<Discovery> {
         body: Center(
           child: FutureBuilder<emotiva.Device>(
             future: discovery(),
-            builder:
-                (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
-              if (snapshot.hasData) {
-                return HomePage(snapshot.data!);
-              } else if (snapshot.hasError) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('No Emotiva devices were found.'),
-                    SizedBox(height: 25.0),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Discovery()),);
-                        },
-                        child: Text('Try again')),
-                  ],
-                );
-              } else {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Scanning for Emotiva devices...'),
-                    SizedBox(height: 25.0),
-                    CircularProgressIndicator(),
-                  ],
-                );
-              }
-            },
+            builder: _futureBuilder,
           ),
         ),
       ),
