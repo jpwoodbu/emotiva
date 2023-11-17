@@ -138,13 +138,6 @@ class Discovery extends StatefulWidget {
 }
 
 class _DiscoveryState extends State<Discovery> {
-  Future<emotiva.Device> discovery() {
-    try {
-      return emotiva.discovery(3);
-    } catch (e) {
-      throw 'Error $e';
-    }
-  }
 
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
@@ -183,7 +176,7 @@ class _DiscoveryState extends State<Discovery> {
       home: Scaffold(
         body: Center(
           child: FutureBuilder<emotiva.Device>(
-            future: discovery(),
+            future: emotiva.discovery(3),
             builder: _futureBuilder,
           ),
         ),
