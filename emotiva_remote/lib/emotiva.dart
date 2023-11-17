@@ -235,4 +235,45 @@ class Device {
       }
     }
   }
+
+  String _controlRequest(String command, String value, bool ack) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaControl', nest: () {
+      builder.element(command,
+          attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
+    });
+    return builder.buildDocument().toString();
+  }
+
+  Future<void> control(String command,
+      {String value = '0', bool ack = false, int timeoutSec = 1}) async {
+    final stream =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
+    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
+    final request = _controlRequest(command, value, ack);
+
+    // TODO - factor out the stream management part.
+    await for (final event in streamWithTimeout) {
+      switch (event) {
+        case RawSocketEvent.write:
+          stream.send(request.codeUnits, address!, controlPort);
+          break;
+        case RawSocketEvent.read:
+          final datagram = stream.receive();
+          stream.close();
+          final data = String.fromCharCodes(datagram!.data);
+          // TODO - update parse function to work with replies to control
+          // requests too.
+          parseUpdate(data);
+          return;
+        case RawSocketEvent.closed:
+          break;
+        case RawSocketEvent.readClosed:
+          break;
+        default:
+          throw 'Unexpected event $event';
+      }
+    }
+  }
 }
