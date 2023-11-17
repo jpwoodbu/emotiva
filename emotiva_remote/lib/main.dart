@@ -22,7 +22,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final emotiva.Device device;
+  const HomePage(this.device, {super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -30,6 +31,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentPageIndex = 0;
+  emotiva.Device device = emotiva.Device();
+
+  _HomePageState();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Center(child: Text('Emotiva Remote')),
         ),
-        body: <Widget>[Info(), Remote()][currentPageIndex],
+        body: <Widget>[Info(widget.device), Remote()][currentPageIndex],
         bottomNavigationBar: NavigationBar(
           destinations: [
             NavigationDestination(
@@ -63,28 +67,24 @@ class _HomePageState extends State<HomePage> {
 }
 
 class Info extends StatefulWidget {
-  const Info({super.key});
+  final emotiva.Device device;
+  Info(this.device, {super.key});
 
   @override
   State<Info> createState() => _InfoState();
 }
 
 class _InfoState extends State<Info> {
-  emotiva.Device device = emotiva.Device();
 
-  void discovery() async {
-    try {
-      device = await emotiva.discovery(1);
-      await device.updateAll();
-    } catch (e) {
-      print('Error: $e');
-    }
+  void updateAll() async {
+    await widget.device.updateAll();
     setState(() {});
   }
 
-  void updateAll() async {
-    await device.updateAll();
-    setState(() {});
+  @override
+  void initState() {
+    updateAll();
+    super.initState();
   }
 
   @override
@@ -95,25 +95,20 @@ class _InfoState extends State<Info> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child:
-                ElevatedButton(onPressed: discovery, child: Text('Discover')),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(onPressed: updateAll, child: Text('Update')),
           ),
-          Text('Name: ${device.name}'),
-          Text('Power: ${device.power}'),
-          Text('Volume: ${device.volume}'),
-          Text('Source: ${device.source}'),
-          Text('Mode: ${device.mode}'),
-          Text('Loudness: ${device.loudness}'),
-          Text('Audio input: ${device.audioInput}'),
-          Text('Audio bitstream: ${device.audioBitstream}'),
-          Text('Audio bits: ${device.audioBits}'),
-          Text('Video input: ${device.videoInput}'),
-          Text('Video format: ${device.videoFormat}'),
-          Text('Video space: ${device.videoSpace}'),
+          Text('Name: ${widget.device.name}'),
+          Text('Power: ${widget.device.power}'),
+          Text('Volume: ${widget.device.volume}'),
+          Text('Source: ${widget.device.source}'),
+          Text('Mode: ${widget.device.mode}'),
+          Text('Loudness: ${widget.device.loudness}'),
+          Text('Audio input: ${widget.device.audioInput}'),
+          Text('Audio bitstream: ${widget.device.audioBitstream}'),
+          Text('Audio bits: ${widget.device.audioBits}'),
+          Text('Video input: ${widget.device.videoInput}'),
+          Text('Video format: ${widget.device.videoFormat}'),
+          Text('Video space: ${widget.device.videoSpace}'),
         ],
       ),
     );
@@ -160,8 +155,7 @@ class _DiscoveryState extends State<Discovery> {
             builder:
                 (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
               if (snapshot.hasData) {
-                // TODO - figure out hwo to pass the device object to HomePage.
-                return HomePage();
+                return HomePage(snapshot.data!);
               } else if (snapshot.hasError) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
