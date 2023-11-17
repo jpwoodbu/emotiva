@@ -124,7 +124,14 @@ class Remote extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(15),
       child: Column(
-        children: [ElevatedButton(onPressed: () {}, child: Text('Power'))],
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              await device.control('power_on');
+            },
+            child: Text('Power'),
+          )
+        ],
       ),
     );
   }

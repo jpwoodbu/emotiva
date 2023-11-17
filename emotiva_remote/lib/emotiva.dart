@@ -105,6 +105,35 @@ Device parseTransponder(String data) {
   return device;
 }
 
+// TODO - This doesn't work. There is no response to control commands unless
+// there is a subscription.  I'll probably need to run an isolate to manage
+// subscription events.
+Future<String> _send(InternetAddress address, int sourcePort,
+    int destinationPort, String request, int timeoutSec) async {
+  final stream =
+      await RawDatagramSocket.bind(InternetAddress.anyIPv4, sourcePort);
+  final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
+
+  await for (final event in streamWithTimeout) {
+    switch (event) {
+      case RawSocketEvent.write:
+        stream.send(request.codeUnits, address, destinationPort);
+        break;
+      case RawSocketEvent.read:
+        final datagram = stream.receive();
+        stream.close();
+        return String.fromCharCodes(datagram!.data);
+      case RawSocketEvent.closed:
+        break;
+      case RawSocketEvent.readClosed:
+        break;
+      default:
+        throw 'Unexpected event $event';
+    }
+  }
+  throw 'Failed to send packet.';
+}
+
 class Device {
   String model = '';
   String name = '';
@@ -155,28 +184,9 @@ class Device {
     // WARNING: This approach won't work if we want to listen for changes to
     // subscribed fields as those messages will also arrive on the controlPort
     // and we'll need to have a long running lister on that port to catch them.
-    final stream =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
-    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
-    await for (final event in streamWithTimeout) {
-      switch (event) {
-        case RawSocketEvent.write:
-          stream.send(request.toXmlString().codeUnits, address!, controlPort);
-          break;
-        case RawSocketEvent.read:
-          final datagram = stream.receive();
-          stream.close();
-          final data = String.fromCharCodes(datagram!.data);
-          parseUpdate(data);
-          return;
-        case RawSocketEvent.closed:
-          break;
-        case RawSocketEvent.readClosed:
-          break;
-        default:
-          throw 'Unexpected event $event';
-      }
-    }
+    final data = await _send(
+        address!, controlPort, controlPort, request.toXmlString(), timeoutSec);
+    parseUpdate(data);
   }
 
   Future<void> updateAll({int timeoutSec = 1}) async {
@@ -248,32 +258,9 @@ class Device {
 
   Future<void> control(String command,
       {String value = '0', bool ack = false, int timeoutSec = 1}) async {
-    final stream =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
-    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
     final request = _controlRequest(command, value, ack);
-
-    // TODO - factor out the stream management part.
-    await for (final event in streamWithTimeout) {
-      switch (event) {
-        case RawSocketEvent.write:
-          stream.send(request.codeUnits, address!, controlPort);
-          break;
-        case RawSocketEvent.read:
-          final datagram = stream.receive();
-          stream.close();
-          final data = String.fromCharCodes(datagram!.data);
-          // TODO - update parse function to work with replies to control
-          // requests too.
-          parseUpdate(data);
-          return;
-        case RawSocketEvent.closed:
-          break;
-        case RawSocketEvent.readClosed:
-          break;
-        default:
-          throw 'Unexpected event $event';
-      }
-    }
+    final data =
+        await _send(address!, controlPort, controlPort, request, timeoutSec);
+    parseUpdate(data);
   }
 }
