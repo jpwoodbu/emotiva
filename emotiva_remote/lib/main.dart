@@ -157,11 +157,12 @@ class _DiscoveryState extends State<Discovery> {
           Text('No Emotiva devices were found.'),
           SizedBox(height: 25.0),
           ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Discovery()));
-              },
-              child: Text('Try again')),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Discovery()));
+            },
+            child: Text('Try again'),
+          ),
         ],
       );
     } else {
