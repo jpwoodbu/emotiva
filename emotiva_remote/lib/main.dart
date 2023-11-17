@@ -16,13 +16,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const Discovery(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int currentPageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -31,29 +38,26 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: const Center(child: Text('Emotiva Remote')),
         ),
-        body: const Info(),
-        bottomNavigationBar: const MyBottomNavigation(),
+        body: <Widget>[Info(), Remote()][currentPageIndex],
+        bottomNavigationBar: NavigationBar(
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.info),
+              label: 'Info',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings_remote),
+              label: 'Remote',
+            ),
+          ],
+          selectedIndex: currentPageIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+        ),
       ),
-    );
-  }
-}
-
-class MyBottomNavigation extends StatelessWidget {
-  const MyBottomNavigation({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.info),
-          label: 'Info',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings_remote),
-          label: 'Remote',
-        ),
-      ],
     );
   }
 }
@@ -66,7 +70,6 @@ class Info extends StatefulWidget {
 }
 
 class _InfoState extends State<Info> {
-
   emotiva.Device device = emotiva.Device();
 
   void discovery() async {
@@ -81,7 +84,7 @@ class _InfoState extends State<Info> {
 
   void updateAll() async {
     await device.updateAll();
-    setState(() { });
+    setState(() {});
   }
 
   @override
@@ -92,7 +95,8 @@ class _InfoState extends State<Info> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(onPressed: discovery, child: Text('Discover')),
+            child:
+                ElevatedButton(onPressed: discovery, child: Text('Discover')),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -124,9 +128,69 @@ class Remote extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(15),
       child: Column(
-        children: [
-          ElevatedButton(onPressed: (){}, child: Text('Power'))
-        ],
+        children: [ElevatedButton(onPressed: () {}, child: Text('Power'))],
+      ),
+    );
+  }
+}
+
+class Discovery extends StatefulWidget {
+  const Discovery({super.key});
+
+  @override
+  State<Discovery> createState() => _DiscoveryState();
+}
+
+class _DiscoveryState extends State<Discovery> {
+  Future<emotiva.Device> discovery() {
+    try {
+      return emotiva.discovery(3);
+    } catch (e) {
+      throw 'Error $e';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: FutureBuilder<emotiva.Device>(
+            future: discovery(),
+            builder:
+                (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
+              if (snapshot.hasData) {
+                // TODO - figure out hwo to pass the device object to HomePage.
+                return HomePage();
+              } else if (snapshot.hasError) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No Emotiva devices were found.'),
+                    SizedBox(height: 25.0),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Discovery()),);
+                        },
+                        child: Text('Try again')),
+                  ],
+                );
+              } else {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Scanning for Emotiva devices...'),
+                    SizedBox(height: 25.0),
+                    CircularProgressIndicator(),
+                  ],
+                );
+              }
+            },
+          ),
+        ),
       ),
     );
   }
