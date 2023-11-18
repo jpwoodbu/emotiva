@@ -80,7 +80,7 @@ Future<Device> discovery(int timeoutSec) async {
 
 String _textFromElement(XmlNode node, String xpath) {
   try {
-    return node.xpath(xpath).first.innerText;
+    return node.xpath(xpath).first.innerText.trim();
   } catch (e) {
     throw 'Error trying to fetch $xpath: $e';
   }
@@ -257,16 +257,8 @@ class Device {
       _subscribedFields.remove(f);
     }
   }
-   Future<void> unsubscribeAll() async => await unsubscribe(_subscribedFields);
 
-  String _valueAttribute(List<XmlAttribute> attributes) {
-    for (final a in attributes) {
-      if (a.name.toString() == 'value') {
-        return a.value.trim();
-      }
-    }
-    throw 'Element missing value attribute';
-  }
+  Future<void> unsubscribeAll() async => await unsubscribe(_subscribedFields);
 
   String _controlRequest(String command, String value, bool ack) {
     final builder = XmlBuilder();
@@ -282,6 +274,15 @@ class Device {
       {String value = '0', bool ack = false, int timeoutSec = 1}) async {
     final request = _controlRequest(command, value, ack);
     await _send(request, controlPort);
+  }
+
+  String _valueAttribute(List<XmlAttribute> attributes) {
+    for (final a in attributes) {
+      if (a.name.toString() == 'value') {
+        return a.value.trim();
+      }
+    }
+    throw 'Element missing value attribute';
   }
 
   void parsePacket(String data) {
