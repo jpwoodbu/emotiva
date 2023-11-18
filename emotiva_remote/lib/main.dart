@@ -6,7 +6,7 @@ void main() {
 }
 
 class DeviceModel with ChangeNotifier {
-  emotiva.Device device;
+  final emotiva.Device device;
   late Stream<String> controlPortStream;
   late Stream<String> notifyPortStream;
 
@@ -115,7 +115,7 @@ class _InfoState extends State<Info> {
     setState(() {});
   }
 
-  void _subscribeAll() async {
+  void subscribeAll() async {
     await widget.device.subscribeAll();
   }
 
@@ -125,7 +125,7 @@ class _InfoState extends State<Info> {
     _deviceNotifier = DeviceModel(widget.device);
     _deviceNotifier.handleControlPackets();
     _deviceNotifier.handleNotifyPackets();
-    _subscribeAll();
+    subscribeAll();
   }
 
   @override
@@ -202,6 +202,7 @@ class Discovery extends StatefulWidget {
 }
 
 class _DiscoveryState extends State<Discovery> {
+
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
     if (snapshot.hasData) {
@@ -213,6 +214,9 @@ class _DiscoveryState extends State<Discovery> {
           Text('No Emotiva devices were found.'),
           SizedBox(height: 25.0),
           ElevatedButton(
+            // TODO - consider calling an async function instead as using the
+            // Navigator makes the page flash with a short animation on loading
+            // a "new" page.
             onPressed: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => Discovery()));
