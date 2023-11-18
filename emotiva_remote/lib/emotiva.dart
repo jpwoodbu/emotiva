@@ -23,7 +23,7 @@ void main() async {
     await device.closeSockets();
   });
   await for (final packet in device.controlPortStream()) {
-    device.parseControlPortPacket(packet);
+    device.parsePacket(packet);
     print('power: ${device.power}');
     print('source: ${device.source}');
     print('mode: ${device.mode}');
@@ -150,10 +150,11 @@ class Device {
     'video_space'
   };
   final List<RawDatagramSocket> _sockets = [];
+  final List<String> _subscribedFields = [];
 
-  Stream<String> controlPortStream() async* {
+  Stream<String> _socketStream(int port) async* {
     final stream =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     stream.writeEventsEnabled = false;
     _sockets.add(stream);
     await for (final event in stream) {
@@ -171,21 +172,26 @@ class Device {
     }
   }
 
+  Stream<String> controlPortStream() {
+    return _socketStream(controlPort);
+  }
+
+  Stream<String> notifyPortStream() {
+    return _socketStream(notifyPort);
+  }
+
   Future<void> closeSockets() async {
     for (RawDatagramSocket s in _sockets) {
       s.close();
     }
   }
 
-  Future<void> _send(
-      String request, int destinationPort, int timeoutSec) async {
+  Future<void> _send(String request, int destinationPort) async {
     if (address == null) {
       throw 'Address needs to be set first.';
     }
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
-
-    await for (final event in streamWithTimeout) {
+    await for (final event in stream) {
       switch (event) {
         case RawSocketEvent.write:
           final bytesSent =
@@ -207,10 +213,10 @@ class Device {
     }
   }
 
-  String _updateRequest(Iterable<String> fields) {
+  String _requestWithFields(String requestType, Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaUpdate', nest: () {
+    builder.element(requestType, nest: () {
       for (final f in fields) {
         builder.element(f);
       }
@@ -218,13 +224,47 @@ class Device {
     return builder.buildDocument().toXmlString();
   }
 
-  Future<void> update(Iterable<String> fields, {int timeoutSec = 1}) async {
-    await _send(_updateRequest(fields), controlPort, timeoutSec);
+  String _updateRequest(Iterable<String> fields) {
+    return _requestWithFields('emotivaUpdate', fields);
+  }
+
+  Future<void> update(Iterable<String> fields) async {
+
+    await _send(_updateRequest(fields), controlPort);
   }
 
   Future<void> updateAll({int timeoutSec = 1}) async {
     await update(_fields);
   }
+
+  String _subscribeRequest(Iterable<String> fields) {
+    return _requestWithFields('emotivaSubscription', fields);
+  }
+
+  Future<void> subscribe(Iterable<String> fields) async {
+    await _send(_subscribeRequest(fields), controlPort);
+    for (final f in fields) {
+      _subscribedFields.add(f);
+    }
+  }
+
+  Future<void> subscribeAll() async {
+    await subscribe(_fields);
+  }
+
+  String _unsubscribeRequest(Iterable<String> fields) {
+    return _requestWithFields('emotivaUnsubscribe', fields);
+  }
+
+  Future<void> unsubscribe(Iterable<String> fields) async {
+    await _send(_unsubscribeRequest(fields), controlPort);
+    for (final f in fields) {
+      _subscribedFields.remove(f);
+    }
+  }
+   Future<void> unsubscribeAll() async {
+    await unsubscribe(_subscribedFields);
+   }
 
   String _valueAttribute(List<XmlAttribute> attributes) {
     for (final a in attributes) {
@@ -248,10 +288,10 @@ class Device {
   Future<void> control(String command,
       {String value = '0', bool ack = false, int timeoutSec = 1}) async {
     final request = _controlRequest(command, value, ack);
-    await _send(request, controlPort, timeoutSec);
+    await _send(request, controlPort);
   }
 
-  void parseControlPortPacket(String data) {
+  void parsePacket(String data) {
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
     final packetType = root.name.toString();

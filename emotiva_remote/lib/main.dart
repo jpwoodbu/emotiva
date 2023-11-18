@@ -7,15 +7,24 @@ void main() {
 
 class DeviceModel with ChangeNotifier {
   emotiva.Device device;
-  late Stream<String> stream;
+  late Stream<String> controlPortStream;
+  late Stream<String> notifyPortStream;
 
   DeviceModel(this.device) {
-    stream = device.controlPortStream();
+    controlPortStream = device.controlPortStream();
+    notifyPortStream = device.notifyPortStream();
   }
 
-  Future<void> listen() async {
-    await for (final packet in stream) {
-      device.parseControlPortPacket(packet);
+  Future<void> handleControlPackets() async {
+    await for (final packet in controlPortStream) {
+      device.parsePacket(packet);
+      notifyListeners();
+    }
+  }
+
+  Future<void> handleNotifyPackets() async {
+    await for (final packet in notifyPortStream) {
+      device.parsePacket(packet);
       notifyListeners();
     }
   }
@@ -48,6 +57,13 @@ class MainView extends StatefulWidget {
 class _MainViewState extends State<MainView> {
   int currentPageIndex = 0;
   _MainViewState();
+
+  @override
+  void dispose() async {
+    super.dispose();
+    await widget.device.unsubscribeAll();
+    await widget.device.closeSockets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,12 +115,17 @@ class _InfoState extends State<Info> {
     setState(() {});
   }
 
+  void _subscribeAll() async {
+    await widget.device.subscribeAll();
+  }
+
   @override
   void initState() {
     super.initState();
     _deviceNotifier = DeviceModel(widget.device);
-    _deviceNotifier.listen();
-    updateAll();
+    _deviceNotifier.handleControlPackets();
+    _deviceNotifier.handleNotifyPackets();
+    _subscribeAll();
   }
 
   @override
@@ -121,6 +142,7 @@ class _InfoState extends State<Info> {
             listenable: _deviceNotifier,
             builder: (BuildContext context, Widget? child) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Name: ${widget.device.name}'),
                   Text('Power: ${widget.device.power}'),
@@ -159,7 +181,13 @@ class Remote extends StatelessWidget {
               await device.control('power_on');
             },
             child: Text('Power'),
-          )
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await device.control('loudness');
+            },
+            child: Text('Toggle Loudness'),
+          ),
         ],
       ),
     );
@@ -174,7 +202,6 @@ class Discovery extends StatefulWidget {
 }
 
 class _DiscoveryState extends State<Discovery> {
-
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
     if (snapshot.hasData) {
