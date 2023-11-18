@@ -54,7 +54,7 @@ Future<Device> discovery(int timeoutSec) async {
   await for (final event in streamWithTimeout) {
     switch (event) {
       case RawSocketEvent.write:
-        var bytesSent = stream.send(
+        final bytesSent = stream.send(
             ping.codeUnits, InternetAddress(broadcastAddress), pingPort);
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
@@ -99,12 +99,12 @@ int _intFromElement(XmlNode node, String xpath) {
 
 Device parseTransponder(String data) {
   final document = XmlDocument.parse(data);
-  var root = document.rootElement;
+  final root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
     throw Exception(
         'Received improperly formatted emotivaTransponder response.');
   }
-  var device = Device();
+  final device = Device();
   device.model = _textFromElement(root, 'model');
   device.name = _textFromElement(root, 'name');
   device.controlVersion = _textFromElement(root, './control/version');
@@ -229,13 +229,10 @@ class Device {
   }
 
   Future<void> update(Iterable<String> fields) async {
-
     await _send(_updateRequest(fields), controlPort);
   }
 
-  Future<void> updateAll({int timeoutSec = 1}) async {
-    await update(_fields);
-  }
+  Future<void> updateAll() async => await update(_fields);
 
   String _subscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaSubscription', fields);
@@ -248,9 +245,7 @@ class Device {
     }
   }
 
-  Future<void> subscribeAll() async {
-    await subscribe(_fields);
-  }
+  Future<void> subscribeAll() async => await subscribe(_fields);
 
   String _unsubscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaUnsubscribe', fields);
@@ -262,9 +257,7 @@ class Device {
       _subscribedFields.remove(f);
     }
   }
-   Future<void> unsubscribeAll() async {
-    await unsubscribe(_subscribedFields);
-   }
+   Future<void> unsubscribeAll() async => await unsubscribe(_subscribedFields);
 
   String _valueAttribute(List<XmlAttribute> attributes) {
     for (final a in attributes) {
@@ -315,6 +308,7 @@ class Device {
           break;
         case 'volume':
           volume = double.parse(_valueAttribute(element.attributes));
+          break;
         case 'loudness':
           loudness = _valueAttribute(element.attributes);
           break;
