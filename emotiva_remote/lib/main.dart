@@ -5,6 +5,22 @@ void main() {
   runApp(const MyApp());
 }
 
+class DeviceModel with ChangeNotifier {
+  emotiva.Device device;
+  late Stream<String> stream;
+
+  DeviceModel(this.device) {
+    stream = device.controlPortStream();
+  }
+
+  Future<void> listen() async {
+    await for (final packet in stream) {
+      device.parseControlPortPacket(packet);
+      notifyListeners();
+    }
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -76,6 +92,8 @@ class Info extends StatefulWidget {
 }
 
 class _InfoState extends State<Info> {
+  late DeviceModel _deviceNotifier;
+
   void updateAll() async {
     await widget.device.updateAll();
     setState(() {});
@@ -83,8 +101,10 @@ class _InfoState extends State<Info> {
 
   @override
   void initState() {
-    updateAll();
     super.initState();
+    _deviceNotifier = DeviceModel(widget.device);
+    _deviceNotifier.listen();
+    updateAll();
   }
 
   @override
@@ -97,18 +117,27 @@ class _InfoState extends State<Info> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(onPressed: updateAll, child: Text('Update')),
           ),
-          Text('Name: ${widget.device.name}'),
-          Text('Power: ${widget.device.power}'),
-          Text('Volume: ${widget.device.volume}'),
-          Text('Source: ${widget.device.source}'),
-          Text('Mode: ${widget.device.mode}'),
-          Text('Loudness: ${widget.device.loudness}'),
-          Text('Audio input: ${widget.device.audioInput}'),
-          Text('Audio bitstream: ${widget.device.audioBitstream}'),
-          Text('Audio bits: ${widget.device.audioBits}'),
-          Text('Video input: ${widget.device.videoInput}'),
-          Text('Video format: ${widget.device.videoFormat}'),
-          Text('Video space: ${widget.device.videoSpace}'),
+          ListenableBuilder(
+            listenable: _deviceNotifier,
+            builder: (BuildContext context, Widget? child) {
+              return Column(
+                children: [
+                  Text('Name: ${widget.device.name}'),
+                  Text('Power: ${widget.device.power}'),
+                  Text('Volume: ${widget.device.volume}'),
+                  Text('Source: ${widget.device.source}'),
+                  Text('Mode: ${widget.device.mode}'),
+                  Text('Loudness: ${widget.device.loudness}'),
+                  Text('Audio input: ${widget.device.audioInput}'),
+                  Text('Audio bitstream: ${widget.device.audioBitstream}'),
+                  Text('Audio bits: ${widget.device.audioBits}'),
+                  Text('Video input: ${widget.device.videoInput}'),
+                  Text('Video format: ${widget.device.videoFormat}'),
+                  Text('Video space: ${widget.device.videoSpace}'),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -179,6 +208,8 @@ class _DiscoveryState extends State<Discovery> {
 
   @override
   Widget build(BuildContext context) {
+    // Since this widget uses the entire surface, we need to wrap it in
+    // MaterialApp() to get the right colors.
     return MaterialApp(
       home: Scaffold(
         body: Center(

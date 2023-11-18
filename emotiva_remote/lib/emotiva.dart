@@ -10,22 +10,32 @@ const pingPort = 7000;
 const transponderPort = 7001;
 const String broadcastAddress = '255.255.255.255';
 
+// main() serves only as a demo. This library is meant to be included in another
+// binary.
 void main() async {
-  var device = await discovery(1);
+  final device = await discovery(1);
   print('address: ${device.address}');
   print('name: ${device.name}');
-  await device.updateAll();
-  print('power: ${device.power}');
-  print('source: ${device.source}');
-  print('mode: ${device.mode}');
-  print('volume: ${device.volume}');
-  print('loudness: ${device.loudness}');
-  print('audio input: ${device.audioInput}');
-  print('audio bitstream: ${device.audioBitstream}');
-  print('audio bits: ${device.audioBits}');
-  print('video input: ${device.videoInput}');
-  print('video format: ${device.videoFormat}');
-  print('video space: ${device.videoSpace}');
+  Future.delayed(Duration(seconds: 1), () async {
+    await device.updateAll();
+  });
+  Future.delayed(Duration(seconds: 3), () async {
+    await device.closeSockets();
+  });
+  await for (final packet in device.controlPortStream()) {
+    device.parseControlPortPacket(packet);
+    print('power: ${device.power}');
+    print('source: ${device.source}');
+    print('mode: ${device.mode}');
+    print('volume: ${device.volume}');
+    print('loudness: ${device.loudness}');
+    print('audio input: ${device.audioInput}');
+    print('audio bitstream: ${device.audioBitstream}');
+    print('audio bits: ${device.audioBits}');
+    print('video input: ${device.videoInput}');
+    print('video format: ${device.videoFormat}');
+    print('video space: ${device.videoSpace}');
+  }
 }
 
 String _pingRequest() {
@@ -105,35 +115,6 @@ Device parseTransponder(String data) {
   return device;
 }
 
-// TODO - This doesn't work. There is no response to control commands unless
-// there is a subscription.  I'll probably need to run an isolate to manage
-// subscription events.
-Future<String> _send(InternetAddress address, int sourcePort,
-    int destinationPort, String request, int timeoutSec) async {
-  final stream =
-      await RawDatagramSocket.bind(InternetAddress.anyIPv4, sourcePort);
-  final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
-
-  await for (final event in streamWithTimeout) {
-    switch (event) {
-      case RawSocketEvent.write:
-        stream.send(request.codeUnits, address, destinationPort);
-        break;
-      case RawSocketEvent.read:
-        final datagram = stream.receive();
-        stream.close();
-        return String.fromCharCodes(datagram!.data);
-      case RawSocketEvent.closed:
-        break;
-      case RawSocketEvent.readClosed:
-        break;
-      default:
-        throw 'Unexpected event $event';
-    }
-  }
-  throw 'Failed to send packet.';
-}
-
 class Device {
   String model = '';
   String name = '';
@@ -168,8 +149,65 @@ class Device {
     'video_format',
     'video_space'
   };
+  final List<RawDatagramSocket> _sockets = [];
 
-  Future<void> update(Iterable<String> fields, {int timeoutSec = 1}) async {
+  Stream<String> controlPortStream() async* {
+    final stream =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
+    stream.writeEventsEnabled = false;
+    _sockets.add(stream);
+    await for (final event in stream) {
+      switch (event) {
+        case RawSocketEvent.read:
+          final datagram = stream.receive();
+          yield String.fromCharCodes(datagram!.data);
+        case RawSocketEvent.closed:
+          break;
+        case RawSocketEvent.readClosed:
+          break;
+        default:
+          throw 'Unexpected event $event';
+      }
+    }
+  }
+
+  Future<void> closeSockets() async {
+    for (RawDatagramSocket s in _sockets) {
+      s.close();
+    }
+  }
+
+  Future<void> _send(
+      String request, int destinationPort, int timeoutSec) async {
+    if (address == null) {
+      throw 'Address needs to be set first.';
+    }
+    final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+    final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
+
+    await for (final event in streamWithTimeout) {
+      switch (event) {
+        case RawSocketEvent.write:
+          final bytesSent =
+              stream.send(request.codeUnits, address!, destinationPort);
+          stream.close();
+          if (bytesSent == 0) {
+            throw 'No bytes were sent';
+          }
+          break;
+        case RawSocketEvent.read:
+          break;
+        case RawSocketEvent.closed:
+          break;
+        case RawSocketEvent.readClosed:
+          break;
+        default:
+          throw 'Unexpected event $event';
+      }
+    }
+  }
+
+  String _updateRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('emotivaUpdate', nest: () {
@@ -177,16 +215,11 @@ class Device {
         builder.element(f);
       }
     });
-    final request = builder.buildDocument();
+    return builder.buildDocument().toXmlString();
+  }
 
-    // Set the source port to the controlPort since no matter what our source
-    // port is, the device will send the response to the controlPort.
-    // WARNING: This approach won't work if we want to listen for changes to
-    // subscribed fields as those messages will also arrive on the controlPort
-    // and we'll need to have a long running lister on that port to catch them.
-    final data = await _send(
-        address!, controlPort, controlPort, request.toXmlString(), timeoutSec);
-    parseUpdate(data);
+  Future<void> update(Iterable<String> fields, {int timeoutSec = 1}) async {
+    await _send(_updateRequest(fields), controlPort, timeoutSec);
   }
 
   Future<void> updateAll({int timeoutSec = 1}) async {
@@ -202,11 +235,32 @@ class Device {
     throw 'Element missing value attribute';
   }
 
-  void parseUpdate(String data) {
+  String _controlRequest(String command, String value, bool ack) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaControl', nest: () {
+      builder.element(command,
+          attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
+    });
+    return builder.buildDocument().toString();
+  }
+
+  Future<void> control(String command,
+      {String value = '0', bool ack = false, int timeoutSec = 1}) async {
+    final request = _controlRequest(command, value, ack);
+    await _send(request, controlPort, timeoutSec);
+  }
+
+  void parseControlPortPacket(String data) {
     final document = XmlDocument.parse(data);
-    var root = document.rootElement;
-    if (root.name.toString() != 'emotivaUpdate') {
-      throw Exception('Received improperly formatted emotivaUpdate response.');
+    final root = document.rootElement;
+    final packetType = root.name.toString();
+    if (packetType != 'emotivaUpdate' &&
+        packetType != 'emotivaNotify' &&
+        packetType != 'emotivaSubscription') {
+      throw ('Received improperly formatted '
+          'emotivaUpdate/emotivaNotify/emotivaSubscription response: '
+          '${root.toXmlString(pretty: true)}');
     }
     for (final element in root.childElements) {
       switch (element.name.toString()) {
@@ -244,23 +298,5 @@ class Device {
           break;
       }
     }
-  }
-
-  String _controlRequest(String command, String value, bool ack) {
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaControl', nest: () {
-      builder.element(command,
-          attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
-    });
-    return builder.buildDocument().toString();
-  }
-
-  Future<void> control(String command,
-      {String value = '0', bool ack = false, int timeoutSec = 1}) async {
-    final request = _controlRequest(command, value, ack);
-    final data =
-        await _send(address!, controlPort, controlPort, request, timeoutSec);
-    parseUpdate(data);
   }
 }
