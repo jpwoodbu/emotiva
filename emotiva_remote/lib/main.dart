@@ -149,18 +149,45 @@ class _InfoState extends State<Info> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Name: ${widget.device.name}'),
-                    Text('Power: ${widget.device.power}'),
-                    Text('Volume: ${widget.device.volume}'),
-                    Text('Source: ${widget.device.source}'),
-                    Text('Mode: ${widget.device.mode}'),
+                    Row(
+                      children: [
+                        Text(widget.device.name,
+                            style: TextStyle(fontSize: 25)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.power_settings_new,
+                              color: widget.device.power == 'On'
+                                  ? Colors.blue
+                                  : Colors.amber),
+                        ),
+                      ],
+                    ),
+                    Table(
+                      children: <TableRow>[
+                        TableRow(children: [
+                          SizedBox(height: 25),
+                          SizedBox(height: 25),
+                          SizedBox(height: 25),
+                        ]),
+                        TableRow(children: [
+                          Text(widget.device.source),
+                          Text(widget.device.mode),
+                          Text('Volume: ${widget.device.volume}dB'),
+                        ]),
+                        TableRow(children: [
+                          Text('A: ${widget.device.audioInput}'),
+                          Text(widget.device.audioBitstream),
+                          Text(widget.device.audioBits),
+                        ]),
+                        TableRow(children: [
+                          Text('V: ${widget.device.videoInput}'),
+                          Text(widget.device.videoFormat),
+                          Text(widget.device.videoSpace),
+                        ])
+                      ],
+                    ),
+                    SizedBox(height: 25),
                     Text('Loudness: ${widget.device.loudness}'),
-                    Text('Audio input: ${widget.device.audioInput}'),
-                    Text('Audio bitstream: ${widget.device.audioBitstream}'),
-                    Text('Audio bits: ${widget.device.audioBits}'),
-                    Text('Video input: ${widget.device.videoInput}'),
-                    Text('Video format: ${widget.device.videoFormat}'),
-                    Text('Video space: ${widget.device.videoSpace}'),
                   ],
                 );
               },
@@ -186,7 +213,13 @@ class Remote extends StatelessWidget {
             onPressed: () async {
               await device.control('power_on');
             },
-            child: Text('Power'),
+            child: Text('Power on'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await device.control('power_off');
+            },
+            child: Text('Power off'),
           ),
           ElevatedButton(
             onPressed: () async {
