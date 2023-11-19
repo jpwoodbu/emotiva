@@ -150,16 +150,15 @@ class _InfoState extends State<Info> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(widget.device.name,
                             style: TextStyle(fontSize: 25)),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.power_settings_new,
+                          Icon(Icons.power_settings_new,
                               color: widget.device.power == 'On'
                                   ? Colors.blue
                                   : Colors.amber),
-                        ),
                       ],
                     ),
                     Table(
