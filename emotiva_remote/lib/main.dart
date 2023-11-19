@@ -131,35 +131,40 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15),
-      child: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(onPressed: updateAll, child: Text('Update')),
-          ),
-          ListenableBuilder(
-            listenable: _deviceNotifier,
-            builder: (BuildContext context, Widget? child) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Name: ${widget.device.name}'),
-                  Text('Power: ${widget.device.power}'),
-                  Text('Volume: ${widget.device.volume}'),
-                  Text('Source: ${widget.device.source}'),
-                  Text('Mode: ${widget.device.mode}'),
-                  Text('Loudness: ${widget.device.loudness}'),
-                  Text('Audio input: ${widget.device.audioInput}'),
-                  Text('Audio bitstream: ${widget.device.audioBitstream}'),
-                  Text('Audio bits: ${widget.device.audioBits}'),
-                  Text('Video input: ${widget.device.videoInput}'),
-                  Text('Video format: ${widget.device.videoFormat}'),
-                  Text('Video space: ${widget.device.videoSpace}'),
-                ],
-              );
-            },
-          ),
-        ],
+      child: RefreshIndicator(
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  ElevatedButton(onPressed: updateAll, child: Text('Update')),
+            ),
+            ListenableBuilder(
+              listenable: _deviceNotifier,
+              builder: (BuildContext context, Widget? child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Name: ${widget.device.name}'),
+                    Text('Power: ${widget.device.power}'),
+                    Text('Volume: ${widget.device.volume}'),
+                    Text('Source: ${widget.device.source}'),
+                    Text('Mode: ${widget.device.mode}'),
+                    Text('Loudness: ${widget.device.loudness}'),
+                    Text('Audio input: ${widget.device.audioInput}'),
+                    Text('Audio bitstream: ${widget.device.audioBitstream}'),
+                    Text('Audio bits: ${widget.device.audioBits}'),
+                    Text('Video input: ${widget.device.videoInput}'),
+                    Text('Video format: ${widget.device.videoFormat}'),
+                    Text('Video space: ${widget.device.videoSpace}'),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      onRefresh: () {return Future(updateAll);},
       ),
     );
   }
