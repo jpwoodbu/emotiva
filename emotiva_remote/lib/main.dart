@@ -132,6 +132,9 @@ class _InfoState extends State<Info> {
     return Padding(
       padding: const EdgeInsets.all(15),
       child: RefreshIndicator(
+        onRefresh: () {
+          return Future(updateAll);
+        },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
@@ -164,7 +167,6 @@ class _InfoState extends State<Info> {
             ),
           ],
         ),
-      onRefresh: () {return Future(updateAll);},
       ),
     );
   }
