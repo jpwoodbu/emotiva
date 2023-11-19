@@ -67,33 +67,31 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Center(child: Text('Emotiva Remote')),
-        ),
-        body: <Widget>[
-          Info(widget.device),
-          Remote(widget.device)
-        ][currentPageIndex],
-        bottomNavigationBar: NavigationBar(
-          destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.info),
-              label: 'Info',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.settings_remote),
-              label: 'Remote',
-            ),
-          ],
-          selectedIndex: currentPageIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Center(child: Text('Emotiva Remote')),
+      ),
+      body: <Widget>[
+        Info(widget.device),
+        Remote(widget.device)
+      ][currentPageIndex],
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.info),
+            label: 'Info',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_remote),
+            label: 'Remote',
+          ),
+        ],
+        selectedIndex: currentPageIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
       ),
     );
   }
@@ -202,7 +200,6 @@ class Discovery extends StatefulWidget {
 }
 
 class _DiscoveryState extends State<Discovery> {
-
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
     if (snapshot.hasData) {
@@ -239,15 +236,11 @@ class _DiscoveryState extends State<Discovery> {
 
   @override
   Widget build(BuildContext context) {
-    // Since this widget uses the entire surface, we need to wrap it in
-    // MaterialApp() to get the right colors.
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: FutureBuilder<emotiva.Device>(
-            future: emotiva.discovery(3),
-            builder: _futureBuilder,
-          ),
+    return Scaffold(
+      body: Center(
+        child: FutureBuilder<emotiva.Device>(
+          future: emotiva.discovery(3),
+          builder: _futureBuilder,
         ),
       ),
     );
