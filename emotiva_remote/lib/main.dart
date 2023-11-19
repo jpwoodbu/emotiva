@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
       title: 'Emotiva Remote',
       theme: ThemeData(
         useMaterial3: true,
+        brightness: Brightness.dark,
       ),
       home: const Discovery(),
     );
