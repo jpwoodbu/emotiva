@@ -162,12 +162,13 @@ class _InfoState extends State<Info> {
                       children: [
                         Text(widget.device.name,
                             style: TextStyle(fontSize: 25)),
-                          Icon(Icons.power_settings_new,
-                              color: widget.device.power == 'On'
-                                  ? Colors.blue
-                                  : Colors.amber),
+                        Icon(Icons.power_settings_new,
+                            color: widget.device.power == 'On'
+                                ? Colors.blue
+                                : Colors.amber),
                       ],
                     ),
+                    Text('Volume: ${widget.device.volume}dB'),
                     Table(
                       children: <TableRow>[
                         TableRow(children: [
@@ -177,8 +178,9 @@ class _InfoState extends State<Info> {
                         ]),
                         TableRow(children: [
                           Text(widget.device.source),
-                          Text(widget.device.mode),
-                          Text('Volume: ${widget.device.volume}dB'),
+                          Text(widget.device.mode,
+                              overflow: TextOverflow.visible, softWrap: false),
+                          Text(''),
                         ]),
                         TableRow(children: [
                           Text('A: ${widget.device.audioInput}'),
