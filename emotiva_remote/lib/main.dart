@@ -143,8 +143,14 @@ class _InfoState extends State<Info> {
   late DeviceModel _deviceNotifier;
 
   void updateAll() async {
+    HapticFeedback.vibrate();
     await widget.device.updateAll();
     setState(() {});
+  }
+
+  void togglePower() async {
+    HapticFeedback.lightImpact();
+    widget.device.togglePower();
   }
 
   void subscribeAll() async {
@@ -171,11 +177,6 @@ class _InfoState extends State<Info> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: updateAll, child: Icon(Icons.refresh)),
-            ),
             ListenableBuilder(
               listenable: _deviceNotifier,
               builder: (BuildContext context, Widget? child) {
@@ -190,18 +191,26 @@ class _InfoState extends State<Info> {
                           widget.device.name,
                           style: TextStyle(fontSize: 25),
                         ),
-                        IconButton(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            widget.device.togglePower();
-                          },
-                          icon: Icon(
-                            Icons.power_settings_new,
-                            color: widget.device.power == 'On'
-                                ? Colors.blue
-                                : Colors.amber,
-                            size: 30,
-                          ),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: updateAll,
+                              icon: Icon(
+                                Icons.refresh,
+                                size: 30,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: togglePower,
+                              icon: Icon(
+                                Icons.power_settings_new,
+                                color: widget.device.power == 'On'
+                                    ? Colors.blue
+                                    : Colors.amber,
+                                size: 30,
+                              ),
+                            ),
+                          ],
                         )
                       ],
                     ),
