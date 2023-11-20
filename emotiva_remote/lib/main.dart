@@ -72,10 +72,17 @@ class _MainViewState extends State<MainView> {
       appBar: AppBar(
         title: const Center(child: Text('Emotiva Remote')),
       ),
-      body: <Widget>[
-        Info(widget.device),
-        Remote(widget.device)
-      ][currentPageIndex],
+      // Using IndexedStack is critical. It preserves the existance (I think) of
+      // the widgets as the user navigates between them so that we don't try to
+      // do something breaking like creating additional listeners for a stream
+      // inside initState perhaps before the prior listeners have been GC'd.
+      body: IndexedStack(
+        index: currentPageIndex,
+        children: [
+          Info(widget.device),
+          Remote(widget.device),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         destinations: [
           NavigationDestination(
@@ -119,6 +126,13 @@ class _InfoState extends State<Info> {
   }
 
   @override
+  // TODO - this is called each time the navigation bar for this widget is
+  // selected. This results in subscriptions to the control/notify streams (in
+  // the form of `await for` loops) be recreated and throwing errors, at least
+  // when using the fake.
+  // A potentially hacky way to fix this is to use a StreamController and call
+  // addError on it within dispose() to break out of the loops.
+  // Hopefully I can find some way to run this code only once.
   void initState() {
     super.initState();
     _deviceNotifier = DeviceModel(widget.device);
@@ -155,10 +169,10 @@ class _InfoState extends State<Info> {
                       children: [
                         Text(widget.device.name,
                             style: TextStyle(fontSize: 25)),
-                          Icon(Icons.power_settings_new,
-                              color: widget.device.power == 'On'
-                                  ? Colors.blue
-                                  : Colors.amber),
+                        Icon(Icons.power_settings_new,
+                            color: widget.device.power == 'On'
+                                ? Colors.blue
+                                : Colors.amber),
                       ],
                     ),
                     Table(
@@ -279,8 +293,9 @@ class _DiscoveryState extends State<Discovery> {
     return Scaffold(
       body: Center(
         child: FutureBuilder<emotiva.Device>(
-          future: emotiva.discovery(3),
-          // future: emotiva.futureFakeDevice(),
+          // Use the fake instead if an Emotiva device is not available.
+          future: emotiva.futureFakeDevice(),
+          // future: emotiva.discovery(3),
           builder: _futureBuilder,
         ),
       ),
