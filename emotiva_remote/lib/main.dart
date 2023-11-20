@@ -126,13 +126,6 @@ class _InfoState extends State<Info> {
   }
 
   @override
-  // TODO - this is called each time the navigation bar for this widget is
-  // selected. This results in subscriptions to the control/notify streams (in
-  // the form of `await for` loops) be recreated and throwing errors, at least
-  // when using the fake.
-  // A potentially hacky way to fix this is to use a StreamController and call
-  // addError on it within dispose() to break out of the loops.
-  // Hopefully I can find some way to run this code only once.
   void initState() {
     super.initState();
     _deviceNotifier = DeviceModel(widget.device);
