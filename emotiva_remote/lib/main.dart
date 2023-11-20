@@ -1,5 +1,6 @@
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -83,6 +84,31 @@ class _MainViewState extends State<MainView> {
           Remote(widget.device),
         ],
       ),
+      persistentFooterButtons: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Volume', style: TextStyle(fontSize: 25.0)),
+            Row(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.device.volumeDelta(-1.0);
+                    },
+                    child: Icon(Icons.remove, size: 30.0)),
+                SizedBox(width: 15.0),
+                ElevatedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.device.volumeDelta(1.0);
+                    },
+                    child: Icon(Icons.add, size: 30.0)),
+              ],
+            ),
+          ],
+        )
+      ],
       bottomNavigationBar: NavigationBar(
         destinations: [
           NavigationDestination(
@@ -147,8 +173,8 @@ class _InfoState extends State<Info> {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: updateAll, child: Text('Update')),
+              child: ElevatedButton(
+                  onPressed: updateAll, child: Icon(Icons.refresh)),
             ),
             ListenableBuilder(
               listenable: _deviceNotifier,
@@ -160,15 +186,29 @@ class _InfoState extends State<Info> {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(widget.device.name,
-                            style: TextStyle(fontSize: 25)),
-                        Icon(Icons.power_settings_new,
+                        Text(
+                          widget.device.name,
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            widget.device.togglePower();
+                          },
+                          icon: Icon(
+                            Icons.power_settings_new,
                             color: widget.device.power == 'On'
                                 ? Colors.blue
-                                : Colors.amber),
+                                : Colors.amber,
+                            size: 30,
+                          ),
+                        )
                       ],
                     ),
-                    Text('Volume: ${widget.device.volume}dB'),
+                    Text(
+                      'Volume: ${widget.device.volume}dB',
+                      style: TextStyle(fontSize: 18),
+                    ),
                     Table(
                       children: <TableRow>[
                         TableRow(children: [
