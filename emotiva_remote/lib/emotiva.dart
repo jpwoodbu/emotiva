@@ -13,7 +13,8 @@ const String broadcastAddress = '255.255.255.255';
 // main() serves only as a demo. This library is meant to be included in another
 // binary.
 void main() async {
-  final device = await discovery(1);
+  // final device = await discovery(1);
+  final device = FakeDevice();
   print('address: ${device.address}');
   print('name: ${device.name}');
   Future.delayed(Duration(seconds: 1), () async {
@@ -153,8 +154,7 @@ class Device {
   final List<String> _subscribedFields = [];
 
   Stream<String> _socketStream(int port) async* {
-    final stream =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
+    final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     stream.writeEventsEnabled = false;
     _sockets.add(stream);
     await for (final event in stream) {
@@ -286,6 +286,7 @@ class Device {
   }
 
   void parsePacket(String data) {
+    print(data);
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
     final packetType = root.name.toString();
@@ -334,4 +335,97 @@ class Device {
       }
     }
   }
+}
+
+class FakeDevice extends Device {
+  final _controlStream = StreamController<String>();
+  final _notifyStream = StreamController<String>();
+
+  FakeDevice() {
+    model = 'Fake Emotiva';
+    name = 'Fake name';
+    controlVersion = '42';
+    controlPort = 1;
+    notifyPort = 2;
+    infoPort = 3;
+    setupPortTcp = 4;
+    source = 'HDMI 1';
+    audioInput = 'HDMI 1';
+    videoInput = 'HDMI 1';
+    mode = 'Dolby Surround';
+    audioBitstream = 'PCM 2.0';
+    videoFormat = '2160P/60';
+    volume = -35.0;
+    audioBits = '48kHz 20bits';
+    videoSpace = '10bits';
+    address = InternetAddress('192.168.42.1');
+  }
+
+  Iterable<String> _elementsToFields(Iterable<XmlElement> elements) {
+    final fields = <String>[];
+    for (final e in elements) {
+      fields.add(e.name.toString());
+    }
+    return fields;
+  }
+
+  void _parseUpdateRequest(Iterable<String> fields) {
+    for (final f in fields) {}
+    // Just adding something is all that is needed right now.
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaUpdate', nest: () {
+      builder.element('volume', attributes: {'value': volume.toString()});
+    });
+    final response = builder.buildDocument().toXmlString();
+    print('response: $response');
+    _controlStream.add(response);
+  }
+
+  void _parseRequest(String request) {
+    final document = XmlDocument.parse(request);
+    final root = document.rootElement;
+    final requestType = root.name.toString();
+    final fields = _elementsToFields(root.childElements);
+    print('request: $request');
+    switch (requestType) {
+      case 'emotivaControl':
+        break;
+      case 'emotivaUpdate':
+        _parseUpdateRequest(fields);
+        break;
+      case 'emotivaSubscription':
+        // _parseSubscriptionRequest(request);
+        break;
+      case 'emotivaUnsubscribe':
+        // _parseUnsubscribeRequest(request);
+        break;
+      default:
+        throw 'Unknown request type $requestType';
+    }
+  }
+
+  @override
+  // destinationPort seems to always be controlPort.
+  Future<void> _send(String request, int destinationPort) async {
+    return _parseRequest(request);
+  }
+
+  @override
+  Stream<String> controlPortStream() async* {
+    await for (final data in _controlStream.stream) {
+      yield data;
+    }
+  }
+
+  @override
+  Stream<String> notifyPortStream() async* {
+    await for (final data in _notifyStream.stream) {
+      yield data;
+    }
+  }
+}
+
+Future<FakeDevice> futureFakeDevice() async {
+  return FakeDevice();
 }
