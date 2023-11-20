@@ -286,7 +286,6 @@ class Device {
   }
 
   void parsePacket(String data) {
-    print(data);
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
     final packetType = root.name.toString();
