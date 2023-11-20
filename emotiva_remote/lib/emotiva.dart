@@ -308,7 +308,11 @@ class Device {
           mode = _valueAttribute(element.attributes);
           break;
         case 'volume':
-          volume = double.parse(_valueAttribute(element.attributes));
+          try {
+            volume = double.parse(_valueAttribute(element.attributes));
+          } catch (e) {
+            // If parsing fails, that could mean the device is in standby.
+          }
           break;
         case 'loudness':
           loudness = _valueAttribute(element.attributes);
@@ -332,6 +336,18 @@ class Device {
           videoSpace = _valueAttribute(element.attributes);
           break;
       }
+    }
+  }
+
+  void volumeDelta(double delta) async {
+    await control('volume', value: delta.toString());
+  }
+  
+  void togglePower() async {
+    if (power == 'On') {
+      await control('power_off');
+    } else {
+      await control('power_on');
     }
   }
 }
@@ -441,18 +457,21 @@ class FakeDevice extends Device {
     }
   }
 
-  String _getValue(element) {
+  String _getValue(XmlElement element) {
     try {
-      return element.attributes['value'];
+      for (final a in element.attributes) {
+        if (a.name.toString() == 'value') {
+          return a.value;
+        }
+      }
     } catch (e) {
-      return '';
+      print(e);
     }
+    return '';
   }
 
   void _parseControlRequest(Iterable<XmlElement> elements) {
     for (final element in elements) {
-      print('element: ${element.toXmlString()}');
-      print('element name: ${element.name.toString()}');
       switch (element.name.toString()) {
         case 'power_on':
           power = 'On';
@@ -468,8 +487,10 @@ class FakeDevice extends Device {
           break;
         case 'volume':
           try {
-            volume = double.parse(_getValue(element));
+            final delta = double.parse(_getValue(element));
+            volume += delta;
           } catch (e) {
+            print(e);
             // Nothing to do until we start sending Notify packets.
           }
           break;
