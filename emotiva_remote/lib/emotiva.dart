@@ -348,6 +348,7 @@ class FakeDevice extends Device {
     notifyPort = 2;
     infoPort = 3;
     setupPortTcp = 4;
+    power = 'Off';
     source = 'HDMI 1';
     audioInput = 'HDMI 1';
     videoInput = 'HDMI 1';
@@ -357,6 +358,7 @@ class FakeDevice extends Device {
     volume = -35.0;
     audioBits = '48kHz 20bits';
     videoSpace = '10bits';
+    loudness = 'Off';
     address = InternetAddress('192.168.42.1');
   }
 
@@ -368,17 +370,123 @@ class FakeDevice extends Device {
     return fields;
   }
 
+  void _updateBuilder(builder, String field, String value) {
+    builder.element(field, attributes: {'value': value, 'status': 'ack'});
+  }
+
   void _parseUpdateRequest(Iterable<String> fields) {
-    for (final f in fields) {}
-    // Just adding something is all that is needed right now.
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('emotivaUpdate', nest: () {
-      builder.element('volume', attributes: {'value': volume.toString()});
+      for (final f in fields) {
+        switch (f) {
+          case 'power':
+            _updateBuilder(builder, f, power);
+            break;
+          case 'source':
+            _updateBuilder(builder, f, source);
+            break;
+          case 'mode':
+            _updateBuilder(builder, f, mode);
+            break;
+          case 'volume':
+            _updateBuilder(builder, f, volume.toString());
+            break;
+          case 'loudness':
+            _updateBuilder(builder, f, loudness);
+            break;
+          case 'audio_input':
+            _updateBuilder(builder, f, audioInput);
+            break;
+          case 'audio_bitstream':
+            _updateBuilder(builder, f, audioBitstream);
+            break;
+          case 'audio_bits':
+            _updateBuilder(builder, f, audioBits);
+            break;
+          case 'video_input':
+            _updateBuilder(builder, f, videoInput);
+            break;
+          case 'video_format':
+            _updateBuilder(builder, f, videoFormat);
+            break;
+          case 'video_space':
+            _updateBuilder(builder, f, videoSpace);
+            break;
+          default:
+            // Unknown field.
+            builder.element(f, attributes: {'value': '', 'status': 'nak'});
+            break;
+        }
+      }
     });
     final response = builder.buildDocument().toXmlString();
     print('response: $response');
     _controlStream.add(response);
+  }
+
+  void _toggleLoudness() {
+    switch (loudness) {
+      case 'On':
+        loudness = 'Off';
+        break;
+      case 'Off':
+        loudness = 'On';
+        break;
+      default:
+        // If loudness wasn't set, set it to off since the device probably would
+        // have it off by default.
+        loudness = 'Off';
+        break;
+    }
+  }
+
+  String _getValue(element) {
+    try {
+      return element.attributes['value'];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  void _parseControlRequest(Iterable<XmlElement> elements) {
+    for (final element in elements) {
+      print('element: ${element.toXmlString()}');
+      print('element name: ${element.name.toString()}');
+      switch (element.name.toString()) {
+        case 'power_on':
+          power = 'On';
+          break;
+        case 'power_off':
+          power = 'Off';
+          break;
+        case 'source':
+          source = _getValue(element);
+          break;
+        case 'mode':
+          mode = _getValue(element);
+          break;
+        case 'volume':
+          try {
+            volume = double.parse(_getValue(element));
+          } catch (e) {
+            // Nothing to do until we start sending Notify packets.
+          }
+          break;
+        case 'loudness':
+          _toggleLoudness();
+          break;
+        case 'audio_input':
+          audioInput = _getValue(element);
+          break;
+        case 'video_input':
+          videoInput = _getValue(element);
+          break;
+        default:
+          // Unknown field.
+          break;
+      }
+    }
   }
 
   void _parseRequest(String request) {
@@ -389,6 +497,7 @@ class FakeDevice extends Device {
     print('request: $request');
     switch (requestType) {
       case 'emotivaControl':
+        _parseControlRequest(root.childElements);
         break;
       case 'emotivaUpdate':
         _parseUpdateRequest(fields);
