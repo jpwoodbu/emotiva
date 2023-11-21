@@ -123,58 +123,72 @@ class Discovery extends StatefulWidget {
   State<Discovery> createState() => _DiscoveryState();
 }
 
+class _NoDevicesFoundPage extends StatelessWidget {
+  const _NoDevicesFoundPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO - Consider, instead of pushing to the navigation below onPressed,
+    // pushing to the "no devices found" widget and then popping onPressed for
+    // trying again. I think that depends on the discovery process actually
+    // getting retried on popping to the previous widget, but I think
+    // initState will get run again on pop. That might involve not using
+    // FutureBuilder, which be an overall simplicifaction.
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('No Emotiva devices were found.'),
+        SizedBox(height: 25.0),
+        ElevatedButton(
+          // TODO - consider calling an async function instead as using the
+          // Navigator makes the page flash with a short animation on loading
+          // a "new" page.
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Discovery()));
+          },
+          child: Text('Try again'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScanningPage extends StatelessWidget {
+  const _ScanningPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Scanning for Emotiva devices...'),
+        SizedBox(height: 25.0),
+        CircularProgressIndicator(),
+      ],
+    );
+  }
+}
+
 class _DiscoveryState extends State<Discovery> {
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
     if (snapshot.hasData) {
       return MainView(snapshot.data!);
     } else if (snapshot.hasError) {
-      // TODO - Consider, instead of pushing to the navigation below onPressed,
-      // pushing to the "no devices found" widget and then popping onPressed for
-      // trying again. I think that depends on the discovery process actually
-      // getting retried on popping to the previous widget, but I think
-      // initState will get run again on pop. That might involve not using
-      // FutureBuilder, which be an overall simplicifaction.
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('No Emotiva devices were found.'),
-          SizedBox(height: 25.0),
-          ElevatedButton(
-            // TODO - consider calling an async function instead as using the
-            // Navigator makes the page flash with a short animation on loading
-            // a "new" page.
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Discovery()));
-            },
-            child: Text('Try again'),
-          ),
-        ],
-      );
+      return _NoDevicesFoundPage();
     } else {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Scanning for Emotiva devices...'),
-          SizedBox(height: 25.0),
-          CircularProgressIndicator(),
-        ],
-      );
+      return _ScanningPage();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: FutureBuilder<emotiva.Device>(
-          // Use the fake instead if an Emotiva device is not available.
-          // future: emotiva.futureFakeDevice(),
-          future: emotiva.discovery(3),
-          builder: _futureBuilder,
-        ),
-      ),
+    return FutureBuilder<emotiva.Device>(
+      // Use the fake instead if an Emotiva device is not available.
+      future: emotiva.futureFakeDevice(),
+      // future: emotiva.discovery(3),
+      builder: _futureBuilder,
     );
   }
 }

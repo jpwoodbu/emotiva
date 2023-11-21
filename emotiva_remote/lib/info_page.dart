@@ -52,12 +52,12 @@ class _InfoState extends State<InfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15),
-      child: RefreshIndicator(
-        onRefresh: () {
-          return Future(updateAll);
-        },
+    return RefreshIndicator(
+      onRefresh: () {
+        return Future(updateAll);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(15),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
@@ -129,15 +129,15 @@ class _InfoState extends State<InfoPage> {
                     ),
                     SizedBox(height: 25),
                     /*
-                    ElevatedButton.icon(
-                      onPressed: _toggleLoudness,
-                      icon: Icon(Icons.hearing,
-                          color: widget.device.loudness == 'On'
-                              ? Colors.green
-                              : Colors.grey),
-                      label: Text('Loudness'),
-                    ),
-                    */
+                        ElevatedButton.icon(
+                          onPressed: _toggleLoudness,
+                          icon: Icon(Icons.hearing,
+                              color: widget.device.loudness == 'On'
+                                  ? Colors.green
+                                  : Colors.grey),
+                          label: Text('Loudness'),
+                        ),
+                        */
                     Row(
                       children: [
                         Text('Loudness'),
