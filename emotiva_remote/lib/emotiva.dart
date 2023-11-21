@@ -151,7 +151,7 @@ class Device {
     'video_space'
   };
   final List<RawDatagramSocket> _sockets = [];
-  final List<String> _subscribedFields = [];
+  final Set<String> _subscribedFields = {};
 
   Stream<String> _socketStream(int port) async* {
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
@@ -289,6 +289,10 @@ class Device {
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
     final packetType = root.name.toString();
+    if (packetType == 'emotivaAck') {
+      // We don't currently do anything with acks.
+      return;
+    }
     if (packetType != 'emotivaUpdate' &&
         packetType != 'emotivaNotify' &&
         packetType != 'emotivaSubscription') {
@@ -471,24 +475,31 @@ class FakeDevice extends Device {
   }
 
   void _parseControlRequest(Iterable<XmlElement> elements) {
+    Set<String> updatedFields = {};
     for (final element in elements) {
-      switch (element.name.toString()) {
+      String field = element.name.toString();
+      switch (field) {
         case 'power_on':
           power = 'On';
+          updatedFields.add('power');
           break;
         case 'power_off':
           power = 'Off';
+          updatedFields.add('power');
           break;
         case 'source':
           source = _getValue(element);
+          updatedFields.add(field);
           break;
         case 'mode':
           mode = _getValue(element);
+          updatedFields.add(field);
           break;
         case 'volume':
           try {
             final delta = double.parse(_getValue(element));
             volume += delta;
+            updatedFields.add(field);
           } catch (e) {
             print(e);
             // Nothing to do until we start sending Notify packets.
@@ -496,18 +507,92 @@ class FakeDevice extends Device {
           break;
         case 'loudness':
           _toggleLoudness();
+          updatedFields.add(field);
           break;
         case 'audio_input':
           audioInput = _getValue(element);
+          updatedFields.add(field);
           break;
         case 'video_input':
           videoInput = _getValue(element);
+          updatedFields.add(field);
           break;
         default:
           // Unknown field.
           break;
       }
     }
+    _notifySubscribers(updatedFields);
+  }
+
+  void _notifySubscribers(Set<String> updatedFields) {
+    // Note that updatedFields has already been vetted by other methods before
+    // this method is called.
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaNotify', nest: () {
+      for (final field in updatedFields) {
+        var value = _getValueForField(field);
+        // TODO - only include the visible attribute for the fields documented
+        // in the API docs where it applies.
+        builder.element(field, attributes: {'value': value, 'visible': 'true'});
+      }
+    });
+    final response = builder.buildDocument().toXmlString();
+    print('response: $response');
+    _notifyStream.add(response);
+  }
+
+  String _getValueForField(String field) {
+    switch (field) {
+      case 'power':
+        return power;
+      case 'source':
+        return source;
+      case 'mode':
+        return mode;
+      case 'volume':
+        return volume.toString();
+      case 'loudness':
+        return loudness;
+      case 'audio_input':
+        return audioInput;
+      case 'audio_bitstream':
+        return audioBitstream;
+      case 'audio_bits':
+        return audioBits;
+      case 'video_input':
+        return videoInput;
+      case 'video_format':
+        return videoFormat;
+      case 'video_space':
+        return videoSpace;
+      default:
+        throw 'Unsupported field.';
+    }
+  }
+  void _parseSubscriptionRequest(Iterable<String> fields) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaSubscription', nest: () {
+      for (final field in fields) {
+        if (Device._fields.contains(field)) {
+          _subscribedFields.add(field);
+          builder.element(
+            field, attributes: {
+              'value': _getValueForField(field),
+              'status': 'ack',
+              'visible': 'true',
+              });
+        } else {
+          // Return nak status for unknown fields.
+          builder.element(field, attributes: {'status': 'nak'});
+        }
+      }
+    });
+    final response = builder.buildDocument().toXmlString();
+    print('response: $response');
+    _controlStream.add(response);
   }
 
   void _parseRequest(String request) {
@@ -524,7 +609,7 @@ class FakeDevice extends Device {
         _parseUpdateRequest(fields);
         break;
       case 'emotivaSubscription':
-        // _parseSubscriptionRequest(request);
+        _parseSubscriptionRequest(fields);
         break;
       case 'emotivaUnsubscribe':
         // _parseUnsubscribeRequest(request);
