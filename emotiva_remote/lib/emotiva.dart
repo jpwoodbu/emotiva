@@ -530,6 +530,8 @@ class FakeDevice extends Device {
     // this method is called.
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
+    // TODO - implement the sequence attribute for the root element. It appears
+    // to be an incrementing int to help clients disregard out-of-date packets.
     builder.element('emotivaNotify', nest: () {
       for (final field in updatedFields) {
         var value = _getValueForField(field);
