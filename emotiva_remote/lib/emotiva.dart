@@ -363,7 +363,7 @@ class Device {
     await control('mute');
   }
 }
-
+  
 class FakeDevice extends Device {
   final _controlStream = StreamController<String>();
   final _notifyStream = StreamController<String>();
