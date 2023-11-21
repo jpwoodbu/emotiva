@@ -152,6 +152,7 @@ class Device {
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
+  int _sequenceNumber = 0;
 
   Stream<String> _socketStream(int port) async* {
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
@@ -285,6 +286,20 @@ class Device {
     throw 'Element missing value attribute';
   }
 
+  int _getSequence(XmlElement element) {
+    for (final a in element.attributes) {
+      if (a.name.toString() == 'sequence') {
+        try {
+          return int.parse(a.value);
+        } catch (e) {
+          throw 'Unable to parse sequence number: $e';
+        }
+      }
+      throw 'Sequence attribute not found.';
+    }
+    throw 'Element has no sequence attribute.';
+  }
+
   void parsePacket(String data) {
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
@@ -292,6 +307,25 @@ class Device {
     if (packetType == 'emotivaAck') {
       // We don't currently do anything with acks.
       return;
+    }
+    if (packetType == 'emotivaSubscription') {
+      try {
+        final sequence = _getSequence(root);
+        // TODO - Remove this special handling of the zero value if we learn
+        // that sequence numbers start at 1.
+        if (_sequenceNumber == 0 || sequence > _sequenceNumber) {
+          _sequenceNumber = sequence;
+        } else {
+          // In this case, we've already seen this packet or a newer packet in
+          // the sequence and should disregard it.
+          // TODO - add logging when packets are rejected.
+          return;
+        }
+      } catch (e) {
+        // If we can't find a sequence number, just assume we should not discard
+        // this packet.
+      }
+
     }
     if (packetType != 'emotivaUpdate' &&
         packetType != 'emotivaNotify' &&
