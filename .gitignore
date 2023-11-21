@@ -1,4 +1,4 @@
 *.pyc
-# Ignore Bazel symlink.
+# Ignore Bazel symlinks.
 /bazel-*
 *.exe
