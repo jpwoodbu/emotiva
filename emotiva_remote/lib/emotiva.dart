@@ -354,6 +354,14 @@ class Device {
       await control('power_on');
     }
   }
+
+  void toggleLoudness() async {
+    await control('loudness');
+  }
+
+  void toggleMute() async {
+    await control('mute');
+  }
 }
 
 class FakeDevice extends Device {
