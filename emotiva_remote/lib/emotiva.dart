@@ -346,7 +346,7 @@ class Device {
   void volumeDelta(double delta) async {
     await control('volume', value: delta.toString());
   }
-  
+
   void togglePower() async {
     if (power == 'On') {
       await control('power_off');
@@ -363,10 +363,11 @@ class Device {
     await control('mute');
   }
 }
-  
+
 class FakeDevice extends Device {
   final _controlStream = StreamController<String>();
   final _notifyStream = StreamController<String>();
+  int _sequence = 0;
 
   FakeDevice() {
     model = 'Fake Emotiva';
@@ -540,7 +541,8 @@ class FakeDevice extends Device {
     builder.processing('xml', 'version="1.0"');
     // TODO - implement the sequence attribute for the root element. It appears
     // to be an incrementing int to help clients disregard out-of-date packets.
-    builder.element('emotivaNotify', nest: () {
+    builder.element('emotivaNotify',
+        attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final field in updatedFields) {
         var value = _getValueForField(field);
         // TODO - only include the visible attribute for the fields documented
@@ -550,6 +552,7 @@ class FakeDevice extends Device {
     });
     final response = builder.buildDocument().toXmlString();
     print('response: $response');
+    _sequence++;
     _notifyStream.add(response);
   }
 
@@ -581,6 +584,7 @@ class FakeDevice extends Device {
         throw 'Unsupported field.';
     }
   }
+
   void _parseSubscriptionRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
@@ -588,12 +592,11 @@ class FakeDevice extends Device {
       for (final field in fields) {
         if (Device._fields.contains(field)) {
           _subscribedFields.add(field);
-          builder.element(
-            field, attributes: {
-              'value': _getValueForField(field),
-              'status': 'ack',
-              'visible': 'true',
-              });
+          builder.element(field, attributes: {
+            'value': _getValueForField(field),
+            'status': 'ack',
+            'visible': 'true',
+          });
         } else {
           // Return nak status for unknown fields.
           builder.element(field, attributes: {'status': 'nak'});
