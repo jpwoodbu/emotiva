@@ -595,6 +595,21 @@ class FakeDevice extends Device {
     _controlStream.add(response);
   }
 
+  void _parseUnsubscribeRequest(Iterable<String> fields) {
+    String status = 'nak';
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaUnsubscribe', nest: () {
+      for (final f in fields) {
+        _subscribedFields.remove(f);
+        if (Device._fields.contains(f)) {
+          status = 'ack';
+        }
+        builder.element(f, attributes: {'status': status});
+      }
+    });
+  }
+
   void _parseRequest(String request) {
     final document = XmlDocument.parse(request);
     final root = document.rootElement;
@@ -612,7 +627,7 @@ class FakeDevice extends Device {
         _parseSubscriptionRequest(fields);
         break;
       case 'emotivaUnsubscribe':
-        // _parseUnsubscribeRequest(request);
+        _parseUnsubscribeRequest(fields);
         break;
       default:
         throw 'Unknown request type $requestType';
