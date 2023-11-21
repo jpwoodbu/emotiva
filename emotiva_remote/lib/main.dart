@@ -166,6 +166,16 @@ class _InfoState extends State<Info> {
     subscribeAll();
   }
 
+  void _toggleLoudness() async {
+    setState(() {
+      widget.device.toggleLoudness();
+    });
+  }
+
+  void _toggleMute() async {
+    widget.device.toggleMute();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -244,7 +254,18 @@ class _InfoState extends State<Info> {
                       ],
                     ),
                     SizedBox(height: 25),
-                    Text('Loudness: ${widget.device.loudness}'),
+                    ElevatedButton.icon(
+                      onPressed: _toggleLoudness,
+                      icon: Icon(Icons.hearing,
+                          color: widget.device.loudness == 'On'
+                              ? Colors.green
+                              : Colors.grey),
+                      label: Text('Loudness'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _toggleMute,
+                      child: Text('Mute'),
+                    ),
                   ],
                 );
               },
@@ -262,31 +283,7 @@ class Remote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () async {
-              await device.control('power_on');
-            },
-            child: Text('Power on'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await device.control('power_off');
-            },
-            child: Text('Power off'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await device.control('loudness');
-            },
-            child: Text('Toggle Loudness'),
-          ),
-        ],
-      ),
-    );
+    return Placeholder();
   }
 }
 
@@ -303,6 +300,12 @@ class _DiscoveryState extends State<Discovery> {
     if (snapshot.hasData) {
       return MainView(snapshot.data!);
     } else if (snapshot.hasError) {
+      // TODO - Consider, instead of pushing to the navigation below onPressed,
+      // pushing to the "no devices found" widget and then popping onPressed for
+      // trying again. I think that depends on the discovery process actually
+      // getting retried on popping to the previous widget, but I think
+      // initState will get run again on pop. That might involve not using
+      // FutureBuilder, which be an overall simplicifaction.
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
