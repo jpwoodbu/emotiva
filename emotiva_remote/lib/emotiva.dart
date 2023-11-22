@@ -439,6 +439,10 @@ class Device {
   void info() async {
     await control('info');
   }
+  
+  void setHdmi(int input) async {
+    await control('hdmi$input');
+  }
 }
 
 class FakeDevice extends Device {
@@ -569,6 +573,14 @@ class FakeDevice extends Device {
     return '';
   }
 
+  void _handleHdmiControlRequest(String command, Set<String> updatedFields) {
+    final input = command.substring(4);
+    videoInput = 'HDMI $input';
+    audioInput = 'HDMI $input';
+    updatedFields.add('video_input');
+    updatedFields.add('audio_input');
+  }
+
   void _parseControlRequest(Iterable<XmlElement> elements) {
     Set<String> updatedFields = {};
     for (final element in elements) {
@@ -629,6 +641,30 @@ class FakeDevice extends Device {
           } else {
             dim += 20;
           }
+          break;
+        case 'hdmi1':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi2':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi3':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi4':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi5':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi6':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi7':
+          _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'hdmi8':
+          _handleHdmiControlRequest(field, updatedFields);
           break;
         default:
           // Unknown field.
