@@ -183,7 +183,7 @@ class Remote extends StatelessWidget {
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton(
                       onPressed: () => addHaptic(device.modeReferenceStereo),
-                      child: Text('Reference Stereo')),
+                      child: Text('Ref. Stereo')),
                 ),
               ]),
               TableRow(children: [
