@@ -795,6 +795,36 @@ class FakeDevice extends Device {
           audioInput = 'Front';
           updatedFields.add('audio_input');
           break;
+        case 'auto':
+          // Dolby Surround is a reasonable fake since it's usually what's
+          // chosen if the source is 2 channel.
+          mode = 'Dolby Surround';
+          updatedFields.add('mode');
+          break;
+        case 'stereo':
+          mode = 'Stereo';
+          updatedFields.add('mode');
+          break;
+        case 'direct':
+          mode = 'Direct';
+          updatedFields.add('mode');
+          break;
+        case 'reference_stereo':
+          mode = 'Reference Stereo';
+          updatedFields.add('mode');
+          break;
+        case 'dolby':
+          mode = 'Dolby Surround';
+          updatedFields.add('mode');
+          break;
+        case 'dts':
+          mode = 'dts Neural:X';
+          updatedFields.add('mode');
+          break;
+        case 'all_stereo':
+          mode = 'All Stereo';
+          updatedFields.add('mode');
+          break;
         default:
           // Unknown field.
           break;
