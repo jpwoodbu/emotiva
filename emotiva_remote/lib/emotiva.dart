@@ -137,6 +137,7 @@ class Device {
   String videoInput = '';
   String videoFormat = '';
   String videoSpace = '';
+  int dim = 0;
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -149,7 +150,8 @@ class Device {
     'audio_bits',
     'video_input',
     'video_format',
-    'video_space'
+    'video_space',
+    'dim',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -380,6 +382,9 @@ class Device {
         case 'video_space':
           videoSpace = _valueAttribute(element.attributes);
           break;
+        case 'dim':
+          dim = int.parse(_valueAttribute(element.attributes));
+          break;
       }
     }
   }
@@ -402,6 +407,10 @@ class Device {
 
   void toggleMute() async {
     await control('mute');
+  }
+  
+  void cycleFrontDisplayBrightness() async {
+    await control('dim');
   }
 }
 
@@ -429,6 +438,7 @@ class FakeDevice extends Device {
     audioBits = '48kHz 20bits';
     videoSpace = '10bits';
     loudness = 'Off';
+    dim = 0;
     address = InternetAddress('192.168.42.1');
   }
 
@@ -487,6 +497,9 @@ class FakeDevice extends Device {
             break;
           case 'video_space':
             _updateBuilder(builder, f, videoSpace);
+            break;
+          case 'dim':
+            _updateBuilder(builder, f, dim.toString());
             break;
           default:
             // Unknown field.
@@ -582,6 +595,14 @@ class FakeDevice extends Device {
           // Emotiva uses the volume field to indicate whether the device is
           // muted.
           updatedFields.add('volume');
+        case 'dim':
+          // cycle through values of 0, 20, 40, 80, and 100.
+          if (dim >= 100) {
+            dim = 0;
+          } else {
+            dim += 20;
+          }
+          break;
         default:
           // Unknown field.
           break;
@@ -639,6 +660,8 @@ class FakeDevice extends Device {
         return videoFormat;
       case 'video_space':
         return videoSpace;
+      case 'dim':
+        return dim.toString();
       default:
         throw 'Unsupported field.';
     }
