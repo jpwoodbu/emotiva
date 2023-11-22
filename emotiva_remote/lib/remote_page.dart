@@ -101,6 +101,8 @@ class Remote extends StatelessWidget {
   Widget build(BuildContext context) {
     const double tableCellPadding = 8.0;
 
+    // TODO - This needs to be a scrollable top-level widget for it to be
+    // reliable on very small screens.
     return Padding(
       padding: const EdgeInsets.all(15),
       child: Column(
