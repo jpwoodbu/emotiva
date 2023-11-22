@@ -16,6 +16,7 @@ class Remote extends StatelessWidget {
           children: [
             DropdownMenu<int>(
               initialSelection: 1,
+              leadingIcon: Icon(Icons.settings_input_hdmi),
               label: const Text('HDMI'),
               dropdownMenuEntries: [
                 DropdownMenuEntry(value: 1, label: '1'),
