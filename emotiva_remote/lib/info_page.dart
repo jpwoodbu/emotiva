@@ -31,6 +31,18 @@ class _InfoState extends State<InfoPage> {
     widget.device.toggleMute();
   }
 
+  void toggleLoudness() async {
+    setState(() {
+      widget.device.toggleLoudness();
+    });
+  }
+
+  void cycleFrontDisplayBrightness() async {
+    setState(() {
+      widget.device.cycleFrontDisplayBrightness();
+    });
+  }
+
   void subscribeAll() async {
     await widget.device.subscribeAll();
   }
@@ -42,12 +54,6 @@ class _InfoState extends State<InfoPage> {
     _deviceNotifier.handleControlPackets();
     _deviceNotifier.handleNotifyPackets();
     subscribeAll();
-  }
-
-  void _toggleLoudness() async {
-    setState(() {
-      widget.device.toggleLoudness();
-    });
   }
 
   @override
@@ -128,26 +134,43 @@ class _InfoState extends State<InfoPage> {
                       ],
                     ),
                     SizedBox(height: 25),
-                    /*
-                        ElevatedButton.icon(
-                          onPressed: _toggleLoudness,
-                          icon: Icon(Icons.hearing,
-                              color: widget.device.loudness == 'On'
-                                  ? Colors.green
-                                  : Colors.grey),
-                          label: Text('Loudness'),
-                        ),
-                        */
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Loudness'),
-                        Switch(value: true, onChanged: (bool value) {}),
+                        Text(
+                          'Loudness',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        Switch(
+                          value: widget.device.loudness == 'On' ? true : false,
+                          onChanged: (bool value) {
+                            toggleLoudness();
+                          },
+                        ),
                       ],
                     ),
-                    ElevatedButton(
-                      onPressed: toggleMute,
-                      child: Text('Mute'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Mute', style: TextStyle(fontSize: 15)),
+                        Switch(
+                          value: widget.device.muted ? true : false,
+                          onChanged: (bool value) {
+                            toggleMute();
+                          },
+                        ),
+                      ],
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Front display brightness: ${widget.device.dim}',
+                            style: TextStyle(fontSize: 15)),
+                        IconButton(
+                            onPressed: cycleFrontDisplayBrightness,
+                            icon: Icon(Icons.radio_button_on))
+                      ],
+                    )
                   ],
                 );
               },
