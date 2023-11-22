@@ -133,13 +133,13 @@ class _InfoState extends State<InfoPage> {
                         ])
                       ],
                     ),
-                    SizedBox(height: 25),
+                    SizedBox(height: 50),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Loudness',
-                          style: TextStyle(fontSize: 15),
+                          style: TextStyle(fontSize: 20),
                         ),
                         Switch(
                           value: widget.device.loudness == 'On' ? true : false,
@@ -152,7 +152,7 @@ class _InfoState extends State<InfoPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Mute', style: TextStyle(fontSize: 15)),
+                        Text('Mute', style: TextStyle(fontSize: 20)),
                         Switch(
                           value: widget.device.muted ? true : false,
                           onChanged: (bool value) {
@@ -164,11 +164,11 @@ class _InfoState extends State<InfoPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Front display brightness: ${widget.device.dim}',
-                            style: TextStyle(fontSize: 15)),
+                        Text('Front display brightness: ${widget.device.dim}%',
+                            style: TextStyle(fontSize: 20)),
                         IconButton(
                             onPressed: cycleFrontDisplayBrightness,
-                            icon: Icon(Icons.radio_button_on))
+                            icon: Icon(Icons.light_mode))
                       ],
                     )
                   ],

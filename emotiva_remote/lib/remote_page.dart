@@ -47,8 +47,6 @@ class Remote extends StatelessWidget {
                 DropdownMenuEntry(value: 13, label: 'Analog 2'),
                 DropdownMenuEntry(value: 14, label: 'Analog 3'),
                 DropdownMenuEntry(value: 15, label: 'Analog 4'),
-                DropdownMenuEntry(value: 16, label: 'Analog 5'),
-                DropdownMenuEntry(value: 17, label: 'Analog 7.1'),
                 DropdownMenuEntry(value: 18, label: 'Front'),
               ],
             ),
