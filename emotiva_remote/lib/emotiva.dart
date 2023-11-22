@@ -411,6 +411,34 @@ class Device {
   void cycleFrontDisplayBrightness() async {
     await control('dim');
   }
+
+  void toggleMenu() async {
+    await control('menu');
+  }
+
+  void menuUp() async {
+    await control('up');
+  }
+
+  void menuDown() async {
+    await control('down');
+  }
+
+  void menuLeft() async {
+    await control('left');
+  }
+
+  void menuRight() async {
+    await control('right');
+  }
+
+  void menuEnter() async {
+    await control('enter');
+  }
+  
+  void info() async {
+    await control('info');
+  }
 }
 
 class FakeDevice extends Device {
