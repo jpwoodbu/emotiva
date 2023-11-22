@@ -5,6 +5,7 @@ import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
 import 'info_page.dart';
 import 'remote_page.dart';
+import 'menu_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +62,7 @@ class _MainViewState extends State<MainView> {
         children: [
           InfoPage(widget.device),
           Remote(widget.device),
-          Placeholder(),
+          MenuPage(widget.device),
         ],
       ),
       persistentFooterButtons: [
@@ -116,15 +117,8 @@ class _MainViewState extends State<MainView> {
   }
 }
 
-class Discovery extends StatefulWidget {
-  const Discovery({super.key});
-
-  @override
-  State<Discovery> createState() => _DiscoveryState();
-}
-
-class _NoDevicesFoundPage extends StatelessWidget {
-  const _NoDevicesFoundPage({super.key});
+class NoDevicesFoundPage extends StatelessWidget {
+  const NoDevicesFoundPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -134,40 +128,55 @@ class _NoDevicesFoundPage extends StatelessWidget {
     // getting retried on popping to the previous widget, but I think
     // initState will get run again on pop. That might involve not using
     // FutureBuilder, which be an overall simplicifaction.
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('No Emotiva devices were found.'),
-        SizedBox(height: 25.0),
-        ElevatedButton(
-          // TODO - consider calling an async function instead as using the
-          // Navigator makes the page flash with a short animation on loading
-          // a "new" page.
-          onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Discovery()));
-          },
-          child: Text('Try again'),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('No Emotiva devices were found.'),
+            SizedBox(height: 25.0),
+            ElevatedButton(
+              // TODO - consider calling an async function instead as using the
+              // Navigator makes the page flash with a short animation on loading
+              // a "new" page.
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Discovery()));
+              },
+              child: Text('Try again'),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
 
-class _ScanningPage extends StatelessWidget {
-  const _ScanningPage({super.key});
+class ScanningPage extends StatelessWidget {
+  const ScanningPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Scanning for Emotiva devices...'),
-        SizedBox(height: 25.0),
-        CircularProgressIndicator(),
-      ],
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Scanning for Emotiva devices...'),
+            SizedBox(height: 25.0),
+            CircularProgressIndicator(),
+          ],
+        ),
+      ),
     );
   }
+}
+
+class Discovery extends StatefulWidget {
+  const Discovery({super.key});
+
+  @override
+  State<Discovery> createState() => _DiscoveryState();
 }
 
 class _DiscoveryState extends State<Discovery> {
@@ -176,9 +185,9 @@ class _DiscoveryState extends State<Discovery> {
     if (snapshot.hasData) {
       return MainView(snapshot.data!);
     } else if (snapshot.hasError) {
-      return _NoDevicesFoundPage();
+      return NoDevicesFoundPage();
     } else {
-      return _ScanningPage();
+      return ScanningPage();
     }
   }
 
