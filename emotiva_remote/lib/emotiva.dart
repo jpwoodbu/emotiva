@@ -155,7 +155,8 @@ class Device {
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
-  int _sequenceNumber = 0;
+  // The first sequence number sent by the Emotiva device is 0.
+  int _sequenceNumber = -1;
 
   Stream<String> _socketStream(int port) async* {
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
@@ -314,9 +315,7 @@ class Device {
     if (packetType == 'emotivaSubscription') {
       try {
         final sequence = _getSequence(root);
-        // TODO - Remove this special handling of the zero value if we learn
-        // that sequence numbers start at 1.
-        if (_sequenceNumber == 0 || sequence > _sequenceNumber) {
+        if (sequence > _sequenceNumber) {
           _sequenceNumber = sequence;
         } else {
           // In this case, we've already seen this packet or a newer packet in
@@ -325,8 +324,8 @@ class Device {
           return;
         }
       } catch (e) {
-        // If we can't find a sequence number, just assume we should not discard
-        // this packet.
+        // If we can't find a sequence number, just assume we should continue
+        // processing this packet.
       }
 
     }
