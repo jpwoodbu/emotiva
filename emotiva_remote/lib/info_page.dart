@@ -17,7 +17,7 @@ class _InfoState extends State<InfoPage> {
   late DeviceModel _deviceNotifier;
 
   void updateAll() async {
-    HapticFeedback.vibrate();
+    HapticFeedback.lightImpact();
     await widget.device.updateAll();
     setState(() {});
   }
@@ -28,16 +28,19 @@ class _InfoState extends State<InfoPage> {
   }
 
   void toggleMute() async {
+    HapticFeedback.lightImpact();
     widget.device.toggleMute();
   }
 
   void toggleLoudness() async {
+    HapticFeedback.lightImpact();
     setState(() {
       widget.device.toggleLoudness();
     });
   }
 
   void cycleFrontDisplayBrightness() async {
+    HapticFeedback.lightImpact();
     setState(() {
       widget.device.cycleFrontDisplayBrightness();
     });
