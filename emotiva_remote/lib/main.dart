@@ -69,7 +69,7 @@ class _MainViewState extends State<MainView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Volume', style: TextStyle(fontSize: 25.0)),
+            Text('Volume', style: TextStyle(fontSize: 20.0)),
             Row(
               children: [
                 ElevatedButton(
@@ -144,6 +144,8 @@ class NoDevicesFoundPage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => Discovery()));
               },
               child: Text('Try again'),
+              // TODO - consider adding a button to demo the app that passes
+              // FakeDevice MainView.
             ),
           ],
         ),
@@ -195,8 +197,8 @@ class _DiscoveryState extends State<Discovery> {
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
       // Use the fake instead if an Emotiva device is not available.
-      // future: emotiva.futureFakeDevice(),
-      future: emotiva.discovery(3),
+      future: emotiva.futureFakeDevice(),
+      // future: emotiva.discovery(3),
       builder: _futureBuilder,
     );
   }

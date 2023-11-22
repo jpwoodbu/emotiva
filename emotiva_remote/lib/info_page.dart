@@ -152,6 +152,7 @@ class _InfoState extends State<InfoPage> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -164,6 +165,7 @@ class _InfoState extends State<InfoPage> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
