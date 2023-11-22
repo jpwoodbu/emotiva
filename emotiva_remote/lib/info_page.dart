@@ -109,7 +109,7 @@ class _InfoState extends State<InfoPage> {
                     ),
                     Text(
                       'Volume: ${widget.device.volume}dB',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 30),
                     ),
                     Table(
                       children: <TableRow>[
