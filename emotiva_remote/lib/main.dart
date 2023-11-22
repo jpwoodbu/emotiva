@@ -197,8 +197,8 @@ class _DiscoveryState extends State<Discovery> {
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
       // Use the fake instead if an Emotiva device is not available.
-      future: emotiva.futureFakeDevice(),
-      // future: emotiva.discovery(3),
+      // future: emotiva.futureFakeDevice(),
+      future: emotiva.discovery(3),
       builder: _futureBuilder,
     );
   }
