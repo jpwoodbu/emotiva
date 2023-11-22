@@ -16,6 +16,7 @@ class Remote extends StatelessWidget {
     if (input == null || input == 0) {
       return;
     }
+    HapticFeedback.lightImpact();
     device.setHdmi(input);
   }
   
@@ -29,51 +30,67 @@ class Remote extends StatelessWidget {
         return;
       case 1:
         device.setCoax(1);
+        HapticFeedback.lightImpact();
         break;
       case 2:
         device.setCoax(2);
+        HapticFeedback.lightImpact();
         break;
       case 3:
         device.setCoax(3);
+        HapticFeedback.lightImpact();
         break;
       case 4:
         device.setCoax(4);
+        HapticFeedback.lightImpact();
         break;
       case 5:
         device.setOptical(1);
+        HapticFeedback.lightImpact();
         break;
       case 6:
         device.setOptical(2);
+        HapticFeedback.lightImpact();
         break;
       case 7:
         device.setOptical(3);
+        HapticFeedback.lightImpact();
         break;
       case 8:
         device.setOptical(4);
+        HapticFeedback.lightImpact();
         break;
       case 9:
         device.setArc();
+        HapticFeedback.lightImpact();
         break;
       case 10:
         device.setUsb();
+        HapticFeedback.lightImpact();
         break;
       case 11:
         device.setTuner();
+        HapticFeedback.lightImpact();
         break;
       case 12:
         device.setAnalog(1);
+        HapticFeedback.lightImpact();
         break;
       case 13:
         device.setAnalog(2);
+        HapticFeedback.lightImpact();
         break;
       case 14:
         device.setAnalog(3);
+        HapticFeedback.lightImpact();
         break;
       case 15:
         device.setAnalog(4);
+        HapticFeedback.lightImpact();
         break;
       case 16:
         device.setFront();
+        HapticFeedback.lightImpact();
         break;
       default:
         break;
