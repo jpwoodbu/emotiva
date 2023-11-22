@@ -129,6 +129,7 @@ class Device {
   String source = '';
   String mode = '';
   double volume = 0.0;
+  bool muted = false;
   String loudness = '';
   String audioInput = '';
   String audioBitstream = '';
@@ -347,7 +348,13 @@ class Device {
           break;
         case 'volume':
           try {
-            volume = double.parse(_valueAttribute(element.attributes));
+            final reportedVolume = _valueAttribute(element.attributes);
+            if (reportedVolume == 'Mute') {
+              muted = true;
+            } else {
+              muted = false;
+              volume = double.parse(reportedVolume);
+            }
           } catch (e) {
             // If parsing fails, that could mean the device is in standby.
           }
@@ -437,6 +444,7 @@ class FakeDevice extends Device {
     builder.element(field, attributes: {'value': value, 'status': 'ack'});
   }
 
+  // TODO - There's probably a code reuse opportunity with _getValueForField().
   void _parseUpdateRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
@@ -453,7 +461,11 @@ class FakeDevice extends Device {
             _updateBuilder(builder, f, mode);
             break;
           case 'volume':
-            _updateBuilder(builder, f, volume.toString());
+            if (muted) {
+              _updateBuilder(builder, f, 'Mute');
+            } else {
+              _updateBuilder(builder, f, volume.toString());
+            }
             break;
           case 'loudness':
             _updateBuilder(builder, f, loudness);
@@ -542,6 +554,7 @@ class FakeDevice extends Device {
           try {
             final delta = double.parse(_getValue(element));
             volume += delta;
+            muted = false;
             updatedFields.add(field);
           } catch (e) {
             print(e);
@@ -560,6 +573,15 @@ class FakeDevice extends Device {
           videoInput = _getValue(element);
           updatedFields.add(field);
           break;
+        case 'mute':
+          if (muted) {
+            muted = false;
+          } else {
+            muted = true;
+          }
+          // Emotiva uses the volume field to indicate whether the device is
+          // muted.
+          updatedFields.add('volume');
         default:
           // Unknown field.
           break;
@@ -599,6 +621,9 @@ class FakeDevice extends Device {
       case 'mode':
         return mode;
       case 'volume':
+        if (muted) {
+          return 'Mute';
+        }
         return volume.toString();
       case 'loudness':
         return loudness;
