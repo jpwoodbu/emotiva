@@ -472,6 +472,36 @@ class Device {
   void setFront() async {
     await control('front_in');
   }
+
+  void modeAuto() async {
+    await control('auto');
+  }
+
+  void modeStereo() async {
+    // TODO - test this. The documentation says 'direct' sets the stero mode.
+    // Seems like a mistake.
+    await control('stereo');
+  }
+
+  void modeDirect() async {
+    await control('direct');
+  }
+
+  void modeReferenceStereo() async {
+    await control('reference_stereo');
+  }
+
+  void modeDolby() async {
+    await control('dolby');
+  }
+
+  void modeDts() async {
+    await control('dts');
+  }
+
+  void modeAllStereo() async {
+    await control('all_stereo');
+  }
 }
 
 class FakeDevice extends Device {
