@@ -443,6 +443,35 @@ class Device {
   void setHdmi(int input) async {
     await control('hdmi$input');
   }
+
+  void setCoax(int input) async {
+    await control('coax$input');
+  }
+
+  void setOptical(int input) async {
+    await control('optical$input');
+  }
+  
+  void setArc() async {
+    await control('ARC');
+  }
+
+  void setUsb() async {
+    await control('usb_stream');
+  }
+
+  void setTuner() async {
+    await control('tuner');
+  }
+
+  // TODO - support 7.1 input (not on RMC-1).
+  void setAnalog(int input) async {
+    await control('analog$input');
+  }
+  
+  void setFront() async {
+    await control('front_in');
+  }
 }
 
 class FakeDevice extends Device {
@@ -581,6 +610,24 @@ class FakeDevice extends Device {
     updatedFields.add('audio_input');
   }
 
+  void _handleCoaxControlRequest(String command, Set<String> updatedFields) {
+    final input = command.substring(4);
+    audioInput = 'Coax $input';
+    updatedFields.add('audio_input');
+  }
+
+  void _handleOpticalControlRequest(String command, Set<String> updatedFields) {
+    final input = command.substring(7);
+    audioInput = 'Optical $input';
+    updatedFields.add('audio_input');
+  }
+
+  void _handleAnalogControlRequest(String command, Set<String> updatedFields) {
+    final input = command.substring(6);
+    audioInput = 'Analog $input';
+    updatedFields.add('audio_input');
+  }
+
   void _parseControlRequest(Iterable<XmlElement> elements) {
     Set<String> updatedFields = {};
     for (final element in elements) {
@@ -665,6 +712,58 @@ class FakeDevice extends Device {
           break;
         case 'hdmi8':
           _handleHdmiControlRequest(field, updatedFields);
+          break;
+        case 'coax1':
+          _handleCoaxControlRequest(field, updatedFields);
+          break;
+        case 'coax2':
+          _handleCoaxControlRequest(field, updatedFields);
+          break;
+        case 'coax3':
+          _handleCoaxControlRequest(field, updatedFields);
+          break;
+        case 'coax4':
+          _handleCoaxControlRequest(field, updatedFields);
+          break;
+        case 'optical1':
+          _handleOpticalControlRequest(field, updatedFields);
+          break;
+        case 'optical2':
+          _handleOpticalControlRequest(field, updatedFields);
+          break;
+        case 'optical3':
+          _handleOpticalControlRequest(field, updatedFields);
+          break;
+        case 'optical4':
+          _handleOpticalControlRequest(field, updatedFields);
+          break;
+        case 'ARC':
+          audioInput = 'ARC';
+          updatedFields.add('audio_input');
+          break;
+        case 'usb_stream':
+          audioInput = 'USB';
+          updatedFields.add('audio_input');
+          break;
+        case 'tuner':
+          audioInput = 'Tuner';
+          updatedFields.add('audio_input');
+          break;
+        case 'analog1':
+          _handleAnalogControlRequest(field, updatedFields);
+          break;
+        case 'analog2':
+          _handleAnalogControlRequest(field, updatedFields);
+          break;
+        case 'analog3':
+          _handleAnalogControlRequest(field, updatedFields);
+          break;
+        case 'analog4':
+          _handleAnalogControlRequest(field, updatedFields);
+          break;
+        case 'front_in':
+          audioInput = 'Front';
+          updatedFields.add('audio_input');
           break;
         default:
           // Unknown field.

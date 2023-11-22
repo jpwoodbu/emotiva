@@ -19,6 +19,66 @@ class Remote extends StatelessWidget {
     device.setHdmi(input);
   }
   
+  void setAudioInput(int? selection) async {
+    switch (selection) {
+      case null:
+        // We are required to handle a null value.
+        return;
+      case 0:
+        // Nothing was selected.
+        return;
+      case 1:
+        device.setCoax(1);
+        break;
+      case 2:
+        device.setCoax(2);
+        break;
+      case 3:
+        device.setCoax(3);
+        break;
+      case 4:
+        device.setCoax(4);
+        break;
+      case 5:
+        device.setOptical(1);
+        break;
+      case 6:
+        device.setOptical(2);
+        break;
+      case 7:
+        device.setOptical(3);
+        break;
+      case 8:
+        device.setOptical(4);
+        break;
+      case 9:
+        device.setArc();
+        break;
+      case 10:
+        device.setUsb();
+        break;
+      case 11:
+        device.setTuner();
+        break;
+      case 12:
+        device.setAnalog(1);
+        break;
+      case 13:
+        device.setAnalog(2);
+        break;
+      case 14:
+        device.setAnalog(3);
+        break;
+      case 15:
+        device.setAnalog(4);
+        break;
+      case 16:
+        device.setFront();
+        break;
+      default:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +109,12 @@ class Remote extends StatelessWidget {
             // TODO - refactor to use an enum once I understand them better.
             DropdownMenu<int>(
               enableSearch: false,
-              initialSelection: 1,
+              initialSelection: 0,
               leadingIcon: Icon(Icons.settings_input_composite),
               label: const Text('Audio source'),
+              onSelected: (int? selection) => setAudioInput(selection),
               dropdownMenuEntries: [
+                DropdownMenuEntry(value: 0, label: 'Select'),
                 DropdownMenuEntry(value: 1, label: 'Coax 1'),
                 DropdownMenuEntry(value: 2, label: 'Coax 2'),
                 DropdownMenuEntry(value: 3, label: 'Coax 3'),
@@ -68,7 +130,7 @@ class Remote extends StatelessWidget {
                 DropdownMenuEntry(value: 13, label: 'Analog 2'),
                 DropdownMenuEntry(value: 14, label: 'Analog 3'),
                 DropdownMenuEntry(value: 15, label: 'Analog 4'),
-                DropdownMenuEntry(value: 18, label: 'Front'),
+                DropdownMenuEntry(value: 16, label: 'Front'),
               ],
             ),
           ],
