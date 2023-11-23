@@ -20,6 +20,12 @@ class Remote extends StatelessWidget {
     Navigator.pop(context);
   }
 
+  void setAesEbu(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    device.setAesEbu();
+    Navigator.pop(context);
+  }
+
   void setOptical(BuildContext context, int input) async {
     HapticFeedback.lightImpact();
     device.setOptical(input);
@@ -29,6 +35,12 @@ class Remote extends StatelessWidget {
   void setAnalog(BuildContext context, int input) async {
     HapticFeedback.lightImpact();
     device.setAnalog(input);
+    Navigator.pop(context);
+  }
+
+  void setBalancedInput(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    device.setBalancedInput();
     Navigator.pop(context);
   }
 
@@ -246,6 +258,30 @@ class Remote extends StatelessWidget {
     );
   }
 
+  void xlrBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton.icon(
+                  onPressed: () => setAesEbu(context),
+                  icon: Icon(Icons.developer_board),
+                  label: Text('AES/EBU')),
+              ElevatedButton.icon(
+                  onPressed: () => setBalancedInput(context),
+                  icon: Icon(Icons.album),
+                  label: Text('Balanced Input')),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void analogBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -267,10 +303,6 @@ class Remote extends StatelessWidget {
                   onPressed: () => setAnalog(context, 3),
                   icon: Icon(Icons.settings_input_component),
                   label: Text('Analog 3')),
-              ElevatedButton.icon(
-                  onPressed: () => setAnalog(context, 4),
-                  icon: Icon(Icons.settings_input_component),
-                  label: Text('Analog 4')),
             ],
           ),
         );
@@ -400,17 +432,19 @@ class Remote extends StatelessWidget {
                       hdmiBottomSheet(context);
                     },
                     icon: Icon(Icons.settings_input_hdmi),
-                    label: Text('HDMI inputs'),
+                    label: Text('HDMI'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      coaxBottomSheet(context);
+                      analogBottomSheet(context);
                     },
-                    icon: Icon(Icons.settings_input_composite),
-                    label: Text('Coax inputs'),
+                    icon: Icon(Icons.settings_input_component),
+                    label: Text('Analog'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
               ]),
@@ -422,17 +456,19 @@ class Remote extends StatelessWidget {
                       opticalBottomSheet(context);
                     },
                     icon: Icon(Icons.lightbulb),
-                    label: Text('Optical inputs'),
+                    label: Text('Optical'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      analogBottomSheet(context);
+                      coaxBottomSheet(context);
                     },
-                    icon: Icon(Icons.settings_input_component),
-                    label: Text('Analog inputs'),
+                    icon: Icon(Icons.settings_input_composite),
+                    label: Text('Coax'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
               ]),
@@ -441,13 +477,24 @@ class Remote extends StatelessWidget {
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      xlrBottomSheet(context);
+                    },
+                    icon: Icon(Icons.donut_large),
+                    label: Text('XLR'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(tableCellPadding),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
                       otherBottomSheet(context);
                     },
                     icon: Icon(Icons.more),
-                    label: Text('Other inputs'),
+                    label: Text('Other'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
-                Text(''),
               ]),
               TableRow(children: [SizedBox(height: 20), Text('')]),
               TableRow(children: [
@@ -459,6 +506,7 @@ class Remote extends StatelessWidget {
                     },
                     icon: Icon(Icons.surround_sound),
                     label: Text('Mode'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
                 Padding(
@@ -468,7 +516,8 @@ class Remote extends StatelessWidget {
                       speakerPresetBottomSheet(context);
                     },
                     icon: Icon(Icons.speaker),
-                    label: Text('Speaker preset'),
+                    label: Text('Speaker'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
               ]),

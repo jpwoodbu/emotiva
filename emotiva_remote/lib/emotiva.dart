@@ -337,7 +337,6 @@ class Device {
         // If we can't find a sequence number, just assume we should continue
         // processing this packet.
       }
-
     }
     if (packetType != 'emotivaUpdate' &&
         packetType != 'emotivaNotify' &&
@@ -452,7 +451,7 @@ class Device {
   void toggleMute() async {
     await control('mute');
   }
-  
+
   void cycleFrontDisplayBrightness() async {
     await control('dim');
   }
@@ -480,11 +479,11 @@ class Device {
   void menuEnter() async {
     await control('enter');
   }
-  
+
   void info() async {
     await control('info');
   }
-  
+
   void setHdmi(int input) async {
     await control('hdmi$input');
   }
@@ -493,10 +492,15 @@ class Device {
     await control('coax$input');
   }
 
+  void setAesEbu() async {
+    // coax5 pulls up the AES/EBU input on the RMC-1.
+    await control('coax5');
+  }
+
   void setOptical(int input) async {
     await control('optical$input');
   }
-  
+
   void setArc() async {
     await control('ARC');
   }
@@ -509,11 +513,15 @@ class Device {
     await control('tuner');
   }
 
-  // TODO - support 7.1 input (not on RMC-1).
   void setAnalog(int input) async {
     await control('analog$input');
   }
-  
+
+  void setBalancedInput() async {
+    // analog5 bring up the balanced input on the RMC-1.
+    await control('analog5');
+  }
+
   void setFront() async {
     await control('front_in');
   }
@@ -734,7 +742,11 @@ class FakeDevice extends Device {
 
   void _handleCoaxControlRequest(String command, Set<String> updatedFields) {
     final input = command.substring(4);
-    audioInput = 'Coax $input';
+    if (input == '5') {
+      audioInput = 'AES/EBU';
+    } else {
+      audioInput = 'Coax $input';
+    }
     updatedFields.add('audio_input');
   }
 
@@ -746,7 +758,11 @@ class FakeDevice extends Device {
 
   void _handleAnalogControlRequest(String command, Set<String> updatedFields) {
     final input = command.substring(6);
-    audioInput = 'Analog $input';
+    if (input == '5') {
+      audioInput = 'Balanced In';
+    } else {
+      audioInput = 'Analog $input';
+    }
     updatedFields.add('audio_input');
   }
 
@@ -857,6 +873,8 @@ class FakeDevice extends Device {
         case 'coax4':
           _handleCoaxControlRequest(field, updatedFields);
           break;
+        case 'coax5':
+          _handleCoaxControlRequest(field, updatedFields);
         case 'optical1':
           _handleOpticalControlRequest(field, updatedFields);
           break;
@@ -890,7 +908,7 @@ class FakeDevice extends Device {
         case 'analog3':
           _handleAnalogControlRequest(field, updatedFields);
           break;
-        case 'analog4':
+        case 'analog5':
           _handleAnalogControlRequest(field, updatedFields);
           break;
         case 'front_in':
