@@ -8,9 +8,9 @@ class Remote extends StatelessWidget {
   const Remote(this.device, {super.key});
   static const double sheetPadding = 15.0;
 
-  void addHaptic(Function function) {
+  void addHapticForTrim(Function function, int trim) {
     HapticFeedback.lightImpact();
-    function();
+    function(trim);
   }
 
   void setHdmi(BuildContext context, int input) async {
@@ -460,16 +460,16 @@ class Remote extends StatelessWidget {
             children: [
               TableRow(children: [
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimCenter, 1),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimSubwoofer, 1),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimSurround, 1),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimBack, 1),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
               ]),
               TableRow(children: [
@@ -480,16 +480,16 @@ class Remote extends StatelessWidget {
               ]),
               TableRow(children: [
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimCenter, -1),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimSubwoofer, -1),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimSurround, -1),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () => addHapticForTrim(device.trimBack, -1),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
               ]),
             ],
