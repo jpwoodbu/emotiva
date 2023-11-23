@@ -15,53 +15,55 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double iconSize = 130;
-    return Center(
-      child: Table(
-        children: <TableRow>[
-          TableRow(
-            children: [
-              Text(''),
-              IconButton(
-                  onPressed: () => addHaptic(device.menuUp),
-                  icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
-              Text(''),
+    return ListView(
+      children: [
+        Table(
+            children: <TableRow>[
+              TableRow(
+                children: [
+                  Text(''),
+                  IconButton(
+                      onPressed: () => addHaptic(device.menuUp),
+                      icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
+                  Text(''),
+                ],
+              ),
+              TableRow(
+                children: [
+                  IconButton(
+                      onPressed: () => addHaptic(device.menuLeft),
+                      icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
+                  IconButton(
+                      onPressed: () => addHaptic(device.menuEnter),
+                      icon: Icon(Icons.circle_outlined, size: iconSize)),
+                  IconButton(
+                      onPressed: () => addHaptic(device.menuRight),
+                      icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
+                ],
+              ),
+              TableRow(
+                children: [
+                  Text(''),
+                  IconButton(
+                      onPressed: () => addHaptic(device.menuDown),
+                      icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
+                  Text(''),
+                ],
+              ),
+              TableRow(
+                children: [
+                  IconButton(
+                      onPressed: () => addHaptic(device.info),
+                      icon: Icon(Icons.info, size: iconSize * 0.50)),
+                  Text(''),
+                  IconButton(
+                      onPressed: () => addHaptic(device.toggleMenu),
+                      icon: Icon(Icons.menu, size: iconSize * 0.50)),
+                ],
+              ),
             ],
           ),
-          TableRow(
-            children: [
-              IconButton(
-                  onPressed: () => addHaptic(device.menuLeft),
-                  icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
-              IconButton(
-                  onPressed: () => addHaptic(device.menuEnter),
-                  icon: Icon(Icons.circle_outlined, size: iconSize)),
-              IconButton(
-                  onPressed: () => addHaptic(device.menuRight),
-                  icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
-            ],
-          ),
-          TableRow(
-            children: [
-              Text(''),
-              IconButton(
-                  onPressed: () => addHaptic(device.menuDown),
-                  icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
-              Text(''),
-            ],
-          ),
-          TableRow(
-            children: [
-              IconButton(
-                  onPressed: () => addHaptic(device.info),
-                  icon: Icon(Icons.info, size: iconSize * 0.50)),
-              Text(''),
-              IconButton(
-                  onPressed: () => addHaptic(device.toggleMenu),
-                  icon: Icon(Icons.menu, size: iconSize * 0.50)),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
