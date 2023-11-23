@@ -515,6 +515,32 @@ class Device {
   void speakerPreset2() async {
     await control('preset2');
   }
+
+  void _validateTrim(int trim) {
+    if (trim < -12 || trim > 12) {
+      throw 'trim must be between -12 and +12';
+    }
+  }
+
+  void trimCenter(int trim) async {
+    _validateTrim(trim);
+    await control('center_trim_set', value: trim.toString());
+  }
+
+  void trimSubwoofer(int trim) async {
+    _validateTrim(trim);
+    await control('subwoofer_trim_set', value: trim.toString());
+  }
+
+  void trimSurround(int trim) async {
+    _validateTrim(trim);
+    await control('surround_trim_set', value: trim.toString());
+  }
+
+  void trimBack(int trim) async {
+    _validateTrim(trim);
+    await control('back_trim_set', value: trim.toString());
+  }
 }
 
 class FakeDevice extends Device {
