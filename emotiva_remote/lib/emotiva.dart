@@ -139,6 +139,10 @@ class Device {
   String videoSpace = '';
   int dim = 0;
   String speakerPreset = '';
+  double centerTrim = 0.0;
+  double subwooferTrim = 0.0;
+  double surroundTrim = 0.0;
+  double backTrim = 0.0;
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -153,7 +157,11 @@ class Device {
     'video_format',
     'video_space',
     'dim',
-    'speaker_preset'
+    'speaker_preset',
+    'center',
+    'subwoofer',
+    'surround',
+    'back',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -389,6 +397,38 @@ class Device {
         case 'speaker_preset':
           speakerPreset = _valueAttribute(element.attributes);
           break;
+        // Trims are delivered from Emotiva in 0.5dB steps. So we divide by two
+        // for better presentation.
+        case 'center':
+          try {
+            centerTrim = double.parse(_valueAttribute(element.attributes));
+          } catch (e) {
+            // TODO - add logging.
+          }
+          break;
+        case 'subwoofer':
+          try {
+            subwooferTrim = double.parse(_valueAttribute(element.attributes));
+          } catch (e) {
+            // TODO - add logging.
+          }
+          break;
+        case 'surround':
+          try {
+            surroundTrim = double.parse(_valueAttribute(element.attributes));
+          } catch (e) {
+            // TODO - add logging.
+          }
+        case 'back':
+          try {
+            backTrim = double.parse(_valueAttribute(element.attributes));
+          } catch (e) {
+            // TODO - add logging.
+          }
+          break;
+        default:
+          // TODO - add logging.
+          break;
       }
     }
   }
@@ -516,29 +556,24 @@ class Device {
     await control('preset2');
   }
 
-  void _validateTrim(int trim) {
-    if (trim < -12 || trim > 12) {
-      throw 'trim must be between -12 and +12';
-    }
-  }
-
-  void trimCenter(int trim) async {
-    _validateTrim(trim);
+  // All trim values are in steps of 0.5dB.
+  void trimCenter(double trim) async {
+    trim = trim * 2;
     await control('center_trim_set', value: trim.toString());
   }
 
-  void trimSubwoofer(int trim) async {
-    _validateTrim(trim);
+  void trimSubwoofer(double trim) async {
+    trim = trim * 2;
     await control('subwoofer_trim_set', value: trim.toString());
   }
 
-  void trimSurround(int trim) async {
-    _validateTrim(trim);
+  void trimSurround(double trim) async {
+    trim = trim * 2;
     await control('surround_trim_set', value: trim.toString());
   }
 
-  void trimBack(int trim) async {
-    _validateTrim(trim);
+  void trimBack(double trim) async {
+    trim = trim * 2;
     await control('back_trim_set', value: trim.toString());
   }
 }
@@ -634,6 +669,18 @@ class FakeDevice extends Device {
           case 'speaker_preset':
             _updateBuilder(builder, f, speakerPreset);
             break;
+          case 'center':
+            _updateBuilder(builder, f, centerTrim.toString());
+            break;
+          case 'subwoofer':
+            _updateBuilder(builder, f, subwooferTrim.toString());
+            break;
+          case 'surround':
+            _updateBuilder(builder, f, surroundTrim.toString());
+            break;
+          case 'back':
+            _updateBuilder(builder, f, backTrim.toString());
+            break;
           default:
             // Unknown field.
             builder.element(f, attributes: {'value': '', 'status': 'nak'});
@@ -701,6 +748,16 @@ class FakeDevice extends Device {
     final input = command.substring(6);
     audioInput = 'Analog $input';
     updatedFields.add('audio_input');
+  }
+
+  double _sanitizeTrimValue(double trim) {
+    if (trim > 24.0) {
+      return 24.0;
+    } else if (trim < -24.0) {
+      return -24.0;
+    } else {
+      return trim;
+    }
   }
 
   void _parseControlRequest(Iterable<XmlElement> elements) {
@@ -878,6 +935,32 @@ class FakeDevice extends Device {
           speakerPreset = 'Preset 2';
           updatedFields.add('speaker_preset');
           break;
+        case 'center_trim_set':
+          final rawTrim = double.parse(_getValue(element));
+          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          // Divide by 2 because this normally happens inside the Emotiva
+          // device.
+          centerTrim = sanitizedTrim / 2;
+          updatedFields.add('center');
+          break;
+        case 'subwoofer_trim_set':
+          final rawTrim = double.parse(_getValue(element));
+          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          subwooferTrim = sanitizedTrim / 2;
+          updatedFields.add('subwoofer');
+          break;
+        case 'surround_trim_set':
+          final rawTrim = double.parse(_getValue(element));
+          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          surroundTrim = sanitizedTrim / 2;
+          updatedFields.add('surround');
+          break;
+        case 'back_trim_set':
+          final rawTrim = double.parse(_getValue(element));
+          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          backTrim = sanitizedTrim / 2;
+          updatedFields.add('back');
+          break;
         default:
           // Unknown field.
           break;
@@ -939,8 +1022,16 @@ class FakeDevice extends Device {
         return dim.toString();
       case 'speaker_preset':
         return speakerPreset;
+      case 'center':
+        return centerTrim.toString();
+      case 'subwoofer':
+        return subwooferTrim.toString();
+      case 'surround':
+        return surroundTrim.toString();
+      case 'back':
+        return backTrim.toString();
       default:
-        throw 'Unsupported field.';
+        throw 'Unsupported field: $field';
     }
   }
 

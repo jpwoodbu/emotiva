@@ -8,11 +8,6 @@ class Remote extends StatelessWidget {
   const Remote(this.device, {super.key});
   static const double sheetPadding = 15.0;
 
-  void addHapticForTrim(Function function, int trim) {
-    HapticFeedback.lightImpact();
-    function(trim);
-  }
-
   void setHdmi(BuildContext context, int input) async {
     HapticFeedback.lightImpact();
     device.setHdmi(input);
@@ -113,6 +108,30 @@ class Remote extends StatelessWidget {
     HapticFeedback.lightImpact();
     device.speakerPreset2();
     Navigator.pop(context);
+  }
+
+  void bumpCenterTrim(double step) async {
+    HapticFeedback.lightImpact();
+    final trim = device.centerTrim += step;
+    device.trimCenter(trim);
+  }
+
+  void bumpSubwooferTrim(double step) async {
+    HapticFeedback.lightImpact();
+    final trim = device.subwooferTrim += step;
+    device.trimSubwoofer(trim);
+  }
+
+  void bumpSurroundTrim(double step) async {
+    HapticFeedback.lightImpact();
+    final trim = device.surroundTrim += step;
+    device.trimSurround(trim);
+  }
+
+  void bumpBackTrim(double step) async {
+    HapticFeedback.lightImpact();
+    final trim = device.backTrim += step;
+    device.trimBack(trim);
   }
 
   void hdmiBottomSheet(BuildContext context) {
@@ -460,16 +479,16 @@ class Remote extends StatelessWidget {
             children: [
               TableRow(children: [
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimCenter, 1),
+                    onPressed: () => bumpCenterTrim(0.5),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimSubwoofer, 1),
+                    onPressed: () => bumpSubwooferTrim(0.5),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimSurround, 1),
+                    onPressed: () => bumpSurroundTrim(0.5),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimBack, 1),
+                    onPressed: () => bumpBackTrim(0.5),
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
               ]),
               TableRow(children: [
@@ -480,16 +499,16 @@ class Remote extends StatelessWidget {
               ]),
               TableRow(children: [
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimCenter, -1),
+                    onPressed: () => bumpCenterTrim(-0.5),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimSubwoofer, -1),
+                    onPressed: () => bumpSubwooferTrim(-0.5),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimSurround, -1),
+                    onPressed: () => bumpSurroundTrim(-0.5),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
-                    onPressed: () => addHapticForTrim(device.trimBack, -1),
+                    onPressed: () => bumpBackTrim(-0.5),
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
               ]),
             ],
