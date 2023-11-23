@@ -138,6 +138,7 @@ class Device {
   String videoFormat = '';
   String videoSpace = '';
   int dim = 0;
+  String speakerPreset = '';
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -152,6 +153,7 @@ class Device {
     'video_format',
     'video_space',
     'dim',
+    'speaker_preset'
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -384,6 +386,9 @@ class Device {
         case 'dim':
           dim = int.parse(_valueAttribute(element.attributes));
           break;
+        case 'speaker_preset':
+          speakerPreset = _valueAttribute(element.attributes);
+          break;
       }
     }
   }
@@ -502,6 +507,14 @@ class Device {
   void modeAllStereo() async {
     await control('all_stereo');
   }
+
+  void speakerPreset1() async {
+    await control('preset1');
+  }
+
+  void speakerPreset2() async {
+    await control('preset2');
+  }
 }
 
 class FakeDevice extends Device {
@@ -529,6 +542,7 @@ class FakeDevice extends Device {
     videoSpace = '10bits';
     loudness = 'Off';
     dim = 0;
+    speakerPreset = 'Preset 1';
     address = InternetAddress('192.168.42.1');
   }
 
@@ -591,6 +605,9 @@ class FakeDevice extends Device {
           case 'dim':
             _updateBuilder(builder, f, dim.toString());
             break;
+          case 'speaker_preset':
+            _updateBuilder(builder, f, speakerPreset);
+            break;
           default:
             // Unknown field.
             builder.element(f, attributes: {'value': '', 'status': 'nak'});
@@ -636,8 +653,10 @@ class FakeDevice extends Device {
     final input = command.substring(4);
     videoInput = 'HDMI $input';
     audioInput = 'HDMI $input';
+    source = 'HDMI $input';
     updatedFields.add('video_input');
     updatedFields.add('audio_input');
+    updatedFields.add('source');
   }
 
   void _handleCoaxControlRequest(String command, Set<String> updatedFields) {
@@ -825,6 +844,14 @@ class FakeDevice extends Device {
           mode = 'All Stereo';
           updatedFields.add('mode');
           break;
+        case 'preset1':
+          speakerPreset = 'Preset 1';
+          updatedFields.add('speaker_preset');
+          break;
+        case 'preset2':
+          speakerPreset = 'Preset 2';
+          updatedFields.add('speaker_preset');
+          break;
         default:
           // Unknown field.
           break;
@@ -884,6 +911,8 @@ class FakeDevice extends Device {
         return videoSpace;
       case 'dim':
         return dim.toString();
+      case 'speaker_preset':
+        return speakerPreset;
       default:
         throw 'Unsupported field.';
     }
