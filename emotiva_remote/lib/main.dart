@@ -36,6 +36,8 @@ const String knownIssues = '''
 1) Changing inputs does not properly update all the fields on the Info page. Workaround: Click the refresh icon after changing inputs.
 
 2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
+
+3) HDMI color space, chroma subsamping, and HDR state are missing.
 ''';
 
 Future<void> showKnownIssus(BuildContext context) {
