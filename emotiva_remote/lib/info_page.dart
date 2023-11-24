@@ -14,7 +14,6 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoState extends State<InfoPage> {
-  
   void updateAll() async {
     HapticFeedback.lightImpact();
     await widget.device.updateAll();
@@ -97,13 +96,9 @@ class _InfoState extends State<InfoPage> {
                       'Volume: ${widget.device.volume}dB',
                       style: TextStyle(fontSize: 30),
                     ),
+                    SizedBox(height: 25),
                     Table(
                       children: <TableRow>[
-                        TableRow(children: [
-                          SizedBox(height: 25),
-                          SizedBox(height: 25),
-                          SizedBox(height: 25),
-                        ]),
                         TableRow(children: [
                           Text(widget.device.source),
                           Text(widget.device.mode,
@@ -122,13 +117,28 @@ class _InfoState extends State<InfoPage> {
                         ])
                       ],
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Speaker preset',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        Text(widget.device.speakerPreset,
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Loudness',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         Switch(
                           value: widget.device.loudness == 'On' ? true : false,
@@ -142,7 +152,9 @@ class _InfoState extends State<InfoPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Mute', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        Text('Mute',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
                         Switch(
                           value: widget.device.muted ? true : false,
                           onChanged: (bool value) {
@@ -156,7 +168,8 @@ class _InfoState extends State<InfoPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Front display brightness:  ${widget.device.dim}%',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
                         IconButton(
                             onPressed: cycleFrontDisplayBrightness,
                             icon: Icon(Icons.light_mode))
