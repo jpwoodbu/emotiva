@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
 import 'info_page.dart';
-import 'remote_page.dart';
+import 'inputs_page.dart';
 import 'menu_page.dart';
 
 void main() {
@@ -61,7 +61,7 @@ class _MainViewState extends State<MainView> {
         index: currentPageIndex,
         children: [
           InfoPage(widget.device),
-          Remote(widget.device),
+          InputsPage(widget.device),
           MenuPage(widget.device),
         ],
       ),

@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
-class Remote extends StatelessWidget {
+class InputsPage extends StatelessWidget {
   final emotiva.Device device;
-  const Remote(this.device, {super.key});
+  const InputsPage(this.device, {super.key});
   static const double sheetPadding = 15.0;
 
   void setHdmi(BuildContext context, int input) async {
