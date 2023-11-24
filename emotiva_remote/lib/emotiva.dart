@@ -322,6 +322,11 @@ class Device {
       // We don't currently do anything with acks.
       return;
     }
+    if (packetType == 'emotivaUnsubscribe') {
+      // If we get a response from an unsubscribe request before we tear down
+      // the socket, catch it and do nothing.
+      return;
+    }
     if (packetType == 'emotivaSubscription') {
       try {
         final sequence = _getSequence(root);
