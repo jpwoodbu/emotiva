@@ -8,6 +8,95 @@ import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
 
+const String helpText = '''
+Tip 1: Click the power icon in the top right to turn On/Off your processor.
+
+Tip 2: When changes happen on the Emotiva processor, data in the app should update automatically. But if you think the app is out-of-sync with the processor, click the refresh icon next to the power icon to refresh all data. Or swipe down on the info page to refresh.
+
+Tip 3: Turn on "Touch feedback" in your system settings (under Vibration & haptics). Everytime the app sends a network packet to the Emotiva processor, it makes a slight vibration.
+
+Tip 4: Data in the app are ONLY changed when updates are receieved from the Emotiva processor. If you see lag between clicking a button and seeing a field being updated, it's likely because it takes the Emotiva processor a moment to process the change and send the update.
+''';
+
+Future<void> showHelp(BuildContext context) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      scrollable: true,
+      content: Text(helpText.trim()),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+      ],
+    ),
+  );
+}
+
+const String knownIssues = '''
+1) Changing inputs does not properly update all the fields on the Info page. Workaround: Click the refresh icon after changing inputs.
+
+2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
+''';
+
+Future<void> showKnownIssus(BuildContext context) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      scrollable: true,
+      content: Text(knownIssues.trim()),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+      ],
+    ),
+  );
+}
+
+const String roadMap = '''
+1) Make the app customize itself based on the Emotiva processor configuration. E.g. use custom input labels, display trim only for speakers which are enabled.
+
+2) Add tuner controls.
+
+3) Test on hardware other than the RMC-1L.
+
+4) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
+''';
+
+Future<void> showRoadMap(BuildContext context) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      scrollable: true,
+      content: Text(roadMap.trim()),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+      ],
+    ),
+  );
+}
+
+const String donateText = '''
+Your support is greatly appreciated!
+
+https://paypal.com
+Venmo: @Jonathan-Woodbury-2
+''';
+
+Future<void> showDonateText(BuildContext context) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      scrollable: true,
+      content: Text(donateText.trim()),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+      ],
+    ),
+  );
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -77,30 +166,32 @@ class _MainViewState extends State<MainView> {
         title: const Center(child: Text('Emotiva Remote')),
         leading: IconButton(
           icon: Icon(Icons.help),
-          onPressed: () => showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: Text('Help title'),
-              content: Text('content.'),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
-              ],
-            ),
-          ),
+          onPressed: () => showHelp(context),
         ),
         actions: [
           PopupMenuButton(
-              itemBuilder: (BuildContext context) => [
-                    PopupMenuItem(
-                        child: Text('Search for Emotiva devices'),
-                        onTap: () {
-                          Navigator.pushNamedAndRemoveUntil(context,
-                              '/discovery', (Route<dynamic> route) => false);
-                        }),
-                    PopupMenuItem(child: Text('Known issues')),
-                    PopupMenuItem(child: Text('Donate')),
-                  ]),
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                child: Text('Search for Emotiva devices'),
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/discovery', (Route<dynamic> route) => false);
+                },
+              ),
+              PopupMenuItem(
+                child: Text('Known issues'),
+                onTap: () => showKnownIssus(context),
+              ),
+              PopupMenuItem(
+                child: Text('Road map'),
+                onTap: () => showRoadMap(context),
+              ),
+              PopupMenuItem(
+                child: Text('Want to show your support?'),
+                onTap: () => showDonateText(context),
+              ),
+            ],
+          ),
         ],
       ),
       // Using IndexedStack is critical. It preserves the existance (I think) of
