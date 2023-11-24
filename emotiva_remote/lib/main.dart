@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       home: const Discovery(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -67,6 +68,26 @@ class _MainViewState extends State<MainView> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Emotiva Remote')),
+        leading: IconButton(icon: Icon(Icons.help), onPressed: () {}),
+        actions: [
+          PopupMenuButton(
+              itemBuilder: (BuildContext context) => [
+                    PopupMenuItem(
+                        child: Text('Search for Emotiva devices'),
+                        onTap: () {
+                          // TODO - does this leak memory if someone keeps
+                          // selecting this option? I.e. do the other MainView
+                          // objects stick around which are maybe still in the
+                          // Navigator stack?
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Discovery()));
+                        }),
+                    PopupMenuItem(child: Text('Known issues')),
+                    PopupMenuItem(child: Text('Donate')),
+                  ]),
+        ],
       ),
       // Using IndexedStack is critical. It preserves the existance (I think) of
       // the widgets as the user navigates between them so that we don't try to
@@ -139,12 +160,6 @@ class NoDevicesFoundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO - Consider, instead of pushing to the navigation below onPressed,
-    // pushing to the "no devices found" widget and then popping onPressed for
-    // trying again. I think that depends on the discovery process actually
-    // getting retried on popping to the previous widget, but I think
-    // initState will get run again on pop. That might involve not using
-    // FutureBuilder, which be an overall simplicifaction.
     return Scaffold(
       body: Center(
         child: Column(
@@ -153,16 +168,21 @@ class NoDevicesFoundPage extends StatelessWidget {
             Text('No Emotiva devices were found.'),
             SizedBox(height: 25.0),
             ElevatedButton(
-              // TODO - consider calling an async function instead as using the
-              // Navigator makes the page flash with a short animation on loading
-              // a "new" page.
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Discovery()));
               },
               child: Text('Try again'),
-              // TODO - consider adding a button to demo the app that passes
-              // FakeDevice MainView.
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MainView(emotiva.FakeDevice())));
+              },
+              child: Text('Demo mode'),
             ),
           ],
         ),
@@ -181,7 +201,7 @@ class ScanningPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Scanning for Emotiva devices...'),
+            Text('Searching for Emotiva devices...'),
             SizedBox(height: 25.0),
             CircularProgressIndicator(),
           ],
