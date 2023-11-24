@@ -25,6 +25,10 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       home: const Discovery(),
+      initialRoute: '/discovery',
+      routes: <String, WidgetBuilder>{
+        '/discovery': (BuildContext context) => const Discovery(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }
@@ -75,14 +79,8 @@ class _MainViewState extends State<MainView> {
                     PopupMenuItem(
                         child: Text('Search for Emotiva devices'),
                         onTap: () {
-                          // TODO - does this leak memory if someone keeps
-                          // selecting this option? I.e. do the other MainView
-                          // objects stick around which are maybe still in the
-                          // Navigator stack?
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Discovery()));
+                          Navigator.pushNamedAndRemoveUntil(context,
+                              '/discovery', (Route<dynamic> route) => false);
                         }),
                     PopupMenuItem(child: Text('Known issues')),
                     PopupMenuItem(child: Text('Donate')),
@@ -169,8 +167,8 @@ class NoDevicesFoundPage extends StatelessWidget {
             SizedBox(height: 25.0),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Discovery()));
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/discovery', (Route<dynamic> route) => false);
               },
               child: Text('Try again'),
             ),
