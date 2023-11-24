@@ -59,7 +59,10 @@ class _MainViewState extends State<MainView> {
   @override
   void dispose() async {
     super.dispose();
-    await widget.device.unsubscribeAll();
+    // Explicitly not unsubscribing from fields since we cannot guarantee that
+    // callers of this method block on it before creating new MainView instances
+    // (e.g. when re-scanning for devices). That race could result in the latest
+    // incarnation of MainView having an incomplete list of subscriptions.
     await widget.device.closeSockets();
   }
 
@@ -72,7 +75,20 @@ class _MainViewState extends State<MainView> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Emotiva Remote')),
-        leading: IconButton(icon: Icon(Icons.help), onPressed: () {}),
+        leading: IconButton(
+          icon: Icon(Icons.help),
+          onPressed: () => showDialog<String>(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              title: Text('Help title'),
+              content: Text('content.'),
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+              ],
+            ),
+          ),
+        ),
         actions: [
           PopupMenuButton(
               itemBuilder: (BuildContext context) => [
