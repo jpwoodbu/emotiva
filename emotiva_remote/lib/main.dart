@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
+import 'device_model.dart';
 import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
 
 class MainView extends StatefulWidget {
   final emotiva.Device device;
-  const MainView(this.device, {super.key});
+  MainView(this.device, {super.key});
 
   @override
   State<MainView> createState() => _MainViewState();
@@ -38,13 +39,27 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
   int currentPageIndex = 0;
+  late DeviceChanges deviceChanges;
   _MainViewState();
+
+  @override
+  void initState() {
+    super.initState();
+    deviceChanges = DeviceChanges(widget.device);
+    deviceChanges.handleControlPackets();
+    deviceChanges.handleNotifyPackets();
+    subscribeAll();
+  }
 
   @override
   void dispose() async {
     super.dispose();
     await widget.device.unsubscribeAll();
     await widget.device.closeSockets();
+  }
+
+  void subscribeAll() async {
+    await widget.device.subscribeAll();
   }
 
   @override
@@ -60,8 +75,8 @@ class _MainViewState extends State<MainView> {
       body: IndexedStack(
         index: currentPageIndex,
         children: [
-          InfoPage(widget.device),
-          InputsPage(widget.device),
+          InfoPage(widget.device, deviceChanges),
+          InputsPage(widget.device, deviceChanges),
           MenuPage(widget.device),
         ],
       ),

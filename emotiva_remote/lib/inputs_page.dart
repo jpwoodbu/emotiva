@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'device_model.dart';
 
 class InputsPage extends StatelessWidget {
   final emotiva.Device device;
-  const InputsPage(this.device, {super.key});
+  final DeviceChanges deviceChanges;
+  const InputsPage(this.device, this.deviceChanges, {super.key});
   static const double sheetPadding = 15.0;
 
   void setHdmi(BuildContext context, int input) async {
@@ -413,8 +415,7 @@ class InputsPage extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _build(BuildContext context) {
     const double tableCellPadding = 8.0;
     const double arrowSize = 50.0;
 
@@ -526,6 +527,15 @@ class InputsPage extends StatelessWidget {
           SizedBox(height: 25),
           Table(
             children: [
+              TableRow(
+                children: [
+                  Text('${device.centerTrim}dB', textAlign: TextAlign.center),
+                  Text('${device.subwooferTrim}dB',
+                      textAlign: TextAlign.center),
+                  Text('${device.surroundTrim}dB', textAlign: TextAlign.center),
+                  Text('${device.backTrim}dB', textAlign: TextAlign.center),
+                ],
+              ),
               TableRow(children: [
                 IconButton(
                     onPressed: () => bumpCenterTrim(0.5),
@@ -564,6 +574,16 @@ class InputsPage extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: deviceChanges,
+      builder: (BuildContext context, Widget? child) {
+        return _build(context);
+      },
     );
   }
 }

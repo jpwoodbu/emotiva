@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
-
 import 'device_model.dart';
 
 class InfoPage extends StatefulWidget {
   final emotiva.Device device;
-  InfoPage(this.device, {super.key});
+  final DeviceChanges deviceChanges;
+  InfoPage(this.device, this.deviceChanges, {super.key});
 
   @override
   State<InfoPage> createState() => _InfoState();
 }
 
 class _InfoState extends State<InfoPage> {
-  late DeviceModel _deviceNotifier;
-
+  
   void updateAll() async {
     HapticFeedback.lightImpact();
     await widget.device.updateAll();
@@ -46,19 +45,6 @@ class _InfoState extends State<InfoPage> {
     });
   }
 
-  void subscribeAll() async {
-    await widget.device.subscribeAll();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _deviceNotifier = DeviceModel(widget.device);
-    _deviceNotifier.handleControlPackets();
-    _deviceNotifier.handleNotifyPackets();
-    subscribeAll();
-  }
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -71,7 +57,7 @@ class _InfoState extends State<InfoPage> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             ListenableBuilder(
-              listenable: _deviceNotifier,
+              listenable: widget.deviceChanges,
               builder: (BuildContext context, Widget? child) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,28 +122,7 @@ class _InfoState extends State<InfoPage> {
                         ])
                       ],
                     ),
-                    SizedBox(height: 25),
-                    Text('Trims', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 3),
-                    Table(
-                      children: [
-                        TableRow(children: [
-                          Text('Center'),
-                          Text('Sub'),
-                          Text('Surround'),
-                          Text('Back'),
-                        ]),
-                        TableRow(
-                          children: [
-                            Text('${widget.device.centerTrim}dB'),
-                            Text('${widget.device.subwooferTrim}dB'),
-                            Text('${widget.device.surroundTrim}dB'),
-                            Text('${widget.device.backTrim}dB'),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25),
+                    SizedBox(height: 50),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -190,7 +155,7 @@ class _InfoState extends State<InfoPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Front display brightness: ${widget.device.dim}%',
+                        Text('Front display brightness:  ${widget.device.dim}%',
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                         IconButton(
                             onPressed: cycleFrontDisplayBrightness,

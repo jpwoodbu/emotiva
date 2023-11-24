@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
-class DeviceModel with ChangeNotifier {
+class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
   late Stream<String> controlPortStream;
   late Stream<String> notifyPortStream;
 
-  DeviceModel(this.device) {
+  DeviceChanges(this.device) {
     controlPortStream = device.controlPortStream();
     notifyPortStream = device.notifyPortStream();
   }
