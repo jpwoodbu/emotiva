@@ -531,8 +531,6 @@ class Device {
   }
 
   void modeStereo() async {
-    // TODO - test this. The documentation says 'direct' sets the stero mode.
-    // Seems like a mistake.
     await control('stereo');
   }
 
@@ -992,8 +990,6 @@ class FakeDevice extends Device {
     // this method is called.
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    // TODO - implement the sequence attribute for the root element. It appears
-    // to be an incrementing int to help clients disregard out-of-date packets.
     builder.element('emotivaNotify',
         attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final field in updatedFields) {

@@ -99,8 +99,6 @@ class _MainViewState extends State<MainView> {
           MenuPage(widget.device),
         ],
       ),
-      // TODO - A background color may be needed as widgets in the body are
-      // visible behind this footer if the screen is small enough.
       persistentFooterButtons: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
