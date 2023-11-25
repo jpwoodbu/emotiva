@@ -8,8 +8,8 @@ class DeviceChanges with ChangeNotifier {
   late Stream<String> notifyPortStream;
 
   DeviceChanges(this.device) {
-    controlPortStream = device.controlPortStream();
-    notifyPortStream = device.notifyPortStream();
+    controlPortStream = device.controlPortStream(device.address!);
+    notifyPortStream = device.notifyPortStream(device.address!);
   }
 
   Future<void> handleControlPackets() async {

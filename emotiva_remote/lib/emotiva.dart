@@ -23,7 +23,7 @@ void main() async {
   Future.delayed(Duration(seconds: 3), () async {
     await device.closeSockets();
   });
-  await for (final packet in device.controlPortStream()) {
+  await for (final packet in device.controlPortStream(device.address!)) {
     device.parsePacket(packet);
     print('power: ${device.power}');
     print('source: ${device.source}');
@@ -168,7 +168,7 @@ class Device {
   // The first sequence number sent by the Emotiva device is 0.
   int _sequenceNumber = -1;
 
-  Stream<String> _socketStream(int port) async* {
+  Stream<String> _socketStream(int port, InternetAddress address) async* {
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     stream.writeEventsEnabled = false;
     _sockets.add(stream);
@@ -176,6 +176,11 @@ class Device {
       switch (event) {
         case RawSocketEvent.read:
           final datagram = stream.receive();
+          // Drop packets not from the address of the discovered Emotiva device.
+          if (datagram!.address != address) {
+            // TODO - add logging.
+            break;
+          }
           yield String.fromCharCodes(datagram!.data);
         case RawSocketEvent.closed:
           break;
@@ -187,12 +192,12 @@ class Device {
     }
   }
 
-  Stream<String> controlPortStream() {
-    return _socketStream(controlPort);
+  Stream<String> controlPortStream(InternetAddress address) {
+    return _socketStream(controlPort, address);
   }
 
-  Stream<String> notifyPortStream() {
-    return _socketStream(notifyPort);
+  Stream<String> notifyPortStream(InternetAddress address) {
+    return _socketStream(notifyPort, address);
   }
 
   Future<void> closeSockets() async {
@@ -1123,14 +1128,14 @@ class FakeDevice extends Device {
   }
 
   @override
-  Stream<String> controlPortStream() async* {
+  Stream<String> controlPortStream(InternetAddress address) async* {
     await for (final data in _controlStream.stream) {
       yield data;
     }
   }
 
   @override
-  Stream<String> notifyPortStream() async* {
+  Stream<String> notifyPortStream(InternetAddress address) async* {
     await for (final data in _notifyStream.stream) {
       yield data;
     }
