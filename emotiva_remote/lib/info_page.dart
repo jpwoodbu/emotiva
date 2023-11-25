@@ -67,7 +67,7 @@ class _InfoState extends State<InfoPage> {
                       children: [
                         Text(
                           widget.device.name,
-                          style: TextStyle(fontSize: 25),
+                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                         ),
                         Row(
                           children: [
@@ -92,11 +92,21 @@ class _InfoState extends State<InfoPage> {
                         )
                       ],
                     ),
-                    Text(
-                      'Volume: ${widget.device.volume}dB',
-                      style: TextStyle(fontSize: 30),
+                    SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Volume',
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                        Text('${widget.device.volume.toString()}dB',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold)),
+                      ],
                     ),
-                    SizedBox(height: 25),
+                    SizedBox(height: 20),
                     Table(
                       children: <TableRow>[
                         TableRow(children: [

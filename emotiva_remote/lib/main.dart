@@ -212,7 +212,10 @@ class _MainViewState extends State<MainView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Volume', style: TextStyle(fontSize: 20.0)),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text('Volume', style: TextStyle(fontSize: 20.0,)),
+            ),
             Row(
               children: [
                 ElevatedButton(
