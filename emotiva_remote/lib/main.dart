@@ -115,7 +115,7 @@ Future<void> showDonateDialog(BuildContext context) {
       ),
       actions: <Widget>[
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+            onPressed: () => Navigator.pop(context), child: Text('Thank you!')),
       ],
     ),
   );
