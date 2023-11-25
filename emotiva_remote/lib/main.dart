@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
@@ -7,6 +8,15 @@ import 'device_model.dart';
 import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
+
+final Uri paypalUrl =
+    Uri.parse('https://www.paypal.com/donate/?hosted_button_id=63AF88NNXDG5L');
+final Uri venmoUrl = Uri.parse('https://venmo.com/u/Jonathan-Woodbury-2');
+
+void showErrorSnackBar(BuildContext context, String error) {
+  final snackBar = SnackBar(content: Text(error));
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
 
 const String helpText = '''
 Tip 1: Click the power icon in the top right to turn On/Off your processor.
@@ -78,19 +88,31 @@ Future<void> showRoadMap(BuildContext context) {
   );
 }
 
-const String donateText = '''
-Your support is greatly appreciated!
-
-https://paypal.com
-Venmo: @Jonathan-Woodbury-2
-''';
-
-Future<void> showDonateText(BuildContext context) {
+Future<void> showDonateDialog(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       scrollable: true,
-      content: Text(donateText.trim()),
+      title: Text('Your support is greatly appreciated!'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextButton(
+              onPressed: () async {
+                if (!await launchUrl(venmoUrl)) {
+                  // TODO - add logging.
+                }
+              },
+              child: Text('Venmo @Jonathan-Woodbury-2')),
+          TextButton(
+              onPressed: () async {
+                if (!await launchUrl(paypalUrl)) {
+                  // TODO - add logging.
+                }
+              },
+              child: Text('Paypal - Jonathan Woodbury')),
+        ],
+      ),
       actions: <Widget>[
         TextButton(
             onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
@@ -190,7 +212,7 @@ class _MainViewState extends State<MainView> {
               ),
               PopupMenuItem(
                 child: Text('Want to show your support?'),
-                onTap: () => showDonateText(context),
+                onTap: () => showDonateDialog(context),
               ),
             ],
           ),
@@ -214,7 +236,10 @@ class _MainViewState extends State<MainView> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: Text('Volume', style: TextStyle(fontSize: 20.0,)),
+              child: Text('Volume',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                  )),
             ),
             Row(
               children: [
