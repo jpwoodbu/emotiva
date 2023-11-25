@@ -497,7 +497,6 @@ class InputsPage extends StatelessWidget {
                   ),
                 ),
               ]),
-              TableRow(children: [SizedBox(height: 20), Text('')]),
               TableRow(children: [
                 Padding(
                   padding: const EdgeInsets.all(tableCellPadding),
