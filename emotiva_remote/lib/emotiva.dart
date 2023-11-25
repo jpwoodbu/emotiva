@@ -181,7 +181,7 @@ class Device {
             // TODO - add logging.
             break;
           }
-          yield String.fromCharCodes(datagram!.data);
+          yield String.fromCharCodes(datagram.data);
         case RawSocketEvent.closed:
           break;
         case RawSocketEvent.readClosed:
