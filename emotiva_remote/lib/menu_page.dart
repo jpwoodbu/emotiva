@@ -14,9 +14,13 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double iconSize = 130;
+    // TODO - use something to automatically size the icons and position them
+    // centrally. See
+    // https://docs.flutter.dev/ui/layout/responsive/adaptive-responsive.
+    const double iconSize = 100;
     return ListView(
       children: [
+        SizedBox(height: 30),
         Table(
             children: <TableRow>[
               TableRow(
