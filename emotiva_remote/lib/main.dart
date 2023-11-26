@@ -328,15 +328,11 @@ class _DiscoveryState extends State<Discovery> {
   late Future<emotiva.Device> _device;
   emotiva.Device? device;
 
-  _DiscoveryState() {
-    developer.log('Discovery constructor running.');
-  }
-
   @override
   initState() {
     super.initState();
-    developer.log('Discovery initial state running.');
     if (widget.useFake) {
+      developer.log('Using fake device.');
       _device = emotiva.futureFakeDevice();
     } else {
       _device = emotiva.discovery(3);
@@ -346,8 +342,8 @@ class _DiscoveryState extends State<Discovery> {
   @override
   void dispose() async {
     super.dispose();
-    developer.log('Discovery dispose called.');
     if (device != null) {
+      developer.log('Unsubscribing and closing sockets for device.');
       await device!.unsubscribeAll();
       await device!.closeSockets();
     }
@@ -362,9 +358,9 @@ class _DiscoveryState extends State<Discovery> {
           if (snapshot.hasError) {
             return NoDevicesFoundPage();
           }
-          developer.log('Creating ChangeNotifierProvider');
           return ChangeNotifierProvider(
             create: (context) {
+              developer.log('Found Emotiva device.');
               device = snapshot.data!;
               // Initialing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in
@@ -376,7 +372,6 @@ class _DiscoveryState extends State<Discovery> {
             child: MainView(),
           );
         } else {
-          developer.log('returning scanning page');
           return ScanningPage();
         }
       },
