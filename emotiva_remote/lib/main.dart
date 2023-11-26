@@ -160,106 +160,98 @@ class _MainViewState extends State<MainView> {
     return Consumer<DeviceChanges>(
       builder: (context, deviceChanges, child) {
         return Scaffold(
-        appBar: AppBar(
-          title: const Center(child: Text('Emotiva Remote')),
-          leading: IconButton(
-            icon: Icon(Icons.help),
-            onPressed: () => showHelp(context),
-          ),
-          actions: [
-            PopupMenuButton(
-              itemBuilder: (BuildContext context) => [
-                PopupMenuItem(
-                  child: Text('Search for Emotiva devices'),
-                  onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/discovery', (Route<dynamic> route) => false);
-                  },
-                ),
-                PopupMenuItem(
-                  child: Text('Known issues'),
-                  onTap: () => showKnownIssus(context),
-                ),
-                PopupMenuItem(
-                  child: Text('Road map'),
-                  onTap: () => showRoadMap(context),
-                ),
-                PopupMenuItem(
-                  child: Text('Want to show your support?'),
-                  onTap: () => showDonateDialog(context),
-                ),
-              ],
+          appBar: AppBar(
+            title: const Center(child: Text('Emotiva Remote')),
+            leading: IconButton(
+              icon: Icon(Icons.help),
+              onPressed: () => showHelp(context),
             ),
-          ],
-        ),
-        // Using IndexedStack is critical. It preserves the existance (I think) of
-        // the widgets as the user navigates between them so that we don't try to
-        // do something breaking like creating additional listeners for a stream
-        // inside initState perhaps before the prior listeners have been GC'd.
-        body: IndexedStack(
-          index: currentPageIndex,
-          children: [
-            InfoPage(),
-            InputsPage(),
-            MenuPage(),
-          ],
-        ),
-        persistentFooterButtons: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Text('Volume',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                    )),
-              ),
-              Row(
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        deviceChanges.device.volumeDelta(-1.0);
-                      },
-                      child: Icon(Icons.remove, size: 30.0)),
-                  SizedBox(width: 15.0),
-                  ElevatedButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        deviceChanges.device.volumeDelta(1.0);
-                      },
-                      child: Icon(Icons.add, size: 30.0)),
+            actions: [
+              PopupMenuButton(
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    child: Text('Known issues'),
+                    onTap: () => showKnownIssus(context),
+                  ),
+                  PopupMenuItem(
+                    child: Text('Road map'),
+                    onTap: () => showRoadMap(context),
+                  ),
+                  PopupMenuItem(
+                    child: Text('Want to show your support?'),
+                    onTap: () => showDonateDialog(context),
+                  ),
                 ],
               ),
             ],
-          )
-        ],
-        bottomNavigationBar: NavigationBar(
-          destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.info),
-              label: 'Info',
-            ),
-            NavigationDestination(
-              // icon: Icon(Icons.settings_remote),
-              icon: Icon(Icons.route),
-              label: 'Inputs',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.gamepad),
-              label: 'Menu',
-            ),
+          ),
+          // Using IndexedStack is critical. It preserves the existance (I think) of
+          // the widgets as the user navigates between them so that we don't try to
+          // do something breaking like creating additional listeners for a stream
+          // inside initState perhaps before the prior listeners have been GC'd.
+          body: IndexedStack(
+            index: currentPageIndex,
+            children: [
+              InfoPage(),
+              InputsPage(),
+              MenuPage(),
+            ],
+          ),
+          persistentFooterButtons: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Text('Volume',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                      )),
+                ),
+                Row(
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          deviceChanges.device.volumeDelta(-1.0);
+                        },
+                        child: Icon(Icons.remove, size: 30.0)),
+                    SizedBox(width: 15.0),
+                    ElevatedButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          deviceChanges.device.volumeDelta(1.0);
+                        },
+                        child: Icon(Icons.add, size: 30.0)),
+                  ],
+                ),
+              ],
+            )
           ],
-          selectedIndex: currentPageIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-        ),
-      );
-
+          bottomNavigationBar: NavigationBar(
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.info),
+                label: 'Info',
+              ),
+              NavigationDestination(
+                // icon: Icon(Icons.settings_remote),
+                icon: Icon(Icons.route),
+                label: 'Inputs',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.gamepad),
+                label: 'Menu',
+              ),
+            ],
+            selectedIndex: currentPageIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                currentPageIndex = index;
+              });
+            },
+          ),
+        );
       },
     );
   }
@@ -279,23 +271,24 @@ class NoDevicesFoundPage extends StatelessWidget {
             SizedBox(height: 25.0),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/discovery', (Route<dynamic> route) => false);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Discovery()),
+                    (Route<dynamic> route) => false);
               },
               child: Text('Try again'),
             ),
             SizedBox(height: 20),
-            /*
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MainView(emotiva.FakeDevice())));
+                        builder: (context) => Discovery(useFake: true)),
+                    (Route<dynamic> route) => false);
               },
               child: Text('Demo mode'),
             ),
-            */
           ],
         ),
       ),
@@ -324,7 +317,8 @@ class ScanningPage extends StatelessWidget {
 }
 
 class Discovery extends StatefulWidget {
-  const Discovery({super.key});
+  final bool useFake;
+  const Discovery({super.key, this.useFake = false});
 
   @override
   State<Discovery> createState() => _DiscoveryState();
@@ -332,7 +326,7 @@ class Discovery extends StatefulWidget {
 
 class _DiscoveryState extends State<Discovery> {
   late Future<emotiva.Device> _device;
-  late emotiva.Device device;
+  emotiva.Device? device;
 
   _DiscoveryState() {
     developer.log('Discovery constructor running.');
@@ -342,15 +336,21 @@ class _DiscoveryState extends State<Discovery> {
   initState() {
     super.initState();
     developer.log('Discovery initial state running.');
-    _device = emotiva.discovery(3);
+    if (widget.useFake) {
+      _device = emotiva.futureFakeDevice();
+    } else {
+      _device = emotiva.discovery(3);
+    }
   }
 
   @override
   void dispose() async {
     super.dispose();
     developer.log('Discovery dispose called.');
-    await device.unsubscribeAll();
-    await device.closeSockets();
+    if (device != null) {
+      await device!.unsubscribeAll();
+      await device!.closeSockets();
+    }
   }
 
   @override
@@ -369,8 +369,8 @@ class _DiscoveryState extends State<Discovery> {
               // Initialing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in
               // populating the attributes of device.
-              final deviceChanges = DeviceChanges(device);
-              device.subscribeAll();
+              final deviceChanges = DeviceChanges(device!);
+              device!.subscribeAll();
               return deviceChanges;
             },
             child: MainView(),
