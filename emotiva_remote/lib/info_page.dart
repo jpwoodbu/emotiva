@@ -1,193 +1,187 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'device_changes.dart';
 
-class InfoPage extends StatefulWidget {
-  final emotiva.Device device;
-  final DeviceChanges deviceChanges;
-  InfoPage(this.device, this.deviceChanges, {super.key});
+class InfoPage extends StatelessWidget {
+  InfoPage({super.key});
 
-  @override
-  State<InfoPage> createState() => _InfoState();
-}
-
-class _InfoState extends State<InfoPage> {
-  void updateAll() async {
+  Future<void> futureUpdateAll(emotiva.Device device) async {
     HapticFeedback.lightImpact();
-    await widget.device.updateAll();
-    setState(() {});
+    await device.updateAll();
   }
 
-  void togglePower() async {
-    HapticFeedback.lightImpact();
-    widget.device.togglePower();
+  void updateAll(emotiva.Device device) async {
+    await futureUpdateAll(device);
   }
 
-  void toggleMute() async {
+  void togglePower(emotiva.Device device) async {
     HapticFeedback.lightImpact();
-    widget.device.toggleMute();
+    device.togglePower();
   }
 
-  void toggleLoudness() async {
+  void toggleMute(emotiva.Device device) async {
     HapticFeedback.lightImpact();
-    setState(() {
-      widget.device.toggleLoudness();
-    });
+    device.toggleMute();
   }
 
-  void cycleFrontDisplayBrightness() async {
+  void toggleLoudness(emotiva.Device device) async {
     HapticFeedback.lightImpact();
-    setState(() {
-      widget.device.cycleFrontDisplayBrightness();
-    });
+    device.toggleLoudness();
+  }
+
+  void cycleFrontDisplayBrightness(emotiva.Device device) async {
+    HapticFeedback.lightImpact();
+    device.cycleFrontDisplayBrightness();
   }
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<DeviceChanges>(
+      builder: (BuildContext context, DeviceChanges deviceChanges, child) {
+        return _build(context, deviceChanges.device);
+      }
+    );
+  }
+
+  Widget _build(BuildContext context, emotiva.Device device) {
     return RefreshIndicator(
-      onRefresh: () {
-        return Future(updateAll);
-      },
+      onRefresh: () => futureUpdateAll(device),
       child: Padding(
         padding: const EdgeInsets.all(15),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            ListenableBuilder(
-              listenable: widget.deviceChanges,
-              builder: (BuildContext context, Widget? child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          widget.device.name,
-                          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: updateAll,
-                              icon: Icon(
-                                Icons.refresh,
-                                size: 30,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: togglePower,
-                              icon: Icon(
-                                Icons.power_settings_new,
-                                color: widget.device.power == 'On'
-                                    ? Colors.blue
-                                    : Colors.amber,
-                                size: 30,
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
+                    Text(
+                      device.name,
+                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 5),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Volume',
-                          style: TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                        Text('${widget.device.volume.toString()}dB',
-                            style: TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Table(
-                      children: <TableRow>[
-                        TableRow(children: [
-                          Text(widget.device.source),
-                          Text(widget.device.mode,
-                              overflow: TextOverflow.visible, softWrap: false),
-                          Text(''),
-                        ]),
-                        TableRow(children: [
-                          Text('A: ${widget.device.audioInput}'),
-                          Text(widget.device.audioBitstream),
-                          Text(widget.device.audioBits),
-                        ]),
-                        TableRow(children: [
-                          Text('V: ${widget.device.videoInput}'),
-                          Text(widget.device.videoFormat),
-                          Text(widget.device.videoSpace),
-                        ])
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Speaker preset',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
-                        Text(widget.device.speakerPreset,
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Loudness',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
-                        Switch(
-                          value: widget.device.loudness == 'On' ? true : false,
-                          onChanged: (bool value) {
-                            toggleLoudness();
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Mute',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold)),
-                        Switch(
-                          value: widget.device.muted ? true : false,
-                          onChanged: (bool value) {
-                            toggleMute();
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Front display brightness:  ${widget.device.dim}%',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold)),
                         IconButton(
-                            onPressed: cycleFrontDisplayBrightness,
-                            icon: Icon(Icons.light_mode))
+                          onPressed: () {updateAll(device);},
+                          icon: Icon(
+                            Icons.refresh,
+                            size: 30,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {togglePower(device);},
+                          icon: Icon(
+                            Icons.power_settings_new,
+                            color: device.power == 'On'
+                                ? Colors.blue
+                                : Colors.amber,
+                            size: 30,
+                          ),
+                        ),
                       ],
                     )
                   ],
-                );
-              },
+                ),
+                SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Volume',
+                      style: TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    Text('${device.volume.toString()}dB',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Table(
+                  children: <TableRow>[
+                    TableRow(children: [
+                      Text(device.source),
+                      Text(device.mode,
+                          overflow: TextOverflow.visible, softWrap: false),
+                      Text(''),
+                    ]),
+                    TableRow(children: [
+                      Text('A: ${device.audioInput}'),
+                      Text(device.audioBitstream),
+                      Text(device.audioBits),
+                    ]),
+                    TableRow(children: [
+                      Text('V: ${device.videoInput}'),
+                      Text(device.videoFormat),
+                      Text(device.videoSpace),
+                    ])
+                  ],
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Speaker preset',
+                      style: TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    Text(device.speakerPreset,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Loudness',
+                      style: TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    Switch(
+                      value: device.loudness == 'On' ? true : false,
+                      onChanged: (bool value) {
+                        toggleLoudness(device);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Mute',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                    Switch(
+                      value: device.muted ? true : false,
+                      onChanged: (bool value) {
+                        toggleMute(device);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Front display brightness:  ${device.dim}%',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                    IconButton(
+                        onPressed: () {cycleFrontDisplayBrightness(device);},
+                        icon: Icon(Icons.light_mode))
+                  ],
+                )
+              ],
             ),
           ],
         ),

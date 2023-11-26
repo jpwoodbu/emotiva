@@ -11,6 +11,10 @@ class DeviceChanges with ChangeNotifier {
   DeviceChanges(this.device) {
     controlPortStream = device.controlPortStream(device.address!);
     notifyPortStream = device.notifyPortStream(device.address!);
+    handleControlPackets();
+    developer.log('handling control packets');
+    handleNotifyPackets();
+    developer.log('handling notify packets');
   }
 
   Future<void> handleControlPackets() async {

@@ -1,11 +1,13 @@
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
+import 'device_changes.dart';
+
 class MenuPage extends StatelessWidget {
-  final emotiva.Device device;
-  const MenuPage(this.device, {super.key});
+  const MenuPage({super.key});
 
   void addHaptic(Function function) {
     HapticFeedback.lightImpact();
@@ -14,6 +16,14 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<DeviceChanges>(
+      builder: (BuildContext context, DeviceChanges deviceChanges, child) {
+        return _build(context, deviceChanges.device);
+      }
+    );
+  }
+
+  Widget _build(BuildContext context, emotiva.Device device) {
     // TODO - use something to automatically size the icons and position them
     // centrally. See
     // https://docs.flutter.dev/ui/layout/responsive/adaptive-responsive.
