@@ -1,10 +1,11 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
-import 'device_model.dart';
+import 'device_changes.dart';
 import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
@@ -160,23 +161,15 @@ class _MainViewState extends State<MainView> {
   late DeviceChanges deviceChanges;
   _MainViewState();
 
-  // Sometimes we don't get a subscription response (which provides initial
-  // values for subscribed fields) when starting up. This tries to detect and
-  // recover from that.
-  void checkInitialState() {
-    if (widget.device.model.isEmpty) {
-      widget.device.subscribeAll();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     deviceChanges = DeviceChanges(widget.device);
     deviceChanges.handleControlPackets();
+    developer.log('handling control packets');
     deviceChanges.handleNotifyPackets();
+    developer.log('handling notify packets');
     subscribeAll();
-    Future.delayed(Duration(seconds: 1), checkInitialState);
   }
 
   @override
@@ -361,14 +354,19 @@ class Discovery extends StatefulWidget {
   State<Discovery> createState() => _DiscoveryState();
 }
 
+// TODO - find an alternative to FutureBuilder below. The widgets can't have
+// side effects because they might be called multiple times.
+// Maybe routes and widget args. When MainView is called multiple times, 
 class _DiscoveryState extends State<Discovery> {
   Widget _futureBuilder(
       BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
     if (snapshot.hasData) {
+      developer.log('Creating MainView from discovery widget');
       return MainView(snapshot.data!);
     } else if (snapshot.hasError) {
       return NoDevicesFoundPage();
     } else {
+      developer.log('returning scanning page');
       return ScanningPage();
     }
   }
