@@ -160,6 +160,15 @@ class _MainViewState extends State<MainView> {
   late DeviceChanges deviceChanges;
   _MainViewState();
 
+  // Sometimes we don't get a subscription response (which provides initial
+  // values for subscribed fields) when starting up. This tries to detect and
+  // recover from that.
+  void checkInitialState() {
+    if (widget.device.model.isEmpty) {
+      widget.device.subscribeAll();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -167,6 +176,7 @@ class _MainViewState extends State<MainView> {
     deviceChanges.handleControlPackets();
     deviceChanges.handleNotifyPackets();
     subscribeAll();
+    Future.delayed(Duration(seconds: 1), checkInitialState);
   }
 
   @override
