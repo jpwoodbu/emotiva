@@ -1,4 +1,4 @@
-package com.example.emotiva_remote
+package one.woodbury.emotiva_remote
 
 import io.flutter.embedding.android.FlutterActivity
 
