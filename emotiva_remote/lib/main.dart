@@ -21,7 +21,7 @@ void showErrorSnackBar(BuildContext context, String error) {
 }
 
 const String helpText = '''
-Tip 1: Click the power icon in the top right to turn On/Off your processor.
+Tip 1: Click the power icon in the top right to turn On/Off your processor. Enable "Video on Standby" on your Emotiva processor so that it can be turned on using this app when in standby.
 
 Tip 2: When changes happen on the Emotiva processor, data in the app should update automatically. But if you think the app is out-of-sync with the processor, click the refresh icon next to the power icon to refresh all data. Or swipe down on the info page to refresh.
 
