@@ -35,3 +35,13 @@ py_interactive(
         "d.update_all()",
     ],
 )
+
+py_interactive(
+    name = "emotiva_debug",
+    deps = [":emotiva"],
+    pushes = [
+        "import emotiva",
+        "import absl",
+        "absl.logging.set_verbosity('debug')",
+    ],
+)
