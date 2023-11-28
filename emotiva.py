@@ -41,6 +41,10 @@ class Device:
   notify_port: int
   info_port: int
   setup_port_tcp: int
+  data_revision: str = ''
+  menu_notify_port: int = 0
+  setup_xml_version: str = ''
+  keep_alive: int = 0
   address: ipaddress.IPv4Address | None = None
   power: str = ''
   source: str = ''
@@ -85,16 +89,17 @@ class Device:
             command, value, 'yes' if ack else 'no'))
     self._send(data)
 
-  def subscribe(self, fields: list[str]) -> None:
+  def subscribe(self, fields: list[str], version_3: bool = False) -> None:
     data = _format_command(
-      '<emotivaSubscription>{}</emotivaSubscription>'.format(
+      '<emotivaSubscription {}>{}</emotivaSubscription>'.format(
+        'protocol="3.0"' if version_3 else '',
         _fields_to_xml(fields)))
     self._send(data)
     for f in fields:
       self._subscribed_fields.add(f)
 
-  def subscribe_all(self) -> None:
-    self.subscribe(list(self._FIELDS))
+  def subscribe_all(self, *args, **kwargs) -> None:
+    self.subscribe(list(self._FIELDS), *args, **kwargs)
 
   def unsubscribe(self, fields: list[str]) -> None:
     data = _format_command(
@@ -229,8 +234,11 @@ class Device:
     self.command('info')
 
 
-def broadcast_ping():
-  data = _format_command('<emotivaPing />')
+def _broadcast_ping(version_3: bool):
+  command = '<emotivaPing />'
+  if version_3:
+    command = '<emotivaPing protocol="3.0" />'
+  data = _format_command(command)
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
     logging.debug('broadcasting: %s', data.decode('utf-8'))
@@ -242,7 +250,7 @@ def parse_transponder(data: str) -> Device:
   if root.tag != 'emotivaTransponder':
     raise ValueError(
         'Received improperly formatted emotivaTransponder response.')
-  return Device(
+  device = Device(
       _text_from_element(root, 'model'),
       _text_from_element(root, 'name'),
       _text_from_element(root, './control/version'),
@@ -250,13 +258,19 @@ def parse_transponder(data: str) -> Device:
       _int_from_element(root, './control/notifyPort'),
       _int_from_element(root, './control/infoPort'),
       _int_from_element(root, './control/setupPortTCP'))
+  if device.control_version == '3.0':
+    device.data_revision = _text_from_element(root, 'dataRevision')
+    device.menu_notify_port = _int_from_element(root, './control/menuNotifyPort')
+    device.setup_xml_version = _text_from_element(root, './control/setupXMLVersion')
+    device.keep_alive = _int_from_element(root, './control/keepAlive')
+  return device
 
 
-def _listen_for_transponder(timeout: float) -> Device:
+def _listen_for_transponder(timeout: float, version_3: bool) -> Device:
   with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind(('', TRANSPONDER_PORT))
     s.settimeout(timeout)
-    broadcast_ping()
+    _broadcast_ping(version_3)
     data, address = s.recvfrom(4096)
     logging.debug('transponder port: \n%s', data.decode('utf-8'))
     device = parse_transponder(data.decode('utf-8'))
@@ -264,13 +278,13 @@ def _listen_for_transponder(timeout: float) -> Device:
     return device
 
 
-def discovery(timeout_sec: float = 1.0) -> Device | None:
+def discovery(timeout_sec: float = 1.0, version_3: bool = False) -> Device | None:
   """This provides a simpler interface for getting a device.
   
   This function should be avoided if there is more than one Emotiva device you
   wish to control on the network. See the multi_device module.
   """
   try:
-    return _listen_for_transponder(timeout_sec)
+    return _listen_for_transponder(timeout_sec, version_3)
   except socket.timeout:
     return None
