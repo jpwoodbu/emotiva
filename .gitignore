@@ -2,3 +2,4 @@
 # Ignore Bazel symlinks.
 /bazel-*
 *.exe
+/.idea
