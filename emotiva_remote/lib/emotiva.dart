@@ -165,7 +165,8 @@ class Device {
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
-  // The first sequence number sent by the Emotiva device is 0.
+  // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
+  // not yet gotten a real sequence number.
   int _sequenceNumber = -1;
 
   Stream<String> _socketStream(int port, InternetAddress address) async* {
@@ -339,8 +340,11 @@ class Device {
           _sequenceNumber = sequence;
         } else {
           // In this case, we've already seen this packet or a newer packet in
-          // the sequence and should disregard it.
+          // the sequence and should disregard it. However, this might mean
+          // we've missed a state change on a subscribed field. Calling
+          // updateAll() should get us up-to-date.
           // TODO - add logging when packets are rejected.
+          updateAll();
           return;
         }
       } catch (e) {
