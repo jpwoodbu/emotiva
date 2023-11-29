@@ -19,19 +19,17 @@ class DeviceChanges with ChangeNotifier {
 
   Future<void> handleControlPackets() async {
     await for (final packet in controlPortStream) {
-      developer.log('got a control response');
+      developer.log('got a control message: $packet');
       device.parsePacket(packet);
       notifyListeners();
-      developer.log('control: notifying listeners');
     }
   }
 
   Future<void> handleNotifyPackets() async {
     await for (final packet in notifyPortStream) {
-      developer.log('got a notify packets');
+      developer.log('got a notify message: $packet');
       device.parsePacket(packet);
       notifyListeners();
-      developer.log('notify: notifying listeners');
     }
   }
 }

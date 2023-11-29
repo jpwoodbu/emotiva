@@ -1,14 +1,16 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
 
-const pingPort = 7000;
-const transponderPort = 7001;
+const int pingPort = 7000;
+const int transponderPort = 7001;
 const String broadcastAddress = '255.255.255.255';
+const String protocolVersion = '2.0';
 
 // main() serves only as a demo. This library is meant to be included in another
 // binary.
@@ -39,13 +41,22 @@ void main() async {
   }
 }
 
+void _log(String message) {
+  developer.log(message, time: DateTime.now(), name: 'emotiva');
+}
+
 String _pingRequest() {
   final builder = XmlBuilder();
   builder.processing('xml', 'version="1.0"');
-  builder.element('emotivaPing');
+  builder.element('emotivaPing', attributes: {'protocol': protocolVersion});
   return builder.buildDocument().toXmlString();
 }
 
+/// Discovers an Emotiva device on the network and returns a [Device].
+///
+/// A socket is opened to listen for a transponder packet from an Emotiva
+/// device. While open, a ping packet is broadcast on the network. The listening
+/// socket waits for [timeoutSec] before giving up and throwing an exception.
 Future<Device> discovery(int timeoutSec) async {
   final stream =
       await RawDatagramSocket.bind(InternetAddress.anyIPv4, transponderPort);
@@ -65,7 +76,7 @@ Future<Device> discovery(int timeoutSec) async {
         final datagram = stream.receive();
         stream.close();
         final data = String.fromCharCodes(datagram!.data);
-        final device = parseTransponder(data);
+        final device = _parseTransponder(data);
         device.address = datagram.address;
         return device;
       case RawSocketEvent.closed:
@@ -98,7 +109,7 @@ int _intFromElement(XmlNode node, String xpath) {
   }
 }
 
-Device parseTransponder(String data) {
+Device _parseTransponder(String data) {
   final document = XmlDocument.parse(data);
   final root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
@@ -116,6 +127,7 @@ Device parseTransponder(String data) {
   return device;
 }
 
+/// A model of an Emotiva device.
 class Device {
   String model = '';
   String name = '';
@@ -179,7 +191,7 @@ class Device {
           final datagram = stream.receive();
           // Drop packets not from the address of the discovered Emotiva device.
           if (datagram!.address != address) {
-            // TODO - add logging.
+            _log('Ignoring packet from ${datagram.address}');
             break;
           }
           yield String.fromCharCodes(datagram.data);
@@ -193,14 +205,17 @@ class Device {
     }
   }
 
+  /// Stream of messages arriving on the control port.
   Stream<String> controlPortStream(InternetAddress address) {
     return _socketStream(controlPort, address);
   }
 
+  /// Stream of messages arriving on the notify port.
   Stream<String> notifyPortStream(InternetAddress address) {
     return _socketStream(notifyPort, address);
   }
 
+  /// Close any sockets opened so far by this object.
   Future<void> closeSockets() async {
     for (RawDatagramSocket s in _sockets) {
       s.close();
@@ -215,6 +230,7 @@ class Device {
     await for (final event in stream) {
       switch (event) {
         case RawSocketEvent.write:
+          _log('sending: $request');
           final bytesSent =
               stream.send(request.codeUnits, address!, destinationPort);
           stream.close();
@@ -237,7 +253,8 @@ class Device {
   String _requestWithFields(String requestType, Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element(requestType, nest: () {
+    builder.element(requestType, attributes: {'protocol': protocolVersion},
+        nest: () {
       for (final f in fields) {
         builder.element(f);
       }
@@ -249,16 +266,22 @@ class Device {
     return _requestWithFields('emotivaUpdate', fields);
   }
 
+  /// Sends a request to get the current values for [fields].
   Future<void> update(Iterable<String> fields) async {
     await _send(_updateRequest(fields), controlPort);
   }
 
+  /// Sends a request to get the current value for all supported fields.
+  ///
+  /// Supported fields are a hardcoded list of fields understood by this
+  /// library.
   Future<void> updateAll() async => await update(_fields);
 
   String _subscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaSubscription', fields);
   }
 
+  /// Sends a request to get notified when any of [fields] change in value.
   Future<void> subscribe(Iterable<String> fields) async {
     await _send(_subscribeRequest(fields), controlPort);
     for (final f in fields) {
@@ -266,12 +289,20 @@ class Device {
     }
   }
 
+  /// Sends a request to get notified when any of the supported fields change.
+  ///
+  /// Supported fields are a hardcoded list of fields understood by this
+  /// library.
   Future<void> subscribeAll() async => await subscribe(_fields);
 
   String _unsubscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaUnsubscribe', fields);
   }
 
+  /// Sends a request to stop being notified when [fields] change.
+  ///
+  /// Supported fields are a hardcoded list of fields understood by this
+  /// library.
   Future<void> unsubscribe(Iterable<String> fields) async {
     await _send(_unsubscribeRequest(fields), controlPort);
     for (final f in fields) {
@@ -279,20 +310,35 @@ class Device {
     }
   }
 
+  /// Sends a request to stop being notified when supported fields change.
   Future<void> unsubscribeAll() async => await unsubscribe(_subscribedFields);
 
   String _controlRequest(String command, String value, bool ack) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaControl', nest: () {
+    builder.element('emotivaControl', attributes: {'protocol': protocolVersion},
+        nest: () {
       builder.element(command,
           attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
     });
     return builder.buildDocument().toString();
   }
 
+  /// Sends a control command.
+  ///
+  /// Some commands have a [value]. E.g. increasing the volume by 1dB would have
+  /// a [command] of 'volume' and a [value] of '1'.
+  ///
+  /// You can send arbitrary commands with this method, but prefer to use the
+  /// public interface instead. E.g. call [volumeDelta] instead of [control]
+  /// with [command] and [value] arguments.
+  ///
+  /// Setting [ack] to true will ask that the Emotiva device respond with an ack
+  /// message if it received the command. An ack message does not indicate that
+  /// it understood and acted on the command; only that the command message was
+  /// received. This library currently ignores ack messages.
   Future<void> control(String command,
-      {String value = '0', bool ack = false, int timeoutSec = 1}) async {
+      {String value = '0', bool ack = false}) async {
     final request = _controlRequest(command, value, ack);
     await _send(request, controlPort);
   }
@@ -320,36 +366,54 @@ class Device {
     throw 'Element has no sequence attribute.';
   }
 
+  /// Parses all messages types other than transponder messages.
+  ///
+  /// This method is made public so that callers can inject logic around a
+  /// stream yielding a message and the message being parsed (which might update
+  /// data in this object). E.g. updating a UI when data in this object changes.
+  ///
+  /// [data] should be a message yielded by [controlPortStream] or
+  /// [notifyPortStream].
   void parsePacket(String data) {
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
     final packetType = root.name.toString();
     if (packetType == 'emotivaAck') {
       // We don't currently do anything with acks.
+      _log('Received an ack message: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaUnsubscribe') {
       // If we get a response from an unsubscribe request before we tear down
       // the socket, catch it and do nothing.
+      _log('Recieved an unsubscribe request: ${root.toXmlString()}');
       return;
     }
-    if (packetType == 'emotivaSubscription') {
+    if (packetType == 'emotivaNotify') {
       try {
         final sequence = _getSequence(root);
-        if (sequence > _sequenceNumber) {
+        if (sequence - _sequenceNumber == 1) {
+          // The sequence number incremented by 1 as expected.
           _sequenceNumber = sequence;
+        } else if (_sequenceNumber == -1) {
+          // Set the initial sequence number.
+          _sequenceNumber = sequence;
+        } else if (sequence - _sequenceNumber > 1) {
+          _log('It looks like we missed one or more messages. '
+              'Updating all fields.');
+          _sequenceNumber = sequence;
+          updateAll();
         } else {
-          // In this case, we've already seen this packet or a newer packet in
-          // the sequence and should disregard it. However, this might mean
-          // we've missed a state change on a subscribed field. Calling
-          // updateAll() should get us up-to-date.
-          // TODO - add logging when packets are rejected.
+          // The only case left is that sequence is <= _sequnceNumber.
+          _log("Received a message with an old sequence number. "
+              "Calling updateAll() in case we've missed something.");
           updateAll();
           return;
         }
       } catch (e) {
         // If we can't find a sequence number, just assume we should continue
         // processing this packet.
+        _log('Sequence number missing: ${root.toXmlString()}');
       }
     }
     if (packetType != 'emotivaUpdate' &&
@@ -381,6 +445,7 @@ class Device {
             }
           } catch (e) {
             // If parsing fails, that could mean the device is in standby.
+            _log('Unable to parse message: $e');
           }
           break;
         case 'loudness':
@@ -410,37 +475,35 @@ class Device {
         case 'speaker_preset':
           speakerPreset = _valueAttribute(element.attributes);
           break;
-        // Trims are delivered from Emotiva in 0.5dB steps. So we divide by two
-        // for better presentation.
         case 'center':
           try {
             centerTrim = double.parse(_valueAttribute(element.attributes));
           } catch (e) {
-            // TODO - add logging.
+            _log('Parsing to centerTrim double failed: $e');
           }
           break;
         case 'subwoofer':
           try {
             subwooferTrim = double.parse(_valueAttribute(element.attributes));
           } catch (e) {
-            // TODO - add logging.
+            _log('Parsing to subwooferTrim double failed: $e');
           }
           break;
         case 'surround':
           try {
             surroundTrim = double.parse(_valueAttribute(element.attributes));
           } catch (e) {
-            // TODO - add logging.
+            _log('Parsing to surroundTrim double failed: $e');
           }
         case 'back':
           try {
             backTrim = double.parse(_valueAttribute(element.attributes));
           } catch (e) {
-            // TODO - add logging.
+            _log('Parsing to backTrim double failed: $e');
           }
           break;
         default:
-          // TODO - add logging.
+          _log('Could not parse ${element.toXmlString()}');
           break;
       }
     }
