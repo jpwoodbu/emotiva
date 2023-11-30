@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
@@ -42,7 +41,7 @@ void main() async {
 }
 
 void _log(String message) {
-  developer.log(message, time: DateTime.now(), name: 'emotiva');
+  developer.log(message, name: 'emotiva');
 }
 
 String _pingRequest() {
@@ -366,6 +365,23 @@ class Device {
     throw 'Element has no sequence attribute.';
   }
 
+  double _getSpeakerTrim(XmlElement element) {
+    final trim = _valueAttribute(element.attributes);
+    if (trim == 'None') {
+      return 0.0;
+    } else {
+      try {
+        // There could be a space after the sign, which would break
+        // double.parse().
+        return double.parse(trim.replaceAll(r' ', ''));
+      } catch (e) {
+        _log(
+            'Casting trim value to double failed for ${element.toXmlString()}: $e');
+      }
+    }
+    return 0.0;
+  }
+
   /// Parses all messages types other than transponder messages.
   ///
   /// This method is made public so that callers can inject logic around a
@@ -476,31 +492,16 @@ class Device {
           speakerPreset = _valueAttribute(element.attributes);
           break;
         case 'center':
-          try {
-            centerTrim = double.parse(_valueAttribute(element.attributes));
-          } catch (e) {
-            _log('Parsing to centerTrim double failed: $e');
-          }
+          centerTrim = _getSpeakerTrim(element);
           break;
         case 'subwoofer':
-          try {
-            subwooferTrim = double.parse(_valueAttribute(element.attributes));
-          } catch (e) {
-            _log('Parsing to subwooferTrim double failed: $e');
-          }
+          subwooferTrim = _getSpeakerTrim(element);
           break;
         case 'surround':
-          try {
-            surroundTrim = double.parse(_valueAttribute(element.attributes));
-          } catch (e) {
-            _log('Parsing to surroundTrim double failed: $e');
-          }
+          surroundTrim = _getSpeakerTrim(element);
+          break;
         case 'back':
-          try {
-            backTrim = double.parse(_valueAttribute(element.attributes));
-          } catch (e) {
-            _log('Parsing to backTrim double failed: $e');
-          }
+          backTrim = _getSpeakerTrim(element);
           break;
         default:
           _log('Could not parse ${element.toXmlString()}');
@@ -509,6 +510,7 @@ class Device {
     }
   }
 
+  /// Changes the volume by [delta]dBs.
   void volumeDelta(double delta) async {
     await control('volume', value: delta.toString());
   }
@@ -529,6 +531,9 @@ class Device {
     await control('mute');
   }
 
+  /// Cycles the front display brightness.
+  ///
+  /// Brightness values cycle through 0%, 20%, 40%, 60%, 80%, and 100%.
   void cycleFrontDisplayBrightness() async {
     await control('dim');
   }
@@ -557,23 +562,28 @@ class Device {
     await control('enter');
   }
 
+  /// Displays the info table on OSD.
   void info() async {
     await control('info');
   }
 
+  /// Sets the source to the HDMI input corresponding to [input].
   void setHdmi(int input) async {
     await control('hdmi$input');
   }
 
+  /// Sets the audio source to the coax input corresponding to [input].
   void setCoax(int input) async {
     await control('coax$input');
   }
 
+  /// Sets the audio source to the balanced digital input.
   void setAesEbu() async {
     // coax5 pulls up the AES/EBU input on the RMC-1.
     await control('coax5');
   }
 
+  /// Sets the audio source to the optical input corresponding to [input].
   void setOptical(int input) async {
     await control('optical$input');
   }
@@ -590,15 +600,18 @@ class Device {
     await control('tuner');
   }
 
+  /// Sets the audio source to the analog input corresponding to [input].
   void setAnalog(int input) async {
     await control('analog$input');
   }
 
+  /// Sets the audio source to the balanced analog input.
   void setBalancedInput() async {
     // analog5 bring up the balanced input on the RMC-1.
     await control('analog5');
   }
 
+  /// Sets the audio source to the front analog input.
   void setFront() async {
     await control('front_in');
   }
@@ -639,28 +652,47 @@ class Device {
     await control('preset2');
   }
 
-  // All trim values are in steps of 0.5dB.
+  /// Adjusts the center speaker trim.
+  ///
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
   void trimCenter(double trim) async {
     trim = trim * 2;
     await control('center_trim_set', value: trim.toString());
   }
 
+  /// Adjusts the subwoofer trim.
+  ///
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
   void trimSubwoofer(double trim) async {
     trim = trim * 2;
     await control('subwoofer_trim_set', value: trim.toString());
   }
 
+  /// Adjusts the trim for surround speakers.
+  ///
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
   void trimSurround(double trim) async {
     trim = trim * 2;
     await control('surround_trim_set', value: trim.toString());
   }
 
+  /// Adjusts the trim for back (i.e. rear) speakers.
+  ///
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
   void trimBack(double trim) async {
     trim = trim * 2;
     await control('back_trim_set', value: trim.toString());
   }
 }
 
+/// A fake Device class that does not create or handle any network traffic.
+///
+/// This class is meant to be use for testing and demonstration.
+/// This class only supports Emotiva protocol 2.0.
 class FakeDevice extends Device {
   final _controlStream = StreamController<String>();
   final _notifyStream = StreamController<String>();
@@ -1209,6 +1241,7 @@ class FakeDevice extends Device {
   }
 }
 
+/// This function is meant to be mostly stand-in replacement for [discovery].
 Future<FakeDevice> futureFakeDevice() async {
   return FakeDevice();
 }
