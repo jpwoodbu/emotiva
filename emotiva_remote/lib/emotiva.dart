@@ -1,7 +1,7 @@
-// ignore_for_file: avoid_print
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
+import 'dart:math';
 
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
@@ -10,35 +10,6 @@ const int pingPort = 7000;
 const int transponderPort = 7001;
 const String broadcastAddress = '255.255.255.255';
 const String protocolVersion = '2.0';
-
-// main() serves only as a demo. This library is meant to be included in another
-// binary.
-void main() async {
-  // final device = await discovery(1);
-  final device = FakeDevice();
-  print('address: ${device.address}');
-  print('name: ${device.name}');
-  Future.delayed(Duration(seconds: 1), () async {
-    await device.updateAll();
-  });
-  Future.delayed(Duration(seconds: 3), () async {
-    await device.closeSockets();
-  });
-  await for (final packet in device.controlPortStream(device.address!)) {
-    device.parsePacket(packet);
-    print('power: ${device.power}');
-    print('source: ${device.source}');
-    print('mode: ${device.mode}');
-    print('volume: ${device.volume}');
-    print('loudness: ${device.loudness}');
-    print('audio input: ${device.audioInput}');
-    print('audio bitstream: ${device.audioBitstream}');
-    print('audio bits: ${device.audioBits}');
-    print('video input: ${device.videoInput}');
-    print('video format: ${device.videoFormat}');
-    print('video space: ${device.videoSpace}');
-  }
-}
 
 void _log(String message) {
   developer.log(message, name: 'emotiva');
@@ -407,20 +378,30 @@ class Device {
     }
     if (packetType == 'emotivaNotify') {
       try {
-        final sequence = _getSequence(root);
-        if (sequence - _sequenceNumber == 1) {
+        final serverSequence = _getSequence(root);
+        final delta = serverSequence - _sequenceNumber;
+        if (delta == 1) {
           // The sequence number incremented by 1 as expected.
-          _sequenceNumber = sequence;
+          _sequenceNumber = serverSequence;
         } else if (_sequenceNumber == -1) {
           // Set the initial sequence number.
-          _sequenceNumber = sequence;
-        } else if (sequence - _sequenceNumber > 1) {
-          _log('It looks like we missed one or more messages. '
-              'Updating all fields.');
-          _sequenceNumber = sequence;
+          _sequenceNumber = serverSequence;
+        } else if (delta > 1) {
+          _log("It looks like we're behind one or more messages. "
+              "Updating all fields.");
+          _sequenceNumber = serverSequence;
           updateAll();
         } else {
-          // The only case left is that sequence is <= _sequnceNumber.
+          // The only case left is that serverSequence is <= _sequnceNumber.
+          if (pow(2, 32) - _sequenceNumber < 1000) {
+            // My simple attempt at rollover detection. Emotiva documents that
+            // the sequence number they produce is an unsigned int. If, somehow
+            // we get within 1000 of 2^32 and the serverSequence number is
+            // lower than our's, let's assume we've rolled over and adopt the
+            // remote sequence number.
+            _sequenceNumber = serverSequence;
+            _log('Sequence rollover heuristic has kicked in.');
+          }
           _log("Received a message with an old sequence number. "
               "Calling updateAll() in case we've missed something.");
           updateAll();
@@ -804,7 +785,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString();
-    print('response: $response');
+    _log('response: $response');
     _controlStream.add(response);
   }
 
@@ -832,7 +813,7 @@ class FakeDevice extends Device {
         }
       }
     } catch (e) {
-      print(e);
+      _log('Unable to get value from ${element.toXmlString()}: $e');
     }
     return '';
   }
@@ -911,8 +892,7 @@ class FakeDevice extends Device {
             muted = false;
             updatedFields.add(field);
           } catch (e) {
-            print(e);
-            // Nothing to do until we start sending Notify packets.
+            _log('Unable to parse volume delta: ${element.toXmlString()}');
           }
           break;
         case 'loudness':
@@ -1109,7 +1089,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString();
-    print('response: $response');
+    _log('response: $response');
     _sequence++;
     _notifyStream.add(response);
   }
@@ -1177,7 +1157,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString();
-    print('response: $response');
+    _log('response: $response');
     _controlStream.add(response);
   }
 
@@ -1201,7 +1181,7 @@ class FakeDevice extends Device {
     final root = document.rootElement;
     final requestType = root.name.toString();
     final fields = _elementsToFields(root.childElements);
-    print('request: $request');
+    _log('request: $request');
     switch (requestType) {
       case 'emotivaControl':
         _parseControlRequest(root.childElements);
