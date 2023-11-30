@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
+void _log(String message) {
+  developer.log(message, name: 'DeviceChanges');
+}
+
 class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
   late Stream<String> controlPortStream;
@@ -12,14 +16,14 @@ class DeviceChanges with ChangeNotifier {
     controlPortStream = device.controlPortStream(device.address!);
     notifyPortStream = device.notifyPortStream(device.address!);
     handleControlPackets();
-    developer.log('handling control packets');
+    _log('handling control packets');
     handleNotifyPackets();
-    developer.log('handling notify packets');
+    _log('handling notify packets');
   }
 
   Future<void> handleControlPackets() async {
     await for (final packet in controlPortStream) {
-      developer.log('got a control message: $packet');
+      _log('got a control message: $packet');
       device.parsePacket(packet);
       notifyListeners();
     }
@@ -27,7 +31,7 @@ class DeviceChanges with ChangeNotifier {
 
   Future<void> handleNotifyPackets() async {
     await for (final packet in notifyPortStream) {
-      developer.log('got a notify message: $packet');
+      _log('got a notify message: $packet');
       device.parsePacket(packet);
       notifyListeners();
     }
