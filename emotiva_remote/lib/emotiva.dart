@@ -125,6 +125,16 @@ class Device {
   double subwooferTrim = 0.0;
   double surroundTrim = 0.0;
   double backTrim = 0.0;
+  String selectedMode = '';
+  String selectedMovieMusic = '';
+  String nameInput1 = '';
+  String nameInput2 = '';
+  String nameInput3 = '';
+  String nameInput4 = '';
+  String nameInput5 = '';
+  String nameInput6 = '';
+  String nameInput7 = '';
+  String nameInput8 = '';
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -144,6 +154,16 @@ class Device {
     'subwoofer',
     'surround',
     'back',
+    'selected_mode',
+    'selected_movie_music',
+    'input_1',
+    'input_2',
+    'input_3',
+    'input_4',
+    'input_5',
+    'input_6',
+    'input_7',
+    'input_8',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -483,6 +503,82 @@ class Device {
           break;
         case 'back':
           backTrim = _getSpeakerTrim(element);
+          break;
+        // "mode*" fields indicate whether these modes are selectable on the
+        // device via the "visibility" atttribute.
+        case 'mode_ref_stereo':
+          break;
+        case 'mode_stereo':
+          break;
+        case 'mode_music':
+          break;
+        case 'mode_movie':
+          break;
+        case 'mode_direct':
+          break;
+        case 'mode_dolby':
+          break;
+        case 'mode_dts':
+          break;
+        case 'mode_all_stereo':
+          break;
+        case 'mode_auto':
+          break;
+        case 'mode_surround':
+          break;
+        case 'selected_mode':
+          selectedMode = _valueAttribute(element.attributes);
+          break;
+        case 'selected_movie_music':
+          selectedMovieMusic = _valueAttribute(element.attributes);
+          break;
+        case 'treble':
+          break;
+        case 'bass':
+          break;
+        case 'zone2_power':
+          break;
+        case 'zone2_volume':
+          break;
+        case 'zone2_input':
+          break;
+        case 'tuner_band':
+          break;
+        case 'tuner_channel':
+          break;
+        case 'tuner_signal':
+          break;
+        case 'tuner_program':
+          break;
+        case 'tuner_RDS':
+          break;
+        case 'input_1':
+          nameInput1 = _valueAttribute(element.attributes);
+          break;
+        case 'input_2':
+          nameInput2 = _valueAttribute(element.attributes);
+          break;
+        case 'input_3':
+          nameInput3 = _valueAttribute(element.attributes);
+          break;
+        case 'input_4':
+          nameInput4 = _valueAttribute(element.attributes);
+          break;
+        case 'input_5':
+          nameInput5 = _valueAttribute(element.attributes);
+          break;
+        case 'input_6':
+          nameInput6 = _valueAttribute(element.attributes);
+          break;
+        case 'input_7':
+          nameInput7 = _valueAttribute(element.attributes);
+          break;
+        case 'input_8':
+          nameInput8 = _valueAttribute(element.attributes);
+          break;
+        case 'menu':
+          break;
+        case 'menu_update':
           break;
         default:
           _log('Could not parse ${element.toXmlString()}');
