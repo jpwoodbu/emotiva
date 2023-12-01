@@ -39,7 +39,7 @@ class MenuPage extends StatelessWidget {
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.menuUp),
-                    tooltip: 'up',
+                    tooltip: 'Up',
                     icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
                 Text(''),
               ],
@@ -48,14 +48,14 @@ class MenuPage extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () => addHaptic(device.menuLeft),
-                    tooltip: 'left',
+                    tooltip: 'Left',
                     icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
                 IconButton(
                     onPressed: () => addHaptic(device.menuEnter),
-                    tooltip: 'enter',
+                    tooltip: 'Enter',
                     icon: Icon(Icons.circle_outlined, size: iconSize)),
                 IconButton(
-                    tooltip: 'right',
+                    tooltip: 'Right',
                     onPressed: () => addHaptic(device.menuRight),
                     icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
               ],
@@ -65,7 +65,7 @@ class MenuPage extends StatelessWidget {
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.menuDown),
-                    tooltip: 'down',
+                    tooltip: 'Down',
                     icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
                 Text(''),
               ],
@@ -74,12 +74,12 @@ class MenuPage extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () => addHaptic(device.info),
-                    tooltip: 'show on screen display info table',
+                    tooltip: 'Show on screen display info table',
                     icon: Icon(Icons.info, size: iconSize * 0.50)),
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.toggleMenu),
-                    tooltip: 'toggles enter and exiting the Emotiva menu',
+                    tooltip: 'Toggles enter and exiting the Emotiva menu',
                     icon: Icon(Icons.menu, size: iconSize * 0.50)),
               ],
             ),

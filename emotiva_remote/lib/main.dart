@@ -129,7 +129,7 @@ class _MainViewState extends State<MainView> {
             title: const Center(child: Text('Emotiva Remote')),
             leading: IconButton(
               icon: Icon(Icons.help),
-              tooltip: 'show help',
+              tooltip: 'Show help',
               onPressed: () => showHelp(context),
             ),
             actions: [
@@ -192,7 +192,7 @@ class _MainViewState extends State<MainView> {
                         child: Icon(
                           Icons.remove,
                           size: 30.0,
-                          semanticLabel: 'volume down',
+                          semanticLabel: 'Volume down',
                         )),
                     SizedBox(width: 15.0),
                     ElevatedButton(
@@ -203,7 +203,7 @@ class _MainViewState extends State<MainView> {
                         child: Icon(
                           Icons.add,
                           size: 30.0,
-                          semanticLabel: 'volume up',
+                          semanticLabel: 'Volume up',
                         )),
                   ],
                 ),
