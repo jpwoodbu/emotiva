@@ -73,6 +73,7 @@ class InfoPage extends StatelessWidget {
                           icon: Icon(
                             Icons.refresh,
                             size: 30,
+                            semanticLabel: 'Refresh data',
                           ),
                         ),
                         IconButton(
@@ -83,6 +84,7 @@ class InfoPage extends StatelessWidget {
                                 ? Colors.blue
                                 : Colors.amber,
                             size: 30,
+                            semanticLabel: 'Toggle power',
                           ),
                         ),
                       ],

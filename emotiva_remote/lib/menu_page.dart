@@ -79,7 +79,7 @@ class MenuPage extends StatelessWidget {
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.toggleMenu),
-                    tooltip: 'Toggles enter and exiting the Emotiva menu',
+                    tooltip: 'Toggles entering and exiting the Emotiva menu',
                     icon: Icon(Icons.menu, size: iconSize * 0.50)),
               ],
             ),
