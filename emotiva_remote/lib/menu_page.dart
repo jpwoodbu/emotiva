@@ -39,6 +39,7 @@ class MenuPage extends StatelessWidget {
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.menuUp),
+                    tooltip: 'up',
                     icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
                 Text(''),
               ],
@@ -47,11 +48,14 @@ class MenuPage extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () => addHaptic(device.menuLeft),
+                    tooltip: 'left',
                     icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
                 IconButton(
                     onPressed: () => addHaptic(device.menuEnter),
+                    tooltip: 'enter',
                     icon: Icon(Icons.circle_outlined, size: iconSize)),
                 IconButton(
+                    tooltip: 'right',
                     onPressed: () => addHaptic(device.menuRight),
                     icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
               ],
@@ -61,6 +65,7 @@ class MenuPage extends StatelessWidget {
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.menuDown),
+                    tooltip: 'down',
                     icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
                 Text(''),
               ],
@@ -69,10 +74,12 @@ class MenuPage extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () => addHaptic(device.info),
+                    tooltip: 'show on screen display info table',
                     icon: Icon(Icons.info, size: iconSize * 0.50)),
                 Text(''),
                 IconButton(
                     onPressed: () => addHaptic(device.toggleMenu),
+                    tooltip: 'toggles enter and exiting the Emotiva menu',
                     icon: Icon(Icons.menu, size: iconSize * 0.50)),
               ],
             ),

@@ -48,6 +48,7 @@ class InfoPage extends StatelessWidget {
 
   Widget _build(BuildContext context, emotiva.Device device) {
     return RefreshIndicator(
+      semanticsLabel: 'info page',
       onRefresh: () => futureUpdateAll(device),
       child: Padding(
         padding: const EdgeInsets.all(15),

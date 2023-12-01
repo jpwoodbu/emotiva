@@ -537,15 +537,19 @@ class InputsPage extends StatelessWidget {
               TableRow(children: [
                 IconButton(
                     onPressed: () => bumpCenterTrim(0.5, device),
+                    tooltip: 'center trim up',
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpSubwooferTrim(0.5, device),
+                    tooltip: 'subwoofer trim up',
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpSurroundTrim(0.5, device),
+                    tooltip: 'surround trim up',
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpBackTrim(0.5, device),
+                    tooltip: 'back trim up',
                     icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
               ]),
               TableRow(children: [
@@ -557,15 +561,19 @@ class InputsPage extends StatelessWidget {
               TableRow(children: [
                 IconButton(
                     onPressed: () => bumpCenterTrim(-0.5, device),
+                    tooltip: 'center trim down',
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpSubwooferTrim(-0.5, device),
+                    tooltip: 'subwoofer trim down',
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpSurroundTrim(-0.5, device),
+                    tooltip: 'surround trim down',
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
                 IconButton(
                     onPressed: () => bumpBackTrim(-0.5, device),
+                    tooltip: 'back trim down',
                     icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
               ]),
             ],

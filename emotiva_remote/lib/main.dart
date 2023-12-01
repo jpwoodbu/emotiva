@@ -129,6 +129,7 @@ class _MainViewState extends State<MainView> {
             title: const Center(child: Text('Emotiva Remote')),
             leading: IconButton(
               icon: Icon(Icons.help),
+              tooltip: 'show help',
               onPressed: () => showHelp(context),
             ),
             actions: [
@@ -188,14 +189,22 @@ class _MainViewState extends State<MainView> {
                           HapticFeedback.lightImpact();
                           deviceChanges.device.volumeDelta(-1.0);
                         },
-                        child: Icon(Icons.remove, size: 30.0)),
+                        child: Icon(
+                          Icons.remove,
+                          size: 30.0,
+                          semanticLabel: 'volume down',
+                        )),
                     SizedBox(width: 15.0),
                     ElevatedButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           deviceChanges.device.volumeDelta(1.0);
                         },
-                        child: Icon(Icons.add, size: 30.0)),
+                        child: Icon(
+                          Icons.add,
+                          size: 30.0,
+                          semanticLabel: 'volume up',
+                        )),
                   ],
                 ),
               ],
