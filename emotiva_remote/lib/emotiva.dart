@@ -122,9 +122,11 @@ class Device {
   int dim = 0;
   String speakerPreset = '';
   double centerTrim = 0.0;
+  double widthTrim = 0.0;
   double subwooferTrim = 0.0;
   double surroundTrim = 0.0;
   double backTrim = 0.0;
+  double heightTrim = 0.0;
   String selectedMode = '';
   String selectedMovieMusic = '';
   String nameInput1 = '';
@@ -151,9 +153,11 @@ class Device {
     'dim',
     'speaker_preset',
     'center',
+    'width',
     'subwoofer',
     'surround',
     'back',
+    'height',
     'selected_mode',
     'selected_movie_music',
     'input_1',
@@ -273,8 +277,11 @@ class Device {
 
   /// Sends a request to get notified when any of [fields] change in value.
   Future<void> subscribe(Iterable<String> fields) async {
-    await _send(_subscribeRequest(fields), controlPort);
-    for (final f in fields) {
+    // Since we're going to be looping over this, we should make a local copy to
+    // avoid getting a ConcurrentModificationError.
+    final localFields = Set<String>.from(fields);
+    await _send(_subscribeRequest(localFields), controlPort);
+    for (final f in localFields) {
       _subscribedFields.add(f);
     }
   }
@@ -294,8 +301,11 @@ class Device {
   /// Supported fields are a hardcoded list of fields understood by this
   /// library.
   Future<void> unsubscribe(Iterable<String> fields) async {
-    await _send(_unsubscribeRequest(fields), controlPort);
-    for (final f in fields) {
+    // Since we're going to be looping over this, we should make a local copy to
+    // avoid getting a ConcurrentModificationError.
+    final localFields = Set<String>.from(fields);
+    await _send(_unsubscribeRequest(localFields), controlPort);
+    for (final f in localFields) {
       _subscribedFields.remove(f);
     }
   }
@@ -504,6 +514,12 @@ class Device {
         case 'back':
           backTrim = _getSpeakerTrim(element);
           break;
+        case 'width':
+          widthTrim = _getSpeakerTrim(element);
+          break;
+        case 'height':
+          heightTrim = _getSpeakerTrim(element);
+          break;
         // "mode*" fields indicate whether these modes are selectable on the
         // device via the "visibility" atttribute.
         case 'mode_ref_stereo':
@@ -579,6 +595,11 @@ class Device {
         case 'menu':
           break;
         case 'menu_update':
+          break;
+        case 'source_tuner':
+          // I don't know what this one is. It's listed as a command in their
+          // doc. But it seems to report the same value as "source".
+          // TODO - remove this if Emotiva fixes the interface.
           break;
         default:
           _log('Could not parse ${element.toXmlString()}');
