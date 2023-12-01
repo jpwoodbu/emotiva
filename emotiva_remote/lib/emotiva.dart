@@ -931,13 +931,17 @@ class FakeDevice extends Device {
     } else {
       audioInput = 'Coax $input';
     }
+    source = audioInput;
     updatedFields.add('audio_input');
+    updatedFields.add('source');
   }
 
   void _handleOpticalControlRequest(String command, Set<String> updatedFields) {
     final input = command.substring(7);
     audioInput = 'Optical $input';
+    source = audioInput;
     updatedFields.add('audio_input');
+    updatedFields.add('source');
   }
 
   void _handleAnalogControlRequest(String command, Set<String> updatedFields) {
@@ -947,7 +951,9 @@ class FakeDevice extends Device {
     } else {
       audioInput = 'Analog $input';
     }
+    source = audioInput;
     updatedFields.add('audio_input');
+    updatedFields.add('source');
   }
 
   double _sanitizeTrimValue(double trim) {
@@ -1071,16 +1077,22 @@ class FakeDevice extends Device {
           _handleOpticalControlRequest(field, updatedFields);
           break;
         case 'ARC':
-          audioInput = 'ARC';
+          audioInput = 'HDMI ARC';
+          source = audioInput;
           updatedFields.add('audio_input');
+          updatedFields.add('source');
           break;
         case 'usb_stream':
-          audioInput = 'USB';
+          audioInput = 'USB Stream';
+          source = audioInput;
           updatedFields.add('audio_input');
+          updatedFields.add('source');
           break;
         case 'tuner':
           audioInput = 'Tuner';
+          source = audioInput;
           updatedFields.add('audio_input');
+          updatedFields.add('source');
           break;
         case 'analog1':
           _handleAnalogControlRequest(field, updatedFields);
@@ -1096,7 +1108,9 @@ class FakeDevice extends Device {
           break;
         case 'front_in':
           audioInput = 'Front';
+          source = audioInput;
           updatedFields.add('audio_input');
+          updatedFields.add('source');
           break;
         case 'auto':
           // Dolby Surround is a reasonable fake since it's usually what's
@@ -1229,6 +1243,26 @@ class FakeDevice extends Device {
         return surroundTrim.toString();
       case 'back':
         return backTrim.toString();
+      case 'selected_mode':
+        return selectedMode;
+      case 'selected_movie_music':
+        return selectedMovieMusic;
+      case 'input_1':
+        return nameInput1;
+      case 'input_2':
+        return nameInput2;
+      case 'input_3':
+        return nameInput3;
+      case 'input_4':
+        return nameInput4;
+      case 'input_5':
+        return nameInput5;
+      case 'input_6':
+        return nameInput6;
+      case 'input_7':
+        return nameInput7;
+      case 'input_8':
+        return nameInput8;
       default:
         throw 'Unsupported field: $field';
     }
