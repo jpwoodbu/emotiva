@@ -10,6 +10,10 @@ import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
 
+void _log(String message) {
+  developer.log(message, name: 'main');
+}
+
 void showErrorSnackBar(BuildContext context, String error) {
   final snackBar = SnackBar(content: Text(error));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -136,7 +140,10 @@ class _MainViewState extends State<MainView> {
                     onTap: () => {
                       Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => Discovery()),
+                          MaterialPageRoute(
+                              builder: (context) => Discovery(
+                                    rediscover: true,
+                                  )),
                           (Route<dynamic> route) => false)
                     },
                   ),
@@ -285,7 +292,8 @@ class ScanningPage extends StatelessWidget {
 
 class Discovery extends StatefulWidget {
   final bool useFake;
-  const Discovery({super.key, this.useFake = false});
+  final bool rediscover;
+  const Discovery({super.key, this.useFake = false, this.rediscover = false});
 
   @override
   State<Discovery> createState() => _DiscoveryState();
@@ -299,7 +307,7 @@ class _DiscoveryState extends State<Discovery> {
   initState() {
     super.initState();
     if (widget.useFake) {
-      developer.log('Using fake device.');
+      _log('Using fake device.');
       _device = emotiva.futureFakeDevice();
     } else {
       _device = emotiva.discovery(3);
@@ -310,8 +318,9 @@ class _DiscoveryState extends State<Discovery> {
   void dispose() async {
     super.dispose();
     if (device != null) {
-      developer.log('Unsubscribing and closing sockets for device.');
+      _log('Unsubscribing from all fields.');
       await device!.unsubscribeAll();
+      _log('Closing sockets for device.');
       await device!.closeSockets();
     }
   }
@@ -319,7 +328,12 @@ class _DiscoveryState extends State<Discovery> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
-      future: _device,
+      // TODO - Figure out a better way to protect against a new Device object
+      // doing work before the old Device object has been disposed.  E.g. The
+      // old Device might unsubscribe the new Device from notification.
+      future: widget.rediscover
+          ? Future.delayed(Duration(seconds: 1), () => _device)
+          : _device,
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
@@ -327,7 +341,7 @@ class _DiscoveryState extends State<Discovery> {
           }
           return ChangeNotifierProvider(
             create: (context) {
-              developer.log('Found Emotiva device.');
+              _log('Found Emotiva device.');
               device = snapshot.data!;
               // Initialing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in
