@@ -1356,8 +1356,8 @@ class FakeDevice extends Device {
   }
 
   @override
-  // destinationPort seems to always be controlPort.
   Future<void> _send(String request, int destinationPort) async {
+    // destinationPort seems to always be controlPort.
     return _parseRequest(request);
   }
 
@@ -1376,7 +1376,7 @@ class FakeDevice extends Device {
   }
 }
 
-/// This function is meant to be mostly stand-in replacement for [discovery].
+/// This function is meant to be mostly a stand-in replacement for [discovery].
 Future<FakeDevice> futureFakeDevice() async {
   return FakeDevice();
 }
