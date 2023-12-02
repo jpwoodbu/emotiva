@@ -1258,12 +1258,16 @@ class FakeDevice extends Device {
         return speakerPreset;
       case 'center':
         return centerTrim.toString();
+      case 'width':
+        return widthTrim.toString();
       case 'subwoofer':
         return subwooferTrim.toString();
       case 'surround':
         return surroundTrim.toString();
       case 'back':
         return backTrim.toString();
+      case 'height':
+        return heightTrim.toString();
       case 'selected_mode':
         return selectedMode;
       case 'selected_movie_music':
