@@ -9,6 +9,12 @@ class InputsPage extends StatelessWidget {
   const InputsPage({super.key});
   static const double sheetPadding = 15.0;
 
+  void setSource(BuildContext context, emotiva.Device device, int input) async {
+    HapticFeedback.lightImpact();
+    device.setSource(input);
+    Navigator.pop(context);
+  }
+
   void setHdmi(BuildContext context, emotiva.Device device, int input) async {
     HapticFeedback.lightImpact();
     device.setHdmi(input);
@@ -27,7 +33,8 @@ class InputsPage extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  void setOptical(BuildContext context, emotiva.Device device, int input) async {
+  void setOptical(
+      BuildContext context, emotiva.Device device, int input) async {
     HapticFeedback.lightImpact();
     device.setOptical(input);
     Navigator.pop(context);
@@ -87,7 +94,8 @@ class InputsPage extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  void setModeReferenceStereo(BuildContext context, emotiva.Device device) async {
+  void setModeReferenceStereo(
+      BuildContext context, emotiva.Device device) async {
     HapticFeedback.lightImpact();
     device.modeReferenceStereo();
     Navigator.pop(context);
@@ -145,6 +153,43 @@ class InputsPage extends StatelessWidget {
     HapticFeedback.lightImpact();
     final trim = device.backTrim += step;
     device.trimBack(trim);
+  }
+
+  List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
+    List<Widget> widgets = [];
+    for (var i = 1; i < 9; i++) {
+      final bool visible = device.visibility['input_$i'] ?? false;
+      String name = device.names['input_$i'] ?? 'Source $i';
+      if (name.isEmpty) {
+        name = 'Source $i';
+      }
+      if (visible) {
+        widgets.add(
+          ElevatedButton.icon(
+            onPressed: () => setSource(context, device, i),
+            icon: Icon(Icons.person),
+            label: Text(name),
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
+
+  void sourceBottomSheet(BuildContext context, emotiva.Device device) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _buildSourceList(context, device),
+          ),
+        );
+      },
+    );
   }
 
   void hdmiBottomSheet(BuildContext context, emotiva.Device device) {
@@ -429,10 +474,10 @@ class InputsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      hdmiBottomSheet(context, device);
+                      sourceBottomSheet(context, device);
                     },
-                    icon: Icon(Icons.settings_input_hdmi),
-                    label: Text('HDMI'),
+                    icon: Icon(Icons.person),
+                    label: Text('Source'),
                     style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
@@ -440,10 +485,10 @@ class InputsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      analogBottomSheet(context, device);
+                      hdmiBottomSheet(context, device);
                     },
-                    icon: Icon(Icons.settings_input_component),
-                    label: Text('Analog'),
+                    icon: Icon(Icons.settings_input_hdmi),
+                    label: Text('HDMI'),
                     style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
@@ -477,6 +522,17 @@ class InputsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      analogBottomSheet(context, device);
+                    },
+                    icon: Icon(Icons.settings_input_component),
+                    label: Text('Analog'),
+                    style: ButtonStyle(alignment: Alignment.centerLeft),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(tableCellPadding),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
                       xlrBottomSheet(context, device);
                     },
                     icon: Icon(Icons.donut_large),
@@ -484,6 +540,8 @@ class InputsPage extends StatelessWidget {
                     style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
+              ]),
+              TableRow(children: [
                 Padding(
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
@@ -495,8 +553,6 @@ class InputsPage extends StatelessWidget {
                     style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
-              ]),
-              TableRow(children: [
                 Padding(
                   padding: const EdgeInsets.all(tableCellPadding),
                   child: ElevatedButton.icon(
@@ -505,17 +561,6 @@ class InputsPage extends StatelessWidget {
                     },
                     icon: Icon(Icons.surround_sound),
                     label: Text('Mode'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      speakerPresetBottomSheet(context, device);
-                    },
-                    icon: Icon(Icons.speaker),
-                    label: Text('Speaker'),
                     style: ButtonStyle(alignment: Alignment.centerLeft),
                   ),
                 ),
@@ -586,9 +631,8 @@ class InputsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceChanges>(
-      builder: (BuildContext context, DeviceChanges deviceChanges, child) {
-        return _build(context, deviceChanges.device);
-      }
-    );
+        builder: (BuildContext context, DeviceChanges deviceChanges, child) {
+      return _build(context, deviceChanges.device);
+    });
   }
 }

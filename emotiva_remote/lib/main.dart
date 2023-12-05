@@ -137,14 +137,14 @@ class _MainViewState extends State<MainView> {
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem(
                     child: Text('Rediscover Emotiva device'),
-                    onTap: () => {
+                    onTap: () {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                               builder: (context) => Discovery(
                                     rediscover: true,
                                   )),
-                          (Route<dynamic> route) => false)
+                          (Route<dynamic> route) => false);
                     },
                   ),
                   PopupMenuItem(

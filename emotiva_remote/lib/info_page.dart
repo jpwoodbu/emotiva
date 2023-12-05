@@ -40,10 +40,9 @@ class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceChanges>(
-      builder: (BuildContext context, DeviceChanges deviceChanges, child) {
-        return _build(context, deviceChanges.device);
-      }
-    );
+        builder: (BuildContext context, DeviceChanges deviceChanges, child) {
+      return _build(context, deviceChanges.device);
+    });
   }
 
   Widget _build(BuildContext context, emotiva.Device device) {
@@ -64,12 +63,15 @@ class InfoPage extends StatelessWidget {
                   children: [
                     Text(
                       device.name,
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {updateAll(device);},
+                          onPressed: () {
+                            updateAll(device);
+                          },
                           icon: Icon(
                             Icons.refresh,
                             size: 30,
@@ -77,7 +79,9 @@ class InfoPage extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {togglePower(device);},
+                          onPressed: () {
+                            togglePower(device);
+                          },
                           icon: Icon(
                             Icons.power_settings_new,
                             color: device.power == 'On'
@@ -97,8 +101,8 @@ class InfoPage extends StatelessWidget {
                   children: [
                     Text(
                       'Volume',
-                      style: TextStyle(
-                          fontSize: 25, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     Text('${device.volume.toString()}dB',
                         style: TextStyle(
@@ -132,12 +136,32 @@ class InfoPage extends StatelessWidget {
                   children: [
                     Text(
                       'Speaker preset',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
-                    Text(device.speakerPreset,
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold)),
+                    PopupMenuButton(
+                      child: Row(
+                        children: [
+                          Text(device.speakerPreset,
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold)),
+                                  SizedBox(width: 5),
+                          Icon(Icons.more_vert),
+                        ],
+                      ),
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem(
+                            child: Text('Preset 1'),
+                            onTap: () async {
+                              device.speakerPreset1();
+                            }),
+                        PopupMenuItem(
+                            child: Text('Preset 2'),
+                            onTap: () async {
+                              device.speakerPreset2();
+                            }),
+                      ],
+                    ),
                   ],
                 ),
                 SizedBox(height: 20),
@@ -146,8 +170,8 @@ class InfoPage extends StatelessWidget {
                   children: [
                     Text(
                       'Loudness',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                     Switch(
                       value: device.loudness == 'On' ? true : false,
@@ -180,7 +204,9 @@ class InfoPage extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.bold)),
                     IconButton(
-                        onPressed: () {cycleFrontDisplayBrightness(device);},
+                        onPressed: () {
+                          cycleFrontDisplayBrightness(device);
+                        },
                         icon: Icon(Icons.light_mode))
                   ],
                 )
