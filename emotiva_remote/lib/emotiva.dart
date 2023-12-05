@@ -129,14 +129,26 @@ class Device {
   double heightTrim = 0.0;
   String selectedMode = '';
   String selectedMovieMusic = '';
-  String nameInput1 = '';
-  String nameInput2 = '';
-  String nameInput3 = '';
-  String nameInput4 = '';
-  String nameInput5 = '';
-  String nameInput6 = '';
-  String nameInput7 = '';
-  String nameInput8 = '';
+  Map<String, String> names = {
+    'input_1': '',
+    'input_2': '',
+    'input_3': '',
+    'input_4': '',
+    'input_5': '',
+    'input_6': '',
+    'input_7': '',
+    'input_8': '',
+  };
+  Map<String, bool> visibility = {
+    'input_1': true,
+    'input_2': true,
+    'input_3': true,
+    'input_4': true,
+    'input_5': true,
+    'input_6': true,
+    'input_7': true,
+    'input_8': true,
+  };
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -350,6 +362,15 @@ class Device {
       }
     }
     throw 'Element missing value attribute';
+  }
+
+  bool _visibleAttribute(List<XmlAttribute> attributes) {
+    for (final a in attributes) {
+      if (a.name.toString() == 'visible') {
+        return bool.parse(a.value.trim(), caseSensitive: false);
+      }
+    }
+    throw 'Element missing visible attribute';
   }
 
   int _getSequence(XmlElement element) {
@@ -569,28 +590,36 @@ class Device {
         case 'tuner_RDS':
           break;
         case 'input_1':
-          nameInput1 = _valueAttribute(element.attributes);
+          names['input_1'] = _valueAttribute(element.attributes);
+          visibility['input_1'] = _visibleAttribute(element.attributes);
           break;
         case 'input_2':
-          nameInput2 = _valueAttribute(element.attributes);
+          names['input_2'] = _valueAttribute(element.attributes);
+          visibility['input_2'] = _visibleAttribute(element.attributes);
           break;
         case 'input_3':
-          nameInput3 = _valueAttribute(element.attributes);
+          names['input_3'] = _valueAttribute(element.attributes);
+          visibility['input_3'] = _visibleAttribute(element.attributes);
           break;
         case 'input_4':
-          nameInput4 = _valueAttribute(element.attributes);
+          names['input_4'] = _valueAttribute(element.attributes);
+          visibility['input_4'] = _visibleAttribute(element.attributes);
           break;
         case 'input_5':
-          nameInput5 = _valueAttribute(element.attributes);
+          names['input_5'] = _valueAttribute(element.attributes);
+          visibility['input_5'] = _visibleAttribute(element.attributes);
           break;
         case 'input_6':
-          nameInput6 = _valueAttribute(element.attributes);
+          names['input_6'] = _valueAttribute(element.attributes);
+          visibility['input_6'] = _visibleAttribute(element.attributes);
           break;
         case 'input_7':
-          nameInput7 = _valueAttribute(element.attributes);
+          names['input_7'] = _valueAttribute(element.attributes);
+          visibility['input_7'] = _visibleAttribute(element.attributes);
           break;
         case 'input_8':
-          nameInput8 = _valueAttribute(element.attributes);
+          names['input_8'] = _valueAttribute(element.attributes);
+          visibility['input_8'] = _visibleAttribute(element.attributes);
           break;
         case 'menu':
           break;
@@ -663,6 +692,11 @@ class Device {
   /// Displays the info table on OSD.
   void info() async {
     await control('info');
+  }
+
+  /// Sets the source to the user configurable inputs.
+  void setSource(int input) async {
+    await control('source_$input');
   }
 
   /// Sets the source to the HDMI input corresponding to [input].
@@ -818,6 +852,8 @@ class FakeDevice extends Device {
     dim = 0;
     speakerPreset = 'Preset 1';
     address = InternetAddress('192.168.42.1');
+    names['input_1'] = 'Blu-Ray analog';
+    names['input_2'] = 'Fancy pants DAC';
   }
 
   Iterable<String> _elementsToFields(Iterable<XmlElement> elements) {
@@ -832,72 +868,16 @@ class FakeDevice extends Device {
     builder.element(field, attributes: {'value': value, 'status': 'ack'});
   }
 
-  // TODO - There's probably a code reuse opportunity with _getValueForField().
   void _parseUpdateRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('emotivaUpdate', nest: () {
       for (final f in fields) {
-        switch (f) {
-          case 'power':
-            _updateBuilder(builder, f, power);
-            break;
-          case 'source':
-            _updateBuilder(builder, f, source);
-            break;
-          case 'mode':
-            _updateBuilder(builder, f, mode);
-            break;
-          case 'volume':
-            if (muted) {
-              _updateBuilder(builder, f, 'Mute');
-            } else {
-              _updateBuilder(builder, f, volume.toString());
-            }
-            break;
-          case 'loudness':
-            _updateBuilder(builder, f, loudness);
-            break;
-          case 'audio_input':
-            _updateBuilder(builder, f, audioInput);
-            break;
-          case 'audio_bitstream':
-            _updateBuilder(builder, f, audioBitstream);
-            break;
-          case 'audio_bits':
-            _updateBuilder(builder, f, audioBits);
-            break;
-          case 'video_input':
-            _updateBuilder(builder, f, videoInput);
-            break;
-          case 'video_format':
-            _updateBuilder(builder, f, videoFormat);
-            break;
-          case 'video_space':
-            _updateBuilder(builder, f, videoSpace);
-            break;
-          case 'dim':
-            _updateBuilder(builder, f, dim.toString());
-            break;
-          case 'speaker_preset':
-            _updateBuilder(builder, f, speakerPreset);
-            break;
-          case 'center':
-            _updateBuilder(builder, f, centerTrim.toString());
-            break;
-          case 'subwoofer':
-            _updateBuilder(builder, f, subwooferTrim.toString());
-            break;
-          case 'surround':
-            _updateBuilder(builder, f, surroundTrim.toString());
-            break;
-          case 'back':
-            _updateBuilder(builder, f, backTrim.toString());
-            break;
-          default:
-            // Unknown field.
-            builder.element(f, attributes: {'value': '', 'status': 'nak'});
-            break;
+        try {
+          _updateBuilder(builder, f, _getValueForField(f));
+        } catch (e) {
+          // Unknown field.
+          builder.element(f, attributes: {'value': '', 'status': 'nak'});
         }
       }
     });
@@ -1000,10 +980,6 @@ class FakeDevice extends Device {
           power = 'Off';
           updatedFields.add('power');
           break;
-        case 'source':
-          source = _getValue(element);
-          updatedFields.add(field);
-          break;
         case 'mode':
           mode = _getValue(element);
           updatedFields.add(field);
@@ -1100,20 +1076,17 @@ class FakeDevice extends Device {
         case 'ARC':
           audioInput = 'HDMI ARC';
           source = audioInput;
-          updatedFields.add('audio_input');
-          updatedFields.add('source');
+          updatedFields.addAll(['audio_input', 'source']);
           break;
         case 'usb_stream':
           audioInput = 'USB Stream';
           source = audioInput;
-          updatedFields.add('audio_input');
-          updatedFields.add('source');
+          updatedFields.addAll(['audio_input', 'source']);
           break;
         case 'tuner':
           audioInput = 'Tuner';
           source = audioInput;
-          updatedFields.add('audio_input');
-          updatedFields.add('source');
+          updatedFields.addAll(['audio_input', 'source']);
           break;
         case 'analog1':
           _handleAnalogControlRequest(field, updatedFields);
@@ -1130,8 +1103,54 @@ class FakeDevice extends Device {
         case 'front_in':
           audioInput = 'Front';
           source = audioInput;
-          updatedFields.add('audio_input');
-          updatedFields.add('source');
+          updatedFields.addAll(['audio_input', 'source']);
+          break;
+        case 'source_1':
+          audioInput = 'Balanced In';
+          videoInput = 'HDMI 1';
+          source = names['input_1']!;
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_2':
+          audioInput = 'Analog 1';
+          source = names['input_2']!;
+          updatedFields.addAll(['audio_input', 'source']);
+          break;
+        case 'source_3':
+          audioInput = 'HDMI 3';
+          videoInput = 'HDMI 3';
+          source = 'HDMI 3';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_4':
+          audioInput = 'HDMI 4';
+          videoInput = 'HDMI 4';
+          source = 'HDMI 4';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_5':
+          audioInput = 'HDMI 5';
+          videoInput = 'HDMI 5';
+          source = 'HDMI 5';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_6':
+          audioInput = 'HDMI 6';
+          videoInput = 'HDMI 6';
+          source = 'HDMI 6';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_7':
+          audioInput = 'HDMI 7';
+          videoInput = 'HDMI 7';
+          source = 'HDMI 7';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
+          break;
+        case 'source_8':
+          audioInput = 'HDMI 8';
+          videoInput = 'HDMI 8';
+          source = 'HDMI 8';
+          updatedFields.addAll(['audio_input', 'video_input', 'source']);
           break;
         case 'auto':
           // Dolby Surround is a reasonable fake since it's usually what's
@@ -1213,10 +1232,10 @@ class FakeDevice extends Device {
     builder.element('emotivaNotify',
         attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final field in updatedFields) {
-        var value = _getValueForField(field);
-        // TODO - only include the visible attribute for the fields documented
-        // in the API docs where it applies.
-        builder.element(field, attributes: {'value': value, 'visible': 'true'});
+        String value = _getValueForField(field);
+        String visible = _getVisibilityForField(field);
+        builder
+            .element(field, attributes: {'value': value, 'visible': visible});
       }
     });
     final response = builder.buildDocument().toXmlString();
@@ -1273,23 +1292,32 @@ class FakeDevice extends Device {
       case 'selected_movie_music':
         return selectedMovieMusic;
       case 'input_1':
-        return nameInput1;
+        return names['input_1']!;
       case 'input_2':
-        return nameInput2;
+        return names['input_2']!;
       case 'input_3':
-        return nameInput3;
+        return names['input_3']!;
       case 'input_4':
-        return nameInput4;
+        return names['input_4']!;
       case 'input_5':
-        return nameInput5;
+        return names['input_5']!;
       case 'input_6':
-        return nameInput6;
+        return names['input_6']!;
       case 'input_7':
-        return nameInput7;
+        return names['input_7']!;
       case 'input_8':
-        return nameInput8;
+        return names['input_8']!;
       default:
         throw 'Unsupported field: $field';
+    }
+  }
+
+  String _getVisibilityForField(String field) {
+    if (field.startsWith('input_')) {
+      bool visible = visibility[field] ?? false;
+      return visible.toString().toLowerCase();
+    } else {
+      return 'true';
     }
   }
 
@@ -1303,7 +1331,7 @@ class FakeDevice extends Device {
           builder.element(field, attributes: {
             'value': _getValueForField(field),
             'status': 'ack',
-            'visible': 'true',
+            'visible': _getVisibilityForField(field),
           });
         } else {
           // Return nak status for unknown fields.
