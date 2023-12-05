@@ -9,7 +9,8 @@ import 'package:xml/xpath.dart';
 const int pingPort = 7000;
 const int transponderPort = 7001;
 const String broadcastAddress = '255.255.255.255';
-const String protocolVersion = '2.0';
+// The highest protocol version this library supports.
+const String protocolVersion = '3.0';
 
 void _log(String message) {
   developer.log(message, name: 'emotiva');
@@ -403,7 +404,6 @@ class Device {
           throw 'Unable to parse sequence number: $e';
         }
       }
-      throw 'Sequence attribute not found.';
     }
     throw 'Element has no sequence attribute.';
   }
@@ -423,6 +423,24 @@ class Device {
       }
     }
     return 0.0;
+  }
+
+  String _getProtocolAttribute(XmlElement element) {
+    for (final a in element.attributes) {
+      if (a.name.toString() == 'protocol') {
+        return a.value.trim();
+      }
+    }
+    return '';
+  }
+
+  String _getNameAttribute(XmlElement element) {
+    for (final a in element.attributes) {
+      if (a.name.toString() == 'name') {
+        return a.value.trim();
+      }
+    }
+    throw 'Element has no name attribute: ${element.toXmlString()}';
   }
 
   /// Parses all messages types other than transponder messages.
@@ -492,8 +510,15 @@ class Device {
           'emotivaUpdate/emotivaNotify/emotivaSubscription response: '
           '${root.toXmlString(pretty: true)}');
     }
+    final protocol = _getProtocolAttribute(root);
     for (final element in root.childElements) {
-      final field = element.name.toString();
+      final name = element.name.toString();
+      final String field;
+      if (protocol.startsWith('3.') && name == 'property') {
+        field = _getNameAttribute(element);
+      } else {
+        field = name;
+      }
       switch (field) {
         case 'power':
           power = _valueAttribute(element.attributes);
@@ -568,6 +593,7 @@ class Device {
         case 'mode_ref_stereo' ||
               'mode_stereo' ||
               'mode_music' ||
+              'mode_movie' ||
               'mode_direct' ||
               'mode_dolby' ||
               'mode_dts' ||
@@ -825,7 +851,7 @@ class FakeDevice extends Device {
   FakeDevice() {
     model = 'Fake Emotiva';
     name = 'Fake name';
-    controlVersion = '42';
+    controlVersion = '2.0';
     controlPort = 1;
     notifyPort = 2;
     infoPort = 3;
