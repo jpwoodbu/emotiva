@@ -148,6 +148,16 @@ class Device {
     'input_6': true,
     'input_7': true,
     'input_8': true,
+    'mode_ref_stereo': true,
+    'mode_stereo': true,
+    'mode_music': true,
+    'mode_movie': true,
+    'mode_direct': true,
+    'mode_dolby': true,
+    'mode_dts': true,
+    'mode_all_stereo': true,
+    'mode_auto': true,
+    'mode_surround': true,
   };
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
@@ -180,6 +190,16 @@ class Device {
     'input_6',
     'input_7',
     'input_8',
+    'mode_ref_stereo',
+    'mode_stereo',
+    'mode_music',
+    'mode_movie',
+    'mode_direct',
+    'mode_dolby',
+    'mode_dts',
+    'mode_all_stereo',
+    'mode_auto',
+    'mode_surround',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -370,6 +390,7 @@ class Device {
         return bool.parse(a.value.trim(), caseSensitive: false);
       }
     }
+    // TODO - Maybe just log and return true?
     throw 'Element missing visible attribute';
   }
 
@@ -472,7 +493,8 @@ class Device {
           '${root.toXmlString(pretty: true)}');
     }
     for (final element in root.childElements) {
-      switch (element.name.toString()) {
+      final field = element.name.toString();
+      switch (field) {
         case 'power':
           power = _valueAttribute(element.attributes);
           break;
@@ -541,27 +563,18 @@ class Device {
         case 'height':
           heightTrim = _getSpeakerTrim(element);
           break;
-        // "mode*" fields indicate whether these modes are selectable on the
+        // "mode_*" fields indicate whether these modes are selectable on the
         // device via the "visibility" atttribute.
-        case 'mode_ref_stereo':
-          break;
-        case 'mode_stereo':
-          break;
-        case 'mode_music':
-          break;
-        case 'mode_movie':
-          break;
-        case 'mode_direct':
-          break;
-        case 'mode_dolby':
-          break;
-        case 'mode_dts':
-          break;
-        case 'mode_all_stereo':
-          break;
-        case 'mode_auto':
-          break;
-        case 'mode_surround':
+        case 'mode_ref_stereo' ||
+              'mode_stereo' ||
+              'mode_music' ||
+              'mode_direct' ||
+              'mode_dolby' ||
+              'mode_dts' ||
+              'mode_all_stereo' ||
+              'mode_auto' ||
+              'mode_surround':
+          visibility[field] = _visibleAttribute(element.attributes);
           break;
         case 'selected_mode':
           selectedMode = _valueAttribute(element.attributes);
@@ -589,37 +602,16 @@ class Device {
           break;
         case 'tuner_RDS':
           break;
-        case 'input_1':
-          names['input_1'] = _valueAttribute(element.attributes);
-          visibility['input_1'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_2':
-          names['input_2'] = _valueAttribute(element.attributes);
-          visibility['input_2'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_3':
-          names['input_3'] = _valueAttribute(element.attributes);
-          visibility['input_3'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_4':
-          names['input_4'] = _valueAttribute(element.attributes);
-          visibility['input_4'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_5':
-          names['input_5'] = _valueAttribute(element.attributes);
-          visibility['input_5'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_6':
-          names['input_6'] = _valueAttribute(element.attributes);
-          visibility['input_6'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_7':
-          names['input_7'] = _valueAttribute(element.attributes);
-          visibility['input_7'] = _visibleAttribute(element.attributes);
-          break;
-        case 'input_8':
-          names['input_8'] = _valueAttribute(element.attributes);
-          visibility['input_8'] = _visibleAttribute(element.attributes);
+        case 'input_1' ||
+              'input_2' ||
+              'input_3' ||
+              'input_4' ||
+              'input_5' ||
+              'input_6' ||
+              'input_7' ||
+              'input_8':
+          names[field] = _valueAttribute(element.attributes);
+          visibility[field] = _visibleAttribute(element.attributes);
           break;
         case 'menu':
           break;
