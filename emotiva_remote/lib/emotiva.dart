@@ -1351,6 +1351,30 @@ class FakeDevice extends Device {
         return names['input_7']!;
       case 'input_8':
         return names['input_8']!;
+      case 'mode_ref_stereo':
+        return 'Reference Stereo';
+      case 'mode_stereo':
+        return 'Stereo';
+      case 'mode_music':
+        return 'Music';
+      case 'mode_movie':
+        return 'Movie';
+      case 'mode_direct':
+        return 'Direct';
+      case 'mode_dolby':
+        return 'Dolby Surround';
+      case 'mode_dts':
+        return 'dtsX';
+      case 'mode_all_stereo':
+        return 'All Stereo';
+      case 'mode_auto':
+        return 'Auto';
+      case 'mode_surround':
+        return 'Dolby Surround';
+      case 'menu':
+        return menuDisplayed ? 'On' : 'Off';
+      case 'menu_update':
+        return '';
       default:
         throw 'Unsupported field: $field';
     }
