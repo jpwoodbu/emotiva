@@ -208,6 +208,14 @@ class Device {
   // not yet gotten a real sequence number.
   int _sequenceNumber = -1;
 
+  /// The protocol version to request after device discovery.
+  String _protocolVersion() {
+    // We currently only support minor version 0 of major version 3.
+    if (controlVersion.startsWith('3.')) return protocolVersion;
+    // Fall back to 2.0 otherwise.
+    return '2.0';
+  }
+
   Stream<String> _socketStream(int port, InternetAddress address) async* {
     final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     stream.writeEventsEnabled = false;
@@ -280,7 +288,7 @@ class Device {
   String _requestWithFields(String requestType, Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element(requestType, attributes: {'protocol': protocolVersion},
+    builder.element(requestType, attributes: {'protocol': _protocolVersion()},
         nest: () {
       for (final f in fields) {
         builder.element(f);
@@ -349,8 +357,8 @@ class Device {
   String _controlRequest(String command, String value, bool ack) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaControl', attributes: {'protocol': protocolVersion},
-        nest: () {
+    builder.element('emotivaControl',
+        attributes: {'protocol': _protocolVersion()}, nest: () {
       builder.element(command,
           attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
     });
