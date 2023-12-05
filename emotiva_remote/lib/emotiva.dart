@@ -130,6 +130,7 @@ class Device {
   double heightTrim = 0.0;
   String selectedMode = '';
   String selectedMovieMusic = '';
+  bool menuDisplayed = false;
   Map<String, String> names = {
     'input_1': '',
     'input_2': '',
@@ -201,6 +202,8 @@ class Device {
     'mode_all_stereo',
     'mode_auto',
     'mode_surround',
+    'menu',
+    'menu_update',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -474,6 +477,10 @@ class Device {
       _log('Recieved an unsubscribe request: ${root.toXmlString()}');
       return;
     }
+    if (packetType == 'emotivaMenuNotify') {
+      _log('Recieved a menu notify request: ${root.toXmlString()}');
+      return;
+    }
     if (packetType == 'emotivaNotify') {
       try {
         final serverSequence = _getSequence(root);
@@ -523,6 +530,12 @@ class Device {
       final name = element.name.toString();
       final String field;
       if (protocol.startsWith('3.') && name == 'property') {
+        field = _getNameAttribute(element);
+      } else if (controlVersion.startsWith('3.') && name == 'property') {
+        // The protocol attribute isn't reliably present in messages. But if the
+        // device initially reports support for protocol version 3+, let's look
+        // for the use of '<property>' tags, which should only be present in
+        // protocol version 3+ messages.
         field = _getNameAttribute(element);
       } else {
         field = name;
@@ -648,6 +661,11 @@ class Device {
           visibility[field] = _visibleAttribute(element.attributes);
           break;
         case 'menu':
+          if (_valueAttribute(element.attributes).toLowerCase() == 'on') {
+            menuDisplayed = true;
+          } else {
+            menuDisplayed = false;
+          }
           break;
         case 'menu_update':
           break;
