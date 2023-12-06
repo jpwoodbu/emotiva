@@ -42,11 +42,13 @@ Future<Device> discovery(int timeoutSec) async {
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
+        _log('sent: $ping');
         break;
       case RawSocketEvent.read:
         final datagram = stream.receive();
         stream.close();
         final data = String.fromCharCodes(datagram!.data);
+        _log('received: $data');
         final device = _parseTransponder(data);
         device.address = datagram.address;
         return device;
@@ -90,23 +92,30 @@ Device _parseTransponder(String data) {
   final device = Device();
   device.model = _textFromElement(root, 'model');
   device.name = _textFromElement(root, 'name');
+  device.dataRevision = _textFromElement(root, 'dataRevision');
   device.controlVersion = _textFromElement(root, './control/version');
   device.controlPort = _intFromElement(root, './control/controlPort');
   device.notifyPort = _intFromElement(root, './control/notifyPort');
   device.infoPort = _intFromElement(root, './control/infoPort');
   device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
+  device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
+  device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
   return device;
 }
 
 /// A model of an Emotiva device.
 class Device {
   String model = '';
+  String dataRevision = '';
   String name = '';
   String controlVersion = '';
   int controlPort = 0;
   int notifyPort = 0;
   int infoPort = 0;
   int setupPortTcp = 0;
+  int menuNotifyPort = 0;
+  int setupXmlVersion = 0;
+  int keepAlive = 0;
   InternetAddress? address;
   String power = '';
   String source = '';
@@ -251,6 +260,11 @@ class Device {
   /// Stream of messages arriving on the notify port.
   Stream<String> notifyPortStream(InternetAddress address) {
     return _socketStream(notifyPort, address);
+  }
+
+  /// Stream of messages arriving on the menu notify port.
+  Stream<String> menuNotifyPortStream(InternetAddress address) {
+    return _socketStream(menuNotifyPort, address);
   }
 
   /// Close any sockets opened so far by this object.
@@ -478,7 +492,7 @@ class Device {
       return;
     }
     if (packetType == 'emotivaMenuNotify') {
-      _log('Recieved a menu notify request: ${root.toXmlString()}');
+      // TODO - implement parsing for emotivaMenuNotify
       return;
     }
     if (packetType == 'emotivaNotify') {
