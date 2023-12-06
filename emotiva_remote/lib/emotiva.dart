@@ -170,6 +170,7 @@ class Device {
     'mode_auto': true,
     'mode_surround': true,
   };
+  Menu menu = Menu();
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -491,11 +492,7 @@ class Device {
       _log('Recieved an unsubscribe request: ${root.toXmlString()}');
       return;
     }
-    if (packetType == 'emotivaMenuNotify') {
-      // TODO - implement parsing for emotivaMenuNotify
-      return;
-    }
-    if (packetType == 'emotivaNotify') {
+    if (packetType == 'emotivaNotify' || packetType == 'emotivaMenuNotify') {
       try {
         final serverSequence = _getSequence(root);
         final delta = serverSequence - _sequenceNumber;
@@ -531,6 +528,10 @@ class Device {
         // processing this packet.
         _log('Sequence number missing: ${root.toXmlString()}');
       }
+    }
+    if (packetType == 'emotivaMenuNotify') {
+      menu = _parseMenuNotify(root);
+      return;
     }
     if (packetType != 'emotivaUpdate' &&
         packetType != 'emotivaNotify' &&
@@ -1489,4 +1490,144 @@ class FakeDevice extends Device {
 /// This function is meant to be mostly a stand-in replacement for [discovery].
 Future<FakeDevice> futureFakeDevice() async {
   return FakeDevice();
+}
+
+enum Arrow {
+  no, up, down, right, left;
+}
+
+class Column {
+  int number = 0;
+  bool highlight = false;
+  Arrow arrow = Arrow.no;
+  bool fixedWidth = false;
+  int? offset;
+  bool? checkbox;
+  String value = '';
+}
+
+class Row {
+  int number = 0;
+  List<Column> columns = [];
+}
+
+class Menu {
+  List<Row> rows = [];
+}
+
+Menu _parseMenuNotify(XmlElement element) {
+  final menu = Menu();
+  if (element.name.toString() != 'emotivaMenuNotify') {
+    _log('Invalid menu notify message: ${element.toXmlString()}');
+    return menu;
+  }
+  for (final e in element.childElements) {
+    menu.rows.add(_parseMenuNotifyRow(e));
+  }
+  return menu;
+}
+
+Row _parseMenuNotifyRow(XmlElement element) {
+  final row = Row();
+  if (element.name.toString() != 'row') {
+    _log('Invalid menu notify row: ${element.toXmlString()}');
+    return row;
+  }
+  for (final a in element.attributes) {
+    if (a.name.toString() != 'number') {
+      _log('Unexpected attribute in row: ${a.toString()}');
+    }
+    try {
+      row.number = int.parse(a.value);
+    } catch (e) {
+      _log('Unable to parse row number: ${a.toXmlString()}');
+    }
+  }
+  for (final e in element.childElements) {
+    row.columns.add(_parseMenuNotifyColumn(e));
+  }
+  return row;
+}
+
+Column _parseMenuNotifyColumn(XmlElement element) {
+  final column = Column();
+  if (element.name.toString() != 'col') {
+    _log('Invalid menu notify column: ${element.toXmlString()}');
+    return column;
+  }
+  for (final a in element.attributes) {
+    final name = a.name.toString();
+    final value = a.value.toString();
+    switch (name) {
+      case 'highlight':
+        try {
+          column.highlight = bool.parse(value);
+        } catch (e) {
+          _log('Unable to parse highlight as bool: ${a.toXmlString()}');
+        }
+        break;
+      case 'arrow':
+        switch (value.toLowerCase()) {
+          case 'no':
+            column.arrow = Arrow.no;
+            break;
+          case 'up':
+            column.arrow = Arrow.up;
+            break;
+          case 'down':
+            column.arrow = Arrow.down;
+            break;
+          case 'right':
+            column.arrow = Arrow.right;
+            break;
+          case 'left':
+            column.arrow = Arrow.left;
+            break;
+          default:
+            _log('Unexpected value for "arcolumn": $value');
+            break;
+        }
+      case 'fixedWidth':
+        try {
+          column.fixedWidth = bool.parse(value);
+        } catch (e) {
+          _log('Unable to parse fixedWidth as bool: ${a.toXmlString()}');
+        }
+        break;
+      case 'offset':
+        try {
+          column.offset = int.parse(value);
+        } catch (e) {
+          _log('Unable to parse offset as int: ${a.toXmlString()}');
+        }
+        break;
+      case 'checkbox':
+        switch (value) {
+          case 'on':
+            column.checkbox = true;
+            break;
+          case 'off':
+            column.checkbox = false;
+            break;
+          default:
+            _log('Unable to parse checkbox as bool: ${a.toXmlString()}');
+            break;
+        }
+        break;
+      case 'value':
+        column.value = value;
+        break;
+      case 'number':
+        try {
+          column.number = int.parse(value);
+        } catch (e) {
+          _log('Unable to parse numbr as int: ${a.toXmlString()}');
+        }
+        break;
+      default:
+        _log('Unexpected attribute name in menu notify message: $name');
+        break;
+    }
+  }
+  return column;
 }
