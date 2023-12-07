@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -192,84 +191,101 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  Widget _build(BuildContext context, emotiva.Device device) {
-    // TODO - Move the LayoutBuilder to only wrap the menu controls since it's
-    // the only things changing size and it might report a more useful set of
-    // box constraints.
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints boxConstraints) {
-      const double scalingFactor = 5.5;
-      final double iconSize = min<double>(
-          boxConstraints.maxHeight / scalingFactor,
-          boxConstraints.maxWidth / scalingFactor);
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  double _iconSize(BoxConstraints boxConstraints) {
+    // At 100, the controls table will be 348w x 424h. That will be our max
+    // and default size.
+    double iconSize = 100.0;
+    if (boxConstraints.maxHeight < 424) {
+      iconSize = boxConstraints.maxHeight / 4.24;
+    }
+    if (boxConstraints.maxWidth < 348) {
+      final newSize = boxConstraints.maxWidth / 3.48;
+      if (iconSize > newSize) iconSize = newSize;
+    }
+    return iconSize;
+  }
+
+  Widget _controls(BuildContext context, emotiva.Device device,
+      BoxConstraints boxConstraints) {
+    final iconSize = _iconSize(boxConstraints);
+    return Table(
+      defaultColumnWidth: IntrinsicColumnWidth(),
+      children: <TableRow>[
+        TableRow(
           children: [
-            _onScreenDisplay(context, device),
-            Table(
-              defaultColumnWidth: IntrinsicColumnWidth(),
-              children: <TableRow>[
-                TableRow(
-                  children: [
-                    Text(''),
-                    IconButton(
-                        onPressed: () => addHaptic(device.menuUp),
-                        tooltip: 'Up',
-                        icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
-                    Text(''),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    IconButton(
-                        onPressed: () => addHaptic(device.menuLeft),
-                        tooltip: 'Left',
-                        icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
-                    IconButton(
-                        onPressed: () => addHaptic(device.menuEnter),
-                        tooltip: 'Enter',
-                        icon: Icon(Icons.circle_outlined, size: iconSize)),
-                    IconButton(
-                        tooltip: 'Right',
-                        onPressed: () => addHaptic(device.menuRight),
-                        icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Text(''),
-                    IconButton(
-                        onPressed: () => addHaptic(device.menuDown),
-                        tooltip: 'Down',
-                        icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
-                    Text(''),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    IconButton(
-                        onPressed: () => addHaptic(device.info),
-                        tooltip: 'Show on screen display info table',
-                        icon: Icon(Icons.info, size: iconSize * 0.50)),
-                    Text(''),
-                    IconButton(
-                        onPressed: () => addHaptic(device.toggleMenu),
-                        tooltip:
-                            'Toggles entering and exiting the Emotiva menu',
-                        icon: Icon(Icons.menu, size: iconSize * 0.50)),
-                  ],
-                ),
-                TableRow(children: [
-                  SizedBox(height: 10.0),
-                  SizedBox(height: 1.0),
-                  SizedBox(height: 1.0),
-                ]),
-              ],
-            ),
+            Text(''),
+            IconButton(
+                onPressed: () => addHaptic(device.menuUp),
+                tooltip: 'Up',
+                icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
+            Text(''),
           ],
         ),
-      );
-    });
+        TableRow(
+          children: [
+            IconButton(
+                onPressed: () => addHaptic(device.menuLeft),
+                tooltip: 'Left',
+                icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
+            IconButton(
+                onPressed: () => addHaptic(device.menuEnter),
+                tooltip: 'Enter',
+                icon: Icon(Icons.circle_outlined, size: iconSize)),
+            IconButton(
+                tooltip: 'Right',
+                onPressed: () => addHaptic(device.menuRight),
+                icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
+          ],
+        ),
+        TableRow(
+          children: [
+            Text(''),
+            IconButton(
+                onPressed: () => addHaptic(device.menuDown),
+                tooltip: 'Down',
+                icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
+            Text(''),
+          ],
+        ),
+        TableRow(
+          children: [
+            IconButton(
+                onPressed: () => addHaptic(device.info),
+                tooltip: 'Show on screen display info table',
+                icon: Icon(Icons.info, size: iconSize * 0.50)),
+            Text(''),
+            IconButton(
+                onPressed: () => addHaptic(device.toggleMenu),
+                tooltip: 'Toggles entering and exiting the Emotiva menu',
+                icon: Icon(Icons.menu, size: iconSize * 0.50)),
+          ],
+        ),
+        TableRow(children: [
+          SizedBox(height: 10.0),
+          SizedBox(height: 1.0),
+          SizedBox(height: 1.0),
+        ]),
+      ],
+    );
+  }
+
+  Widget _build(BuildContext context, emotiva.Device device) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _onScreenDisplay(context, device),
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints boxConstraints) {
+                return _controls(context, device, boxConstraints);
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
