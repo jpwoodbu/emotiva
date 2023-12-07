@@ -242,7 +242,9 @@ class Device {
             _log('Ignoring packet from ${datagram.address}');
             break;
           }
-          yield String.fromCharCodes(datagram.data);
+          final packet = String.fromCharCodes(datagram.data);
+          _log('received: $packet');
+          yield packet;
         case RawSocketEvent.closed:
           break;
         case RawSocketEvent.readClosed:
