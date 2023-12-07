@@ -27,7 +27,6 @@ class DeviceChanges with ChangeNotifier {
 
   Future<void> handleControlPackets() async {
     await for (final packet in controlPortStream) {
-      _log('got a control message: $packet');
       device.parsePacket(packet);
       notifyListeners();
     }
@@ -35,7 +34,6 @@ class DeviceChanges with ChangeNotifier {
 
   Future<void> handleNotifyPackets() async {
     await for (final packet in notifyPortStream) {
-      _log('got a notify message: $packet');
       device.parsePacket(packet);
       notifyListeners();
     }
@@ -43,7 +41,6 @@ class DeviceChanges with ChangeNotifier {
 
   Future<void> handleMenuNotifyPackets() async {
     await for (final packet in menuNotifyPortStream) {
-      _log('got a menu notify message: $packet');
       device.parsePacket(packet);
       notifyListeners();
     }
