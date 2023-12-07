@@ -140,6 +140,7 @@ class Device {
   String selectedMode = '';
   String selectedMovieMusic = '';
   bool menuDisplayed = false;
+  Menu menuContents = Menu();
   Map<String, String> names = {
     'input_1': '',
     'input_2': '',
@@ -170,7 +171,6 @@ class Device {
     'mode_auto': true,
     'mode_surround': true,
   };
-  Menu menu = Menu();
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
     'power',
@@ -530,7 +530,7 @@ class Device {
       }
     }
     if (packetType == 'emotivaMenuNotify') {
-      menu = _parseMenuNotify(root);
+      menuContents = _parseMenuNotify(root);
       return;
     }
     if (packetType != 'emotivaUpdate' &&
@@ -914,6 +914,41 @@ class FakeDevice extends Device {
     address = InternetAddress('192.168.42.1');
     names['input_1'] = 'Blu-Ray analog';
     names['input_2'] = 'Fancy pants DAC';
+    menuContents = _initMenuContent();
+  }
+
+  Menu _initMenuContent() {
+    final menu = Menu();
+    for (int i=0; i<11; i++) {
+      final row = Row(i);
+      for (int j=0; j<3; j++) {
+        final column = Column(j, false, Arrow.no, false);
+        row.columns.add(column);
+      }
+      if (i == 4) {
+        row.columns[1].value = 'Lip Synch Auto';
+        row.columns[1].arrow = Arrow.up;
+        row.columns[2].checkbox = true;
+        // TODO - confirm what 'value' is set to for checked vs. unchecked
+        // checkboxes.
+        row.columns[2].value = 'true';
+      }
+      if (i == 5) {
+        row.columns[0].value = 'HDMI 1';
+        row.columns[0].arrow = Arrow.left;
+        row.columns[1].value = 'Button';
+        row.columns[1].highlight = true;
+        row.columns[2].value = 'Input 1';
+        row.columns[2].arrow = Arrow.right;
+      }
+      if (i == 6) {
+        row.columns[1].value = '5.1 Mode';
+        row.columns[1].arrow = Arrow.down;
+        row.columns[2].value = 'Auto';
+      }
+      menu.rows.add(row);
+    }
+    return menu;
   }
 
   Iterable<String> _elementsToFields(Iterable<XmlElement> elements) {
@@ -947,7 +982,7 @@ class FakeDevice extends Device {
         }
       }
     });
-    final response = builder.buildDocument().toXmlString();
+    final response = builder.buildDocument().toXmlString(pretty: true);
     _log('response: $response');
     _controlStream.add(response);
   }
@@ -1282,12 +1317,64 @@ class FakeDevice extends Device {
           backTrim = sanitizedTrim / 2;
           updatedFields.add('back');
           break;
+        case 'menu':
+          menuDisplayed = menuDisplayed ? false : true; 
+          updatedFields.add('menu');
+          if (menuDisplayed) _notifyMenuSubscribers();
+          break;
+        case 'up':
+          _notifyMenuSubscribers();
+          break;
+        case 'down':
+          _notifyMenuSubscribers();
+          break;
+        case 'left':
+          _notifyMenuSubscribers();
+          break;
+        case 'right':
+          _notifyMenuSubscribers();
+          break;
+        case 'enter':
+          _notifyMenuSubscribers();
+          break;
         default:
-          // Unknown field.
+          _log('FakeDevice does not support: $field');
           break;
       }
     }
     _notifySubscribers(updatedFields);
+  }
+
+  void _notifyMenuSubscribers() {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0"');
+    builder.element('emotivaMenuNotify', attributes: {'sequence': _sequence.toString()}, nest: () {
+      for (final row in menuContents.rows) {
+        builder.element('row', attributes: {'number': row.number.toString()}, nest: () {
+          for (final column in row.columns) {
+            Map<String, String> attributes = {
+              'number': column.number.toString(),
+              'value': column.value,
+              'fixedWidth': column.fixedWidth.toString(),
+              'highlight': column.highlight.toString(),
+              'arrow': column.arrow.name,
+            };
+            if (column.fixedWidth) {
+              attributes['offset'] = '5';  // just making something up for now
+            }
+            if (column.checkbox ?? false) {
+              attributes.remove('value');
+              attributes['checkbox'] = 'on';
+            }
+            builder.element('col', attributes: attributes);
+          }
+        });
+      }
+    });
+    final response = builder.buildDocument().toXmlString(pretty: true);
+    _log('response: $response');
+    _sequence++;
+    _menuNotifyStream.add(response);
   }
 
   void _notifySubscribers(Set<String> updatedFields) {
@@ -1304,7 +1391,7 @@ class FakeDevice extends Device {
             attributes: {'name': field, 'value': value, 'visible': visible});
       }
     });
-    final response = builder.buildDocument().toXmlString();
+    final response = builder.buildDocument().toXmlString(pretty: true);
     _log('response: $response');
     _sequence++;
     _notifyStream.add(response);
@@ -1431,7 +1518,7 @@ class FakeDevice extends Device {
         }
       }
     });
-    final response = builder.buildDocument().toXmlString();
+    final response = builder.buildDocument().toXmlString(pretty: true);
     _log('response: $response');
     _controlStream.add(response);
   }
@@ -1523,12 +1610,16 @@ class Column {
   bool fixedWidth = false;
   int? offset;
   bool? checkbox;
-  String value = '';
+  String value;
+
+  Column(this.number, this.highlight, this.arrow, this.fixedWidth, {this.offset, this.checkbox, this.value = ''});
 }
 
 class Row {
   int number = 0;
   List<Column> columns = [];
+
+  Row(this.number);
 }
 
 class Menu {
@@ -1548,7 +1639,7 @@ Menu _parseMenuNotify(XmlElement element) {
 }
 
 Row _parseMenuNotifyRow(XmlElement element) {
-  final row = Row();
+  final row = Row(0);
   if (element.name.toString() != 'row') {
     _log('Invalid menu notify row: ${element.toXmlString()}');
     return row;
@@ -1570,7 +1661,7 @@ Row _parseMenuNotifyRow(XmlElement element) {
 }
 
 Column _parseMenuNotifyColumn(XmlElement element) {
-  final column = Column();
+  final column = Column(0, false, Arrow.no, false);
   if (element.name.toString() != 'col') {
     _log('Invalid menu notify column: ${element.toXmlString()}');
     return column;
