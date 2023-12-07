@@ -152,6 +152,9 @@ class MenuPage extends StatelessWidget {
   }
 
   Widget _onScreenDisplay(BuildContext context, emotiva.Device device) {
+    if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
+      return SizedBox();
+    }
     Color borderColor = Colors.white;
     return Padding(
       padding: const EdgeInsets.all(20.0),
