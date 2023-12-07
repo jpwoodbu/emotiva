@@ -110,6 +110,51 @@ class MyApp extends StatelessWidget {
   }
 }
 
+List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
+  if (currentPageIndex == 2) {
+    return null;
+  }
+  return [
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Text('Volume',
+              style: TextStyle(
+                fontSize: 20.0,
+              )),
+        ),
+        Row(
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  device.volumeDelta(-1.0);
+                },
+                child: Icon(
+                  Icons.remove,
+                  size: 30.0,
+                  semanticLabel: 'Volume down',
+                )),
+            SizedBox(width: 15.0),
+            ElevatedButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  device.volumeDelta(1.0);
+                },
+                child: Icon(
+                  Icons.add,
+                  size: 30.0,
+                  semanticLabel: 'Volume up',
+                )),
+          ],
+        ),
+      ],
+    )
+  ];
+}
+
 class MainView extends StatefulWidget {
   MainView({super.key});
 
@@ -171,45 +216,8 @@ class _MainViewState extends State<MainView> {
               MenuPage(),
             ],
           ),
-          persistentFooterButtons: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Text('Volume',
-                      style: TextStyle(
-                        fontSize: 20.0,
-                      )),
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          deviceChanges.device.volumeDelta(-1.0);
-                        },
-                        child: Icon(
-                          Icons.remove,
-                          size: 30.0,
-                          semanticLabel: 'Volume down',
-                        )),
-                    SizedBox(width: 15.0),
-                    ElevatedButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          deviceChanges.device.volumeDelta(1.0);
-                        },
-                        child: Icon(
-                          Icons.add,
-                          size: 30.0,
-                          semanticLabel: 'Volume up',
-                        )),
-                  ],
-                ),
-              ],
-            )
-          ],
+          persistentFooterButtons:
+              _footer(deviceChanges.device, currentPageIndex),
           bottomNavigationBar: NavigationBar(
             destinations: [
               NavigationDestination(

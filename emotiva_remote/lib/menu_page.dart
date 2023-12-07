@@ -83,8 +83,8 @@ class MenuPage extends StatelessWidget {
       } else {
         // TODO - fixed width and offset features. This might require including
         // fonts from Google Fonts in my assets.
-        const fontSize = 16.0;
-        const fontWeight = FontWeight.bold;
+        const fontSize = 12.0;
+        const fontWeight = FontWeight.w400;
         Color? color;
         Color? backgroundColor;
         if (column.highlight) {
@@ -157,7 +157,7 @@ class MenuPage extends StatelessWidget {
     }
     Color borderColor = Colors.white;
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
       child: Table(
         columnWidths: {
           0: FixedColumnWidth(25.0),
@@ -193,6 +193,9 @@ class MenuPage extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, emotiva.Device device) {
+    // TODO - Move the LayoutBuilder to only wrap the menu controls since it's
+    // the only things changing size and it might report a more useful set of
+    // box constraints.
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints boxConstraints) {
       const double scalingFactor = 5.5;
@@ -201,6 +204,7 @@ class MenuPage extends StatelessWidget {
           boxConstraints.maxWidth / scalingFactor);
       return Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _onScreenDisplay(context, device),
             Table(
@@ -256,6 +260,11 @@ class MenuPage extends StatelessWidget {
                         icon: Icon(Icons.menu, size: iconSize * 0.50)),
                   ],
                 ),
+                TableRow(children: [
+                  SizedBox(height: 10.0),
+                  SizedBox(height: 1.0),
+                  SizedBox(height: 1.0),
+                ]),
               ],
             ),
           ],
