@@ -625,7 +625,7 @@ class Device {
           heightTrim = _getSpeakerTrim(element);
           break;
         // "mode_*" fields indicate whether these modes are selectable on the
-        // device via the "visibility" atttribute.
+        // device via the "visible" atttribute.
         case 'mode_ref_stereo' ||
               'mode_stereo' ||
               'mode_music' ||
@@ -883,16 +883,17 @@ class Device {
 /// A fake Device class that does not create or handle any network traffic.
 ///
 /// This class is meant to be use for testing and demonstration.
-/// This class only supports Emotiva protocol 2.0.
+/// This class only supports Emotiva protocol 3.0.
 class FakeDevice extends Device {
   final _controlStream = StreamController<String>();
   final _notifyStream = StreamController<String>();
+  final _menuNotifyStream = StreamController<String>();
   int _sequence = 0;
 
   FakeDevice() {
     model = 'Fake Emotiva';
     name = 'Fake name';
-    controlVersion = '2.0';
+    controlVersion = '3.0';
     controlPort = 1;
     notifyPort = 2;
     infoPort = 3;
@@ -924,19 +925,25 @@ class FakeDevice extends Device {
   }
 
   void _updateBuilder(builder, String field, String value) {
-    builder.element(field, attributes: {'value': value, 'status': 'ack'});
+    builder.element('property', attributes: {
+      'name': field,
+      'value': value,
+      'visible': _getVisibilityForField(field),
+      'status': 'ack'
+    });
   }
 
   void _parseUpdateRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaUpdate', nest: () {
+    builder.element('emotivaUpdate', attributes: {'protocol': '3.0'}, nest: () {
       for (final f in fields) {
         try {
           _updateBuilder(builder, f, _getValueForField(f));
         } catch (e) {
           // Unknown field.
-          builder.element(f, attributes: {'value': '', 'status': 'nak'});
+          builder.element(f,
+              attributes: {'value': '', 'visible': 'true', 'status': 'nak'});
         }
       }
     });
@@ -1293,8 +1300,8 @@ class FakeDevice extends Device {
       for (final field in updatedFields) {
         String value = _getValueForField(field);
         String visible = _getVisibilityForField(field);
-        builder
-            .element(field, attributes: {'value': value, 'visible': visible});
+        builder.element('property',
+            attributes: {'name': field, 'value': value, 'visible': visible});
       }
     });
     final response = builder.buildDocument().toXmlString();
@@ -1407,11 +1414,13 @@ class FakeDevice extends Device {
   void _parseSubscriptionRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaSubscription', nest: () {
+    builder.element('emotivaSubscription', attributes: {'protocol': '3.0'},
+        nest: () {
       for (final field in fields) {
         if (Device._fields.contains(field)) {
           _subscribedFields.add(field);
-          builder.element(field, attributes: {
+          builder.element('property', attributes: {
+            'name': field,
             'value': _getValueForField(field),
             'status': 'ack',
             'visible': _getVisibilityForField(field),
@@ -1485,6 +1494,13 @@ class FakeDevice extends Device {
       yield data;
     }
   }
+
+  @override
+  Stream<String> menuNotifyPortStream(InternetAddress address) async* {
+    await for (final data in _menuNotifyStream.stream) {
+      yield data;
+    }
+  }
 }
 
 /// This function is meant to be mostly a stand-in replacement for [discovery].
@@ -1493,7 +1509,11 @@ Future<FakeDevice> futureFakeDevice() async {
 }
 
 enum Arrow {
-  no, up, down, right, left;
+  no,
+  up,
+  down,
+  right,
+  left;
 }
 
 class Column {
