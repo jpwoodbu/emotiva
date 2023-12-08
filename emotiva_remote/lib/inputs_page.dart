@@ -580,6 +580,9 @@ class InputsPage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 25),
+          // TODO - Fix there being a table error if the system is configured
+          // only with L and R speakers. Perhaps wrap the whole table in a
+          // conditinoal that at least one of the speaker trims is visible.
           Table(
             children: [
               TableRow(
