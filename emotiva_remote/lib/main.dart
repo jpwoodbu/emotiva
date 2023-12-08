@@ -110,7 +110,7 @@ class MyApp extends StatelessWidget {
 }
 
 List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
-  if (currentPageIndex == 3) {
+  if (currentPageIndex == 2) {
     return null;
   }
   final volumeFunction =
@@ -214,8 +214,8 @@ class _MainViewState extends State<MainView> {
             children: [
               InfoPage(),
               InputsPage(),
-              TunerPage(),
               MenuPage(),
+              TunerPage(),
               Zone2Page(),
             ],
           ),
@@ -233,12 +233,12 @@ class _MainViewState extends State<MainView> {
                 label: 'Inputs',
               ),
               NavigationDestination(
-                icon: Icon(Icons.radio),
-                label: 'Tuner',
-              ),
-              NavigationDestination(
                 icon: Icon(Icons.gamepad),
                 label: 'Menu',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.radio),
+                label: 'Tuner',
               ),
               NavigationDestination(
                 icon: Icon(Icons.location_on),
