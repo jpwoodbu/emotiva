@@ -1,9 +1,220 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
 import 'device_changes.dart';
+
+const double sheetPadding = 15.0;
+
+togglePower(emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2TogglePower();
+}
+
+void toggleMute(emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2ToggleMute();
+}
+
+void setFollowMain(emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2FollowMain();
+}
+
+void setCoax(BuildContext context, emotiva.Device device, int input) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetCoax(input);
+  Navigator.pop(context);
+}
+
+void setAesEbu(BuildContext context, emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetAesEbu();
+  Navigator.pop(context);
+}
+
+void setOptical(BuildContext context, emotiva.Device device, int input) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetOptical(input);
+  Navigator.pop(context);
+}
+
+void setAnalog(BuildContext context, emotiva.Device device, int input) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetAnalog(input);
+  Navigator.pop(context);
+}
+
+void setBalancedInput(BuildContext context, emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetBalancedInput();
+  Navigator.pop(context);
+}
+
+void setUsb(BuildContext context, emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetUsb();
+  Navigator.pop(context);
+}
+
+void setTuner(BuildContext context, emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetTuner();
+  Navigator.pop(context);
+}
+
+void setFront(BuildContext context, emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  device.zone2SetFront();
+  Navigator.pop(context);
+}
+
+void opticalBottomSheet(BuildContext context, emotiva.Device device) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(sheetPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () => setOptical(context, device, 1),
+                icon: Icon(Icons.lightbulb),
+                label: Text('Optical 1')),
+            ElevatedButton.icon(
+                onPressed: () => setOptical(context, device, 2),
+                icon: Icon(Icons.lightbulb),
+                label: Text('Optical 2')),
+            ElevatedButton.icon(
+                onPressed: () => setOptical(context, device, 3),
+                icon: Icon(Icons.lightbulb),
+                label: Text('Optical 3')),
+            ElevatedButton.icon(
+                onPressed: () => setOptical(context, device, 4),
+                icon: Icon(Icons.lightbulb),
+                label: Text('Optical 4')),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void coaxBottomSheet(BuildContext context, emotiva.Device device) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(sheetPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () => setCoax(context, device, 1),
+                icon: Icon(Icons.settings_input_composite),
+                label: Text('Coax 1')),
+            ElevatedButton.icon(
+                onPressed: () => setCoax(context, device, 2),
+                icon: Icon(Icons.settings_input_composite),
+                label: Text('Coax 2')),
+            ElevatedButton.icon(
+                onPressed: () => setCoax(context, device, 3),
+                icon: Icon(Icons.settings_input_composite),
+                label: Text('Coax 3')),
+            ElevatedButton.icon(
+                onPressed: () => setCoax(context, device, 4),
+                icon: Icon(Icons.settings_input_composite),
+                label: Text('Coax 4')),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void analogBottomSheet(BuildContext context, emotiva.Device device) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(sheetPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () => setAnalog(context, device, 1),
+                icon: Icon(Icons.settings_input_component),
+                label: Text('Analog 1')),
+            ElevatedButton.icon(
+                onPressed: () => setAnalog(context, device, 2),
+                icon: Icon(Icons.settings_input_component),
+                label: Text('Analog 2')),
+            ElevatedButton.icon(
+                onPressed: () => setAnalog(context, device, 3),
+                icon: Icon(Icons.settings_input_component),
+                label: Text('Analog 3')),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void xlrBottomSheet(BuildContext context, emotiva.Device device) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(sheetPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () => setAesEbu(context, device),
+                icon: Icon(Icons.developer_board),
+                label: Text('AES/EBU')),
+            ElevatedButton.icon(
+                onPressed: () => setBalancedInput(context, device),
+                icon: Icon(Icons.album),
+                label: Text('Balanced Input')),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void otherBottomSheet(BuildContext context, emotiva.Device device) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(sheetPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () => setUsb(context, device),
+                icon: Icon(Icons.usb),
+                label: Text('USB')),
+            ElevatedButton.icon(
+                onPressed: () => setTuner(context, device),
+                icon: Icon(Icons.radio),
+                label: Text('Tuner')),
+            ElevatedButton.icon(
+                onPressed: () => setFront(context, device),
+                icon: Icon(Icons.smartphone),
+                label: Text('Front')),
+          ],
+        ),
+      );
+    },
+  );
+}
 
 class Zone2Page extends StatelessWidget {
   const Zone2Page({super.key});
@@ -16,7 +227,166 @@ class Zone2Page extends StatelessWidget {
     });
   }
 
+  Widget _powerRow(emotiva.Device device) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Zone 2',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () => togglePower(device),
+              icon: Icon(
+                Icons.power_settings_new,
+                color: device.zone2Power ? Colors.blue : Colors.amber,
+                size: 30,
+                semanticLabel: 'Toggle zone 2 power',
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _volumeRow(emotiva.Device device) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Volume',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        Text('${device.zone2Volume.toString()}dB',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _inputRow(emotiva.Device device) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Input',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        // TODO - What might the value be if the input isn't selected
+        // or Zone 2 is not powered on? We don't want to show just
+        // empty text.
+        Text(device.zone2Input,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _muteRow(emotiva.Device device) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('Mute',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        Switch(
+          value: device.zone2Muted ? true : false,
+          onChanged: (bool _) => toggleMute(device),
+        ),
+      ],
+    );
+  }
+
+  Widget _inputSelection(BuildContext context, emotiva.Device device) {
+    const double tableCellPadding = 8.0;
+    return Table(
+      children: [
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => opticalBottomSheet(context, device),
+              icon: Icon(Icons.lightbulb),
+              label: Text('Optical'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => coaxBottomSheet(context, device),
+              icon: Icon(Icons.settings_input_composite),
+              label: Text('Coax'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => analogBottomSheet(context, device),
+              icon: Icon(Icons.settings_input_component),
+              label: Text('Analog'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => xlrBottomSheet(context, device),
+              icon: Icon(Icons.donut_large),
+              label: Text('XLR'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => otherBottomSheet(context, device),
+              icon: Icon(Icons.more),
+              label: Text('Other'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => setFollowMain(device),
+              icon: Icon(Icons.sync_alt),
+              label: Text('Follow Main'),
+              style: ButtonStyle(alignment: Alignment.centerLeft),
+            ),
+          ),
+        ]),
+      ],
+    );
+  }
+
   Widget _build(BuildContext context, emotiva.Device device) {
-    return Placeholder();
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: ListView(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _powerRow(device),
+              SizedBox(height: 5),
+              _volumeRow(device),
+              SizedBox(height: 20),
+              _muteRow(device),
+              SizedBox(height: 20),
+              _inputRow(device),
+              SizedBox(height: 20),
+              _inputSelection(context, device),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

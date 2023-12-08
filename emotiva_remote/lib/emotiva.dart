@@ -141,6 +141,10 @@ class Device {
   String selectedMovieMusic = '';
   bool menuDisplayed = false;
   Menu menuContents = Menu();
+  bool zone2Power = false;
+  double zone2Volume = 0.0;
+  bool zone2Muted = false;
+  String zone2Input = '';
   Map<String, String> names = {
     'input_1': '',
     'input_2': '',
@@ -151,6 +155,10 @@ class Device {
     'input_7': '',
     'input_8': '',
   };
+  // TODO - Maybe turn this into a data class. Having to do null checks on
+  // element access is annoying, as well as using element selector syntax. Then
+  // again, using a string to access a value is nice. I've not found a getattr()
+  // type function in Dart.
   Map<String, bool> visibility = {
     'input_1': true,
     'input_2': true,
@@ -222,6 +230,9 @@ class Device {
     'mode_surround',
     'menu',
     'menu_update',
+    'zone2_power',
+    'zone2_volume',
+    'zone2_input',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -672,10 +683,29 @@ class Device {
         case 'bass':
           break;
         case 'zone2_power':
+          final value = _valueAttribute(element.attributes);
+          if (value == 'On') {
+            zone2Power = true;
+          } else {
+            zone2Power = false;
+          }
           break;
         case 'zone2_volume':
+          try {
+            final reportedVolume = _valueAttribute(element.attributes);
+            if (reportedVolume == 'Mute') {
+              zone2Muted = true;
+            } else {
+              zone2Muted = false;
+              zone2Volume = double.parse(reportedVolume);
+            }
+          } catch (e) {
+            // If parsing fails, that could mean the device is in standby.
+            _log('Unable to parse message: $e');
+          }
           break;
         case 'zone2_input':
+          zone2Input = _valueAttribute(element.attributes);
           break;
         case 'tuner_band':
           break;
@@ -722,6 +752,11 @@ class Device {
   /// Changes the volume by [delta]dBs.
   void volumeDelta(double delta) async {
     await control('volume', value: delta.toString());
+  }
+
+  /// Sets the volume to [level]dBs.
+  void volumeSet(int level) async {
+    await control('set_volume', value: level.toString());
   }
 
   void togglePower() async {
@@ -921,6 +956,66 @@ class Device {
     trim = trim * 2;
     await control('width_trim_set', value: trim.toString());
   }
+
+  void zone2TogglePower() async {
+    await control('zone2_power');
+  }
+
+  /// Changes the zone 2 volume by [delta]dBs.
+  void zone2VolumeDelta(double delta) async {
+    await control('zone2_volume', value: delta.toString());
+  }
+
+  /// Sets the volume to [level]dBs.
+  void zone2VolumeSet(int level) async {
+    await control('zone2_set_volume', value: level.toString());
+  }
+  
+  void zone2ToggleMute() async {
+    await control('zone2_mute');
+  }
+
+  void zone2SetAnalog(int input) async {
+    await control('zone2_analog$input');
+  }
+
+  void zone2SetBalancedInput() async {
+    // analog5 bring up the balanced input on the RMC-1.
+    await control('zone2_analog5');
+  }
+
+  void zone2SetFront() async {
+    await control('zone2_front_in');
+  }
+
+  /// Sets the zone 2 input to follow the main (i.e. zone 1) input.
+  void zone2FollowMain() async {
+    await control('zone2_follow_main');
+  }
+
+  void zone2SetCoax(int input) async {
+    await control('zone2_coax$input');
+  }
+
+  void zone2SetOptical(int input) async {
+    await control('zone2_optical$input');
+  }
+
+  // Not in the API docs.
+  void zone2SetUsb() async {
+    await control('zone2_usb_stream');
+  }
+ 
+  // Not in the API docs.
+  void zone2SetAesEbu() async {
+    // coax5 pulls up the AES/EBU input on the RMC-1.
+    await control('zone2_coax5');
+  }
+   
+  // Not in the API docs.
+  void zone2SetTuner() async {
+    await control('zone2_tuner');
+  }
 }
 
 /// A fake Device class that does not create or handle any network traffic.
@@ -966,6 +1061,8 @@ class FakeDevice extends Device {
     names['input_1'] = 'Blu-Ray analog';
     names['input_2'] = 'Fancy pants DAC';
     menuContents = _initMenuContent();
+    zone2Input = 'Follow Main';
+    zone2Volume = -40.0;
   }
 
   Menu _initMenuContent() {
@@ -1413,6 +1510,97 @@ class FakeDevice extends Device {
         case 'enter':
           _notifyMenuSubscribers();
           break;
+        case 'zone2_power':
+          zone2Power = zone2Power ? false : true;
+          updatedFields.add('zone2_power');
+          break;
+        case 'zone2_volume': 
+          try {
+            final delta = double.parse(_getValue(element));
+            zone2Volume += delta;
+            zone2Muted = false;
+            updatedFields.add(field);
+          } catch (e) {
+            _log('Unable to parse zone 2 volume delta: ${element.toXmlString()}');
+          }
+          break;
+        case 'zone2_mute':
+          zone2Muted = zone2Muted ? false : true;
+          // Emotiva uses the volume field to indicate whether the device is
+          // muted.
+          updatedFields.add('zone2_volume');
+        case 'zone2_analog1':
+          zone2Input = 'Analog 1';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_analog2':
+          zone2Input = 'Analog 2';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_analog3':
+          zone2Input = 'Analog 3';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_analog4':
+          zone2Input = 'Analog 4';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_analog5':
+          zone2Input = 'Balanced In';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_front_in':
+          zone2Input = 'Front';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_follow_main':
+          zone2Input = 'Follow Main';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_coax1':
+          zone2Input = 'Coax 1';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_coax2':
+          zone2Input = 'Coax 2';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_coax3':
+          zone2Input = 'Coax 3';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_coax4':
+          zone2Input = 'Coax 4';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_coax5':
+          zone2Input = 'AES/EBU';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_optical1':
+          zone2Input = 'Optical 1';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_optical2':
+          zone2Input = 'Optical 2';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_optical3':
+          zone2Input = 'Optical 3';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_optical4':
+          zone2Input = 'Optical 4';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_usb_stream':
+          zone2Input = 'USB Stream';
+          updatedFields.add('zone2_input');
+          break;
+        case 'zone2_tuner':
+          zone2Input = 'Tuner';
+          updatedFields.add('zone2_input');
+          break;
         default:
           _log('FakeDevice does not support: $field');
           break;
@@ -1568,6 +1756,15 @@ class FakeDevice extends Device {
         return menuDisplayed ? 'On' : 'Off';
       case 'menu_update':
         return '';
+      case 'zone2_power':
+        return zone2Power ? 'On' : 'Off';
+      case 'zone2_volume':
+        if (zone2Muted) {
+          return 'Mute';
+        }
+        return zone2Volume.toString();
+      case 'zone2_input':
+        return zone2Input;
       default:
         throw 'Unsupported field: $field';
     }

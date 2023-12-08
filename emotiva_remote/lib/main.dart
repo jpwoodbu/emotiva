@@ -113,6 +113,8 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   if (currentPageIndex == 3) {
     return null;
   }
+  final volumeFunction =
+      currentPageIndex == 4 ? device.zone2VolumeDelta : device.volumeDelta;
   return [
     Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,7 +131,7 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
             ElevatedButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  device.volumeDelta(-1.0);
+                  volumeFunction(-1.0);
                 },
                 child: Icon(
                   Icons.remove,
@@ -140,7 +142,7 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
             ElevatedButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  device.volumeDelta(1.0);
+                  volumeFunction(1.0);
                 },
                 child: Icon(
                   Icons.add,
