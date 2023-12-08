@@ -942,6 +942,14 @@ class FakeDevice extends Device {
     infoPort = 3;
     setupPortTcp = 4;
     power = 'Off';
+    // With the power off, the device normally returns a 'None' value for the
+    // speaker trims. We handle that internally as false visibility.
+    visibility['center'] = false;
+    visibility['subwoofer'] = false;
+    visibility['surround'] = false;
+    visibility['back'] = false;
+    visibility['height'] = false;
+    visibility['width'] = false;
     source = 'HDMI 1';
     audioInput = 'HDMI 1';
     videoInput = 'HDMI 1';
@@ -962,9 +970,9 @@ class FakeDevice extends Device {
 
   Menu _initMenuContent() {
     final menu = Menu();
-    for (int i=0; i<11; i++) {
+    for (int i = 0; i < 11; i++) {
       final row = Row(i);
-      for (int j=0; j<3; j++) {
+      for (int j = 0; j < 3; j++) {
         final column = Column(j, false, Arrow.no, false);
         row.columns.add(column);
       }
@@ -1115,11 +1123,39 @@ class FakeDevice extends Device {
       switch (field) {
         case 'power_on':
           power = 'On';
-          updatedFields.add('power');
+          visibility['center'] = true;
+          visibility['subwoofer'] = true;
+          visibility['surround'] = true;
+          visibility['back'] = true;
+          visibility['height'] = true;
+          visibility['width'] = true;
+          updatedFields.addAll([
+            'power',
+            'center',
+            'subwoofer',
+            'surround',
+            'back',
+            'height',
+            'width',
+          ]);
           break;
         case 'power_off':
           power = 'Off';
-          updatedFields.add('power');
+          visibility['center'] = false;
+          visibility['subwoofer'] = false;
+          visibility['surround'] = false;
+          visibility['back'] = false;
+          visibility['height'] = false;
+          visibility['width'] = false;
+          updatedFields.addAll([
+            'power',
+            'center',
+            'subwoofer',
+            'surround',
+            'back',
+            'height',
+            'width',
+          ]);
           break;
         case 'mode':
           mode = _getValue(element);
@@ -1358,7 +1394,7 @@ class FakeDevice extends Device {
           updatedFields.add('back');
           break;
         case 'menu':
-          menuDisplayed = menuDisplayed ? false : true; 
+          menuDisplayed = menuDisplayed ? false : true;
           updatedFields.add('menu');
           if (menuDisplayed) _notifyMenuSubscribers();
           break;
@@ -1388,9 +1424,11 @@ class FakeDevice extends Device {
   void _notifyMenuSubscribers() {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaMenuNotify', attributes: {'sequence': _sequence.toString()}, nest: () {
+    builder.element('emotivaMenuNotify',
+        attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final row in menuContents.rows) {
-        builder.element('row', attributes: {'number': row.number.toString()}, nest: () {
+        builder.element('row', attributes: {'number': row.number.toString()},
+            nest: () {
           for (final column in row.columns) {
             Map<String, String> attributes = {
               'number': column.number.toString(),
@@ -1400,7 +1438,7 @@ class FakeDevice extends Device {
               'arrow': column.arrow.name,
             };
             if (column.fixedWidth) {
-              attributes['offset'] = '5';  // just making something up for now
+              attributes['offset'] = '5'; // just making something up for now
             }
             if (column.checkbox ?? false) {
               attributes.remove('value');
@@ -1469,16 +1507,22 @@ class FakeDevice extends Device {
       case 'speaker_preset':
         return speakerPreset;
       case 'center':
+        if (!visibility[field]!) return 'None';
         return centerTrim.toString();
       case 'width':
+        if (!visibility[field]!) return 'None';
         return widthTrim.toString();
       case 'subwoofer':
+        if (!visibility[field]!) return 'None';
         return subwooferTrim.toString();
       case 'surround':
+        if (!visibility[field]!) return 'None';
         return surroundTrim.toString();
       case 'back':
+        if (!visibility[field]!) return 'None';
         return backTrim.toString();
       case 'height':
+        if (!visibility[field]!) return 'None';
         return heightTrim.toString();
       case 'selected_mode':
         return selectedMode;
@@ -1648,7 +1692,8 @@ class Column {
   bool? checkbox;
   String value;
 
-  Column(this.number, this.highlight, this.arrow, this.fixedWidth, {this.offset, this.checkbox, this.value = ''});
+  Column(this.number, this.highlight, this.arrow, this.fixedWidth,
+      {this.offset, this.checkbox, this.value = ''});
 }
 
 class Row {
