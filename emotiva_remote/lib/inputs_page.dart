@@ -471,9 +471,116 @@ class InputsPage extends StatelessWidget {
     );
   }
 
+  Widget _trimControls(emotiva.Device device) {
+    // If no trims are visible, don't try to render an empty table. That
+    // would throw an error.
+    if (!(device.visibility['center']! ||
+        device.visibility['subwoofer']! ||
+        device.visibility['surround']! ||
+        device.visibility['back']! ||
+        device.visibility['height']! ||
+        device.visibility['width']!)) {
+      return Center(
+          child: Text(
+              'Speaker trim configuration unavailable while powered off'));
+    }
+    const double arrowSize = 50.0;
+    return Table(
+      children: [
+        TableRow(
+          children: [
+            if (device.visibility['center']!)
+              Text('${device.centerTrim}dB', textAlign: TextAlign.center),
+            if (device.visibility['subwoofer']!)
+              Text('${device.subwooferTrim}dB', textAlign: TextAlign.center),
+            if (device.visibility['surround']!)
+              Text('${device.surroundTrim}dB', textAlign: TextAlign.center),
+            if (device.visibility['back']!)
+              Text('${device.backTrim}dB', textAlign: TextAlign.center),
+            if (device.visibility['height']!)
+              Text('${device.heightTrim}dB', textAlign: TextAlign.center),
+            if (device.visibility['width']!)
+              Text('${device.widthTrim}dB', textAlign: TextAlign.center),
+          ],
+        ),
+        TableRow(children: [
+          if (device.visibility['center']!)
+            IconButton(
+                onPressed: () => bumpCenterTrim(0.5, device),
+                tooltip: 'Center trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          if (device.visibility['subwoofer']!)
+            IconButton(
+                onPressed: () => bumpSubwooferTrim(0.5, device),
+                tooltip: 'Subwoofer trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          if (device.visibility['surround']!)
+            IconButton(
+                onPressed: () => bumpSurroundTrim(0.5, device),
+                tooltip: 'Surround trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          if (device.visibility['back']!)
+            IconButton(
+                onPressed: () => bumpBackTrim(0.5, device),
+                tooltip: 'Back trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          if (device.visibility['height']!)
+            IconButton(
+                onPressed: () => bumpHeightTrim(0.5, device),
+                tooltip: 'Height trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          if (device.visibility['width']!)
+            IconButton(
+                onPressed: () => bumpWidthTrim(0.5, device),
+                tooltip: 'Width trim up',
+                icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+        ]),
+        TableRow(children: [
+          if (device.visibility['center']!) Center(child: Text('Center')),
+          if (device.visibility['subwoofer']!) Center(child: Text('Sub')),
+          if (device.visibility['surround']!) Center(child: Text('Surr')),
+          if (device.visibility['back']!) Center(child: Text('Back')),
+          if (device.visibility['height']!) Center(child: Text('Height')),
+          if (device.visibility['width']!) Center(child: Text('Width')),
+        ]),
+        TableRow(children: [
+          if (device.visibility['center']!)
+            IconButton(
+                onPressed: () => bumpCenterTrim(-0.5, device),
+                tooltip: 'Center trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+          if (device.visibility['subwoofer']!)
+            IconButton(
+                onPressed: () => bumpSubwooferTrim(-0.5, device),
+                tooltip: 'Subwoofer trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+          if (device.visibility['surround']!)
+            IconButton(
+                onPressed: () => bumpSurroundTrim(-0.5, device),
+                tooltip: 'Surround trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+          if (device.visibility['back']!)
+            IconButton(
+                onPressed: () => bumpBackTrim(-0.5, device),
+                tooltip: 'Back trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+          if (device.visibility['height']!)
+            IconButton(
+                onPressed: () => bumpHeightTrim(-0.5, device),
+                tooltip: 'Height trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+          if (device.visibility['width']!)
+            IconButton(
+                onPressed: () => bumpWidthTrim(-0.5, device),
+                tooltip: 'Width trim down',
+                icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      ],
+    );
+  }
+
   Widget _build(BuildContext context, emotiva.Device device) {
     const double tableCellPadding = 8.0;
-    const double arrowSize = 50.0;
 
     return Padding(
       padding: const EdgeInsets.all(15),
@@ -580,103 +687,7 @@ class InputsPage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 25),
-          // TODO - Fix there being a table error if the system is configured
-          // only with L and R speakers. Perhaps wrap the whole table in a
-          // conditinoal that at least one of the speaker trims is visible.
-          Table(
-            children: [
-              TableRow(
-                children: [
-                  if (device.visibility['center']!)
-                    Text('${device.centerTrim}dB', textAlign: TextAlign.center),
-                  if (device.visibility['subwoofer']!)
-                    Text('${device.subwooferTrim}dB',
-                        textAlign: TextAlign.center),
-                  if (device.visibility['surround']!)
-                    Text('${device.surroundTrim}dB',
-                        textAlign: TextAlign.center),
-                  if (device.visibility['back']!)
-                    Text('${device.backTrim}dB', textAlign: TextAlign.center),
-                  if (device.visibility['height']!)
-                    Text('${device.heightTrim}dB', textAlign: TextAlign.center),
-                  if (device.visibility['width']!)
-                    Text('${device.widthTrim}dB', textAlign: TextAlign.center),
-                ],
-              ),
-              TableRow(children: [
-                if (device.visibility['center']!)
-                  IconButton(
-                      onPressed: () => bumpCenterTrim(0.5, device),
-                      tooltip: 'Center trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                if (device.visibility['subwoofer']!)
-                  IconButton(
-                      onPressed: () => bumpSubwooferTrim(0.5, device),
-                      tooltip: 'Subwoofer trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                if (device.visibility['surround']!)
-                  IconButton(
-                      onPressed: () => bumpSurroundTrim(0.5, device),
-                      tooltip: 'Surround trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                if (device.visibility['back']!)
-                  IconButton(
-                      onPressed: () => bumpBackTrim(0.5, device),
-                      tooltip: 'Back trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                if (device.visibility['height']!)
-                  IconButton(
-                      onPressed: () => bumpHeightTrim(0.5, device),
-                      tooltip: 'Height trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                if (device.visibility['width']!)
-                  IconButton(
-                      onPressed: () => bumpWidthTrim(0.5, device),
-                      tooltip: 'Width trim up',
-                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-              ]),
-              TableRow(children: [
-                if (device.visibility['center']!) Center(child: Text('Center')),
-                if (device.visibility['subwoofer']!) Center(child: Text('Sub')),
-                if (device.visibility['surround']!) Center(child: Text('Surr')),
-                if (device.visibility['back']!) Center(child: Text('Back')),
-                if (device.visibility['height']!) Center(child: Text('Height')),
-                if (device.visibility['width']!) Center(child: Text('Width')),
-              ]),
-              TableRow(children: [
-                if (device.visibility['center']!)
-                  IconButton(
-                      onPressed: () => bumpCenterTrim(-0.5, device),
-                      tooltip: 'Center trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                if (device.visibility['subwoofer']!)
-                  IconButton(
-                      onPressed: () => bumpSubwooferTrim(-0.5, device),
-                      tooltip: 'Subwoofer trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                if (device.visibility['surround']!)
-                  IconButton(
-                      onPressed: () => bumpSurroundTrim(-0.5, device),
-                      tooltip: 'Surround trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                if (device.visibility['back']!)
-                  IconButton(
-                      onPressed: () => bumpBackTrim(-0.5, device),
-                      tooltip: 'Back trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                if (device.visibility['height']!)
-                  IconButton(
-                      onPressed: () => bumpHeightTrim(-0.5, device),
-                      tooltip: 'Height trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                if (device.visibility['width']!)
-                  IconButton(
-                      onPressed: () => bumpWidthTrim(-0.5, device),
-                      tooltip: 'Width trim down',
-                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-              ]),
-            ],
-          )
+          _trimControls(device),
         ],
       ),
     );
