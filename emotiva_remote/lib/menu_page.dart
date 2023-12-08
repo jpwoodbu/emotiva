@@ -152,7 +152,15 @@ class MenuPage extends StatelessWidget {
 
   Widget _onScreenDisplay(BuildContext context, emotiva.Device device) {
     if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
-      return SizedBox();
+      return SizedBox(
+        // 152 is the height of the OSD table, at least with the current font
+        // settings.
+        height: 152,
+        child: Container(
+          margin: EdgeInsets.all(10.0),
+          color: Theme.of(context).focusColor,
+        ),
+      );
     }
     Color borderColor = Colors.white;
     return Padding(
@@ -278,8 +286,8 @@ class MenuPage extends StatelessWidget {
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints boxConstraints) {
+              child: LayoutBuilder(builder:
+                  (BuildContext context, BoxConstraints boxConstraints) {
                 return _controls(context, device, boxConstraints);
               }),
             ),
