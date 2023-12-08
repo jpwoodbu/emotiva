@@ -8,6 +8,8 @@ import 'device_changes.dart';
 import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
+import 'tuner_page.dart';
+import 'zone2_page.dart';
 
 void _log(String message) {
   developer.log(message, name: 'main');
@@ -108,7 +110,7 @@ class MyApp extends StatelessWidget {
 }
 
 List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
-  if (currentPageIndex == 2) {
+  if (currentPageIndex == 3) {
     return null;
   }
   return [
@@ -210,7 +212,9 @@ class _MainViewState extends State<MainView> {
             children: [
               InfoPage(),
               InputsPage(),
+              TunerPage(),
               MenuPage(),
+              Zone2Page(),
             ],
           ),
           persistentFooterButtons:
@@ -227,8 +231,16 @@ class _MainViewState extends State<MainView> {
                 label: 'Inputs',
               ),
               NavigationDestination(
+                icon: Icon(Icons.radio),
+                label: 'Tuner',
+              ),
+              NavigationDestination(
                 icon: Icon(Icons.gamepad),
                 label: 'Menu',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.location_on),
+                label: 'Zone 2',
               ),
             ],
             selectedIndex: currentPageIndex,
