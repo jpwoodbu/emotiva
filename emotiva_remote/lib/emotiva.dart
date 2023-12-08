@@ -931,9 +931,6 @@ class FakeDevice extends Device {
         row.columns[1].value = 'Lip Synch Auto';
         row.columns[1].arrow = Arrow.up;
         row.columns[2].checkbox = true;
-        // TODO - confirm what 'value' is set to for checked vs. unchecked
-        // checkboxes.
-        row.columns[2].value = 'true';
       }
       if (i == 5) {
         row.columns[0].value = 'HDMI 1';

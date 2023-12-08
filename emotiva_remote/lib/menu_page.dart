@@ -59,14 +59,21 @@ class MenuPage extends StatelessWidget {
       columns[0] = _arrowWidget(emotiva.Arrow.left, arrowSize);
     }
     for (final column in device.menuContents.rows[rowIndex].columns) {
-      if (column.checkbox ?? false) {
-        if (column.value == 'true') {
+      Color? color;
+      Color? backgroundColor;
+      if (column.highlight) {
+        color = Colors.black;
+        backgroundColor = Colors.white;
+      }
+      if (column.checkbox != null) {
+        if (column.checkbox!) {
           columns.add(
             Container(
               margin: EdgeInsets.all(inset),
               padding: EdgeInsets.all(inset),
               alignment: Alignment.centerLeft,
-              child: Icon(Icons.disabled_by_default_outlined),
+              color: backgroundColor,
+              child: Icon(Icons.disabled_by_default_outlined, color: color),
             ),
           );
         } else {
@@ -75,7 +82,8 @@ class MenuPage extends StatelessWidget {
               margin: EdgeInsets.all(inset),
               padding: EdgeInsets.all(inset),
               alignment: Alignment.centerLeft,
-              child: Icon(Icons.check_box_outline_blank),
+              color: backgroundColor,
+              child: Icon(Icons.check_box_outline_blank, color: color),
             ),
           );
         }
@@ -84,12 +92,6 @@ class MenuPage extends StatelessWidget {
         // fonts from Google Fonts in my assets.
         const fontSize = 12.0;
         const fontWeight = FontWeight.w400;
-        Color? color;
-        Color? backgroundColor;
-        if (column.highlight) {
-          color = Colors.black;
-          backgroundColor = Colors.white;
-        }
         columns.add(
           Container(
             margin: EdgeInsets.all(inset),
