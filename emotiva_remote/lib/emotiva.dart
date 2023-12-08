@@ -170,6 +170,14 @@ class Device {
     'mode_all_stereo': true,
     'mode_auto': true,
     'mode_surround': true,
+    'center': true,
+    'subwoofer': true,
+    'surround': true,
+    'back': true,
+    // height and width trims are not available in protocol version <3.0. By
+    // default, make their related widgets invisible.
+    'height': false,
+    'width': false,
   };
   // List of tracked fields. Used for *_all() convenience functions.
   static const _fields = {
@@ -423,6 +431,16 @@ class Device {
     throw 'Element missing visible attribute';
   }
 
+  String _nameAttribute(List<XmlAttribute> attributes) {
+    for (final a in attributes) {
+      if (a.name.toString() == 'name') {
+        return a.value.trim();
+      }
+    }
+    // TODO - Maybe just log and return true?
+    throw 'Element missing name attribute';
+  }
+
   int _getSequence(XmlElement element) {
     for (final a in element.attributes) {
       if (a.name.toString() == 'sequence') {
@@ -438,9 +456,12 @@ class Device {
 
   double _getSpeakerTrim(XmlElement element) {
     final trim = _valueAttribute(element.attributes);
+    final speaker = _nameAttribute(element.attributes);
     if (trim == 'None') {
+      visibility[speaker] = false;
       return 0.0;
     } else {
+      visibility[speaker] = true;
       try {
         // There could be a space after the sign, which would break
         // double.parse().
@@ -879,6 +900,26 @@ class Device {
   void trimBack(double trim) async {
     trim = trim * 2;
     await control('back_trim_set', value: trim.toString());
+  }
+
+  /// Adjusts the trim for height speakers.
+  ///
+  /// Only available in protocol version >= 3.0.
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
+  void trimHeight(double trim) async {
+    trim = trim * 2;
+    await control('height_trim_set', value: trim.toString());
+  }
+
+  /// Adjusts the trim for width speakers.
+  ///
+  /// Only available in protocol version >= 3.0.
+  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
+  /// -12dB and +12dB.
+  void trimWidth(double trim) async {
+    trim = trim * 2;
+    await control('width_trim_set', value: trim.toString());
   }
 }
 
@@ -1489,12 +1530,8 @@ class FakeDevice extends Device {
   }
 
   String _getVisibilityForField(String field) {
-    if (field.startsWith('input_')) {
-      bool visible = visibility[field] ?? false;
-      return visible.toString().toLowerCase();
-    } else {
-      return 'true';
-    }
+    bool visible = visibility[field] ?? true;
+    return visible.toString().toLowerCase();
   }
 
   void _parseSubscriptionRequest(Iterable<String> fields) {

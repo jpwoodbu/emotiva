@@ -155,6 +155,18 @@ class InputsPage extends StatelessWidget {
     device.trimBack(trim);
   }
 
+  void bumpHeightTrim(double step, emotiva.Device device) async {
+    HapticFeedback.lightImpact();
+    final trim = device.heightTrim += step;
+    device.trimHeight(trim);
+  }
+
+  void bumpWidthTrim(double step, emotiva.Device device) async {
+    HapticFeedback.lightImpact();
+    final trim = device.widthTrim += step;
+    device.trimWidth(trim);
+  }
+
   List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
     List<Widget> widgets = [];
     for (var i = 1; i < 9; i++) {
@@ -572,54 +584,93 @@ class InputsPage extends StatelessWidget {
             children: [
               TableRow(
                 children: [
-                  Text('${device.centerTrim}dB', textAlign: TextAlign.center),
-                  Text('${device.subwooferTrim}dB',
-                      textAlign: TextAlign.center),
-                  Text('${device.surroundTrim}dB', textAlign: TextAlign.center),
-                  Text('${device.backTrim}dB', textAlign: TextAlign.center),
+                  if (device.visibility['center']!)
+                    Text('${device.centerTrim}dB', textAlign: TextAlign.center),
+                  if (device.visibility['subwoofer']!)
+                    Text('${device.subwooferTrim}dB',
+                        textAlign: TextAlign.center),
+                  if (device.visibility['surround']!)
+                    Text('${device.surroundTrim}dB',
+                        textAlign: TextAlign.center),
+                  if (device.visibility['back']!)
+                    Text('${device.backTrim}dB', textAlign: TextAlign.center),
+                  if (device.visibility['height']!)
+                    Text('${device.heightTrim}dB', textAlign: TextAlign.center),
+                  if (device.visibility['width']!)
+                    Text('${device.widthTrim}dB', textAlign: TextAlign.center),
                 ],
               ),
               TableRow(children: [
-                IconButton(
-                    onPressed: () => bumpCenterTrim(0.5, device),
-                    tooltip: 'Center trim up',
-                    icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpSubwooferTrim(0.5, device),
-                    tooltip: 'Subwoofer trim up',
-                    icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpSurroundTrim(0.5, device),
-                    tooltip: 'Surround trim up',
-                    icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpBackTrim(0.5, device),
-                    tooltip: 'Back trim up',
-                    icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['center']!)
+                  IconButton(
+                      onPressed: () => bumpCenterTrim(0.5, device),
+                      tooltip: 'Center trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['subwoofer']!)
+                  IconButton(
+                      onPressed: () => bumpSubwooferTrim(0.5, device),
+                      tooltip: 'Subwoofer trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['surround']!)
+                  IconButton(
+                      onPressed: () => bumpSurroundTrim(0.5, device),
+                      tooltip: 'Surround trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['back']!)
+                  IconButton(
+                      onPressed: () => bumpBackTrim(0.5, device),
+                      tooltip: 'Back trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['height']!)
+                  IconButton(
+                      onPressed: () => bumpHeightTrim(0.5, device),
+                      tooltip: 'Height trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+                if (device.visibility['width']!)
+                  IconButton(
+                      onPressed: () => bumpWidthTrim(0.5, device),
+                      tooltip: 'Width trim up',
+                      icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
               ]),
               TableRow(children: [
-                Center(child: Text('Center')),
-                Center(child: Text('Sub')),
-                Center(child: Text('Surround')),
-                Center(child: Text('Back')),
+                if (device.visibility['center']!) Center(child: Text('Center')),
+                if (device.visibility['subwoofer']!) Center(child: Text('Sub')),
+                if (device.visibility['surround']!) Center(child: Text('Surr')),
+                if (device.visibility['back']!) Center(child: Text('Back')),
+                if (device.visibility['height']!) Center(child: Text('Height')),
+                if (device.visibility['width']!) Center(child: Text('Width')),
               ]),
               TableRow(children: [
-                IconButton(
-                    onPressed: () => bumpCenterTrim(-0.5, device),
-                    tooltip: 'Center trim down',
-                    icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpSubwooferTrim(-0.5, device),
-                    tooltip: 'Subwoofer trim down',
-                    icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpSurroundTrim(-0.5, device),
-                    tooltip: 'Surround trim down',
-                    icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-                IconButton(
-                    onPressed: () => bumpBackTrim(-0.5, device),
-                    tooltip: 'Back trim down',
-                    icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['center']!)
+                  IconButton(
+                      onPressed: () => bumpCenterTrim(-0.5, device),
+                      tooltip: 'Center trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['subwoofer']!)
+                  IconButton(
+                      onPressed: () => bumpSubwooferTrim(-0.5, device),
+                      tooltip: 'Subwoofer trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['surround']!)
+                  IconButton(
+                      onPressed: () => bumpSurroundTrim(-0.5, device),
+                      tooltip: 'Surround trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['back']!)
+                  IconButton(
+                      onPressed: () => bumpBackTrim(-0.5, device),
+                      tooltip: 'Back trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['height']!)
+                  IconButton(
+                      onPressed: () => bumpHeightTrim(-0.5, device),
+                      tooltip: 'Height trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+                if (device.visibility['width']!)
+                  IconButton(
+                      onPressed: () => bumpWidthTrim(-0.5, device),
+                      tooltip: 'Width trim down',
+                      icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
               ]),
             ],
           )
