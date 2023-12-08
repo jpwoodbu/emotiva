@@ -65,13 +65,11 @@ Future<void> showKnownIssus(BuildContext context) {
 }
 
 const String roadMap = '''
-1) Make the app customize itself based on the Emotiva processor configuration. E.g. use custom input labels, display trim only for speakers which are enabled.
+1) Add tuner controls.
 
-2) Add tuner controls.
+2) Add Zone 2 controls.
 
-3) Test on hardware other than the RMC-1L.
-
-4) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
+3) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
 ''';
 
 Future<void> showRoadMap(BuildContext context) {
@@ -95,7 +93,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
