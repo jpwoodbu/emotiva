@@ -103,6 +103,8 @@ Device _parseTransponder(String data) {
   return device;
 }
 
+enum TunerBand {unknown, am, fm}
+
 /// A model of an Emotiva device.
 class Device {
   String model = '';
@@ -145,6 +147,11 @@ class Device {
   double zone2Volume = 0.0;
   bool zone2Muted = false;
   String zone2Input = '';
+  TunerBand tunerBand = TunerBand.unknown;
+  String tunerChannel = '';
+  String tunerSignal = '';
+  String tunerProgram = '';
+  String tunerRds = '';
   Map<String, String> names = {
     'input_1': '',
     'input_2': '',
@@ -1017,6 +1024,47 @@ class Device {
   void zone2SetTuner() async {
     await control('zone2_tuner');
   }
+  
+  void toggleTunerBand() async {
+    // Applies to both zones.
+    await control('zone1_band');
+  }
+
+  void setBand(TunerBand band) async {
+    if (band == TunerBand.am) {
+      await control('band_am');
+    } else {
+      await control('band_fm');
+    }
+  }
+
+  void frequencyHigher() async {
+    await control('frequency', value: '1'); 
+  }
+  
+  void frequencyLower() async {
+    await control('frequency', value: '1');
+  }
+
+  void seekHigher() async {
+    await control('seek', value: '1');
+  }
+
+  void seekLower() async {
+    await control('seek', value: '-1');
+  }
+  
+  void channelUp() async {
+    await control('channel', value: '1');
+  }
+
+  void channelDown() async {
+    await control('channel', value: '-1');
+  }
+
+  void setChannel(int channel) async {
+    await control('channel_$channel');
+  }
 }
 
 /// A fake Device class that does not create or handle any network traffic.
@@ -1064,6 +1112,10 @@ class FakeDevice extends Device {
     menuContents = _initMenuContent();
     zone2Input = 'Optical 1';
     zone2Volume = -40.0;
+    tunerBand = TunerBand.fm;
+    tunerSignal = '1 mV';
+    tunerProgram = 'Classical';
+    tunerRds = 'WPCE: Mahler 5';
   }
 
   Menu _initMenuContent() {
@@ -1766,6 +1818,14 @@ class FakeDevice extends Device {
         return zone2Volume.toString();
       case 'zone2_input':
         return zone2Input;
+      case 'tuner_band':
+        return tunerBand == TunerBand.am ? 'AM' : 'FM';
+      case 'tuner_channel':
+        return tunerChannel;
+      case 'tuner_signal':
+        return tunerSignal;
+      case 'tuner_RDS':
+        return tunerRds;
       default:
         throw 'Unsupported field: $field';
     }
