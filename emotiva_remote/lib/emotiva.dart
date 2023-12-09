@@ -103,7 +103,7 @@ Device _parseTransponder(String data) {
   return device;
 }
 
-enum TunerBand {unknown, am, fm}
+enum TunerBand { unknown, am, fm }
 
 /// A model of an Emotiva device.
 class Device {
@@ -240,6 +240,11 @@ class Device {
     'zone2_power',
     'zone2_volume',
     'zone2_input',
+    'tuner_band',
+    'tuner_channel',
+    'tuner_signal',
+    'tuner_program',
+    'tuner_RDS',
   };
   final List<RawDatagramSocket> _sockets = [];
   final Set<String> _subscribedFields = {};
@@ -715,14 +720,26 @@ class Device {
           zone2Input = _valueAttribute(element.attributes);
           break;
         case 'tuner_band':
+          final band = _valueAttribute(element.attributes).toLowerCase();
+          if (band == 'am') {
+            tunerBand = TunerBand.am;
+          } else if (band == 'fm') {
+            tunerBand = TunerBand.fm;
+          } else {
+            _log('Unrecognized tuner band: $band');
+          }
           break;
         case 'tuner_channel':
+          tunerChannel = _valueAttribute(element.attributes);
           break;
         case 'tuner_signal':
+          tunerSignal = _valueAttribute(element.attributes);
           break;
         case 'tuner_program':
+          tunerProgram = _valueAttribute(element.attributes);
           break;
         case 'tuner_RDS':
+          tunerRds = _valueAttribute(element.attributes);
           break;
         case 'input_1' ||
               'input_2' ||
@@ -977,7 +994,7 @@ class Device {
   void zone2VolumeSet(int level) async {
     await control('zone2_set_volume', value: level.toString());
   }
-  
+
   // This does not appear to work.
   void zone2ToggleMute() async {
     await control('zone2_mute');
@@ -1013,18 +1030,18 @@ class Device {
   void zone2SetUsb() async {
     await control('zone2_usb_stream');
   }
- 
+
   // Not in the API docs.
   void zone2SetAesEbu() async {
     // coax5 pulls up the AES/EBU input on the RMC-1.
     await control('zone2_coax5');
   }
-   
+
   // Not in the API docs.
   void zone2SetTuner() async {
     await control('zone2_tuner');
   }
-  
+
   void toggleTunerBand() async {
     // Applies to both zones.
     await control('zone1_band');
@@ -1039,11 +1056,11 @@ class Device {
   }
 
   void frequencyHigher() async {
-    await control('frequency', value: '1'); 
-  }
-  
-  void frequencyLower() async {
     await control('frequency', value: '1');
+  }
+
+  void frequencyLower() async {
+    await control('frequency', value: '-1');
   }
 
   void seekHigher() async {
@@ -1053,7 +1070,7 @@ class Device {
   void seekLower() async {
     await control('seek', value: '-1');
   }
-  
+
   void channelUp() async {
     await control('channel', value: '1');
   }
@@ -1567,14 +1584,15 @@ class FakeDevice extends Device {
           zone2Power = zone2Power ? false : true;
           updatedFields.add('zone2_power');
           break;
-        case 'zone2_volume': 
+        case 'zone2_volume':
           try {
             final delta = double.parse(_getValue(element));
             zone2Volume += delta;
             zone2Muted = false;
             updatedFields.add(field);
           } catch (e) {
-            _log('Unable to parse zone 2 volume delta: ${element.toXmlString()}');
+            _log(
+                'Unable to parse zone 2 volume delta: ${element.toXmlString()}');
           }
           break;
         case 'zone2_mute':
