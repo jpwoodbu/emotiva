@@ -8,67 +8,87 @@ import 'device_changes.dart';
 
 const double sheetPadding = 15.0;
 
+Future<void> futureUpdateAll(emotiva.Device device) async {
+  HapticFeedback.lightImpact();
+  await device.updateAll();
+}
+
+void updateAll(emotiva.Device device) async {
+  await futureUpdateAll(device);
+}
+
+
+// This is a workaround for not getting notify messages when changing inputs for
+// zone 2.
+void delayedUpdateAll(emotiva.Device device) {
+  Future.delayed(Duration(seconds: 2), () => updateAll(device));
+}
+
 togglePower(emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2TogglePower();
 }
 
-void toggleMute(emotiva.Device device) async {
-  HapticFeedback.lightImpact();
-  device.zone2ToggleMute();
-}
-
 void setFollowMain(emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2FollowMain();
+  delayedUpdateAll(device);
 }
 
 void setCoax(BuildContext context, emotiva.Device device, int input) async {
   HapticFeedback.lightImpact();
   device.zone2SetCoax(input);
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setAesEbu(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetAesEbu();
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setOptical(BuildContext context, emotiva.Device device, int input) async {
   HapticFeedback.lightImpact();
   device.zone2SetOptical(input);
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setAnalog(BuildContext context, emotiva.Device device, int input) async {
   HapticFeedback.lightImpact();
   device.zone2SetAnalog(input);
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setBalancedInput(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetBalancedInput();
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setUsb(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetUsb();
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setTuner(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetTuner();
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void setFront(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetFront();
   Navigator.pop(context);
+  delayedUpdateAll(device);
 }
 
 void opticalBottomSheet(BuildContext context, emotiva.Device device) {
@@ -239,6 +259,16 @@ class Zone2Page extends StatelessWidget {
         Row(
           children: [
             IconButton(
+              onPressed: () {
+                updateAll(device);
+              },
+              icon: Icon(
+                Icons.refresh,
+                size: 30,
+                semanticLabel: 'Refresh data',
+              ),
+            ),
+            IconButton(
               onPressed: () => togglePower(device),
               icon: Icon(
                 Icons.power_settings_new,
@@ -273,27 +303,13 @@ class Zone2Page extends StatelessWidget {
       children: [
         Text(
           'Input',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         // TODO - What might the value be if the input isn't selected
         // or Zone 2 is not powered on? We don't want to show just
         // empty text.
         Text(device.zone2Input,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _muteRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Mute',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        Switch(
-          value: device.zone2Muted ? true : false,
-          onChanged: (bool _) => toggleMute(device),
-        ),
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -377,9 +393,7 @@ class Zone2Page extends StatelessWidget {
               _powerRow(device),
               SizedBox(height: 5),
               _volumeRow(device),
-              SizedBox(height: 20),
-              _muteRow(device),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               _inputRow(device),
               SizedBox(height: 20),
               _inputSelection(context, device),

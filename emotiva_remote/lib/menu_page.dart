@@ -272,8 +272,8 @@ class MenuPage extends StatelessWidget {
         ),
         TableRow(children: [
           SizedBox(height: 10.0),
-          SizedBox(height: 1.0),
-          SizedBox(height: 1.0),
+          SizedBox(),
+          SizedBox(),
         ]),
       ],
     );

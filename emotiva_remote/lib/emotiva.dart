@@ -971,6 +971,7 @@ class Device {
     await control('zone2_set_volume', value: level.toString());
   }
   
+  // This does not appear to work.
   void zone2ToggleMute() async {
     await control('zone2_mute');
   }
@@ -1061,7 +1062,7 @@ class FakeDevice extends Device {
     names['input_1'] = 'Blu-Ray analog';
     names['input_2'] = 'Fancy pants DAC';
     menuContents = _initMenuContent();
-    zone2Input = 'Follow Main';
+    zone2Input = 'Optical 1';
     zone2Volume = -40.0;
   }
 
@@ -1554,7 +1555,7 @@ class FakeDevice extends Device {
           updatedFields.add('zone2_input');
           break;
         case 'zone2_follow_main':
-          zone2Input = 'Follow Main';
+          zone2Input = 'HDMI ARC';
           updatedFields.add('zone2_input');
           break;
         case 'zone2_coax1':
