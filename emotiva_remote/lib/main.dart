@@ -50,6 +50,8 @@ const String knownIssues = '''
 2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
 
 3) HDMI color space, chroma subsamping, and HDR state are missing.
+
+4) While the Emotiva menu is acive, many functions are disabled.
 ''';
 
 Future<void> showKnownIssus(BuildContext context) {
@@ -67,11 +69,7 @@ Future<void> showKnownIssus(BuildContext context) {
 }
 
 const String roadMap = '''
-1) Add tuner controls.
-
-2) Add Zone 2 controls.
-
-3) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
+1) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
 ''';
 
 Future<void> showRoadMap(BuildContext context) {
