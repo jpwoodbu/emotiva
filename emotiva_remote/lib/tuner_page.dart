@@ -17,6 +17,26 @@ class TunerPage extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, emotiva.Device device) {
-    return Placeholder();
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: ListView(
+        children: [
+          Text(device.tunerBand.name.toUpperCase()),
+          Text(device.tunerChannel),
+          Text(device.tunerSignal),
+          Text(device.tunerProgram),
+          Text(device.tunerRds),
+          ElevatedButton(onPressed: () {}, child: Text('Set tuner input')),
+          ElevatedButton(onPressed: () {}, child: Text('Toggle AM/FM')),
+          ElevatedButton(onPressed: () {}, child: Text('Frequency +')),
+          ElevatedButton(onPressed: () {}, child: Text('Frequency -')),
+          ElevatedButton(onPressed: () {}, child: Text('Seek +')),
+          ElevatedButton(onPressed: () {}, child: Text('Seek -')),
+          ElevatedButton(onPressed: () {}, child: Text('Channel +')),
+          ElevatedButton(onPressed: () {}, child: Text('Channel -')),
+          ElevatedButton(onPressed: () {}, child: Text('Channel list')),
+        ],
+      ),
+    );
   }
 }
