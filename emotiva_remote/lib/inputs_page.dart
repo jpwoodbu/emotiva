@@ -482,7 +482,7 @@ class InputsPage extends StatelessWidget {
         device.visibility['width']!)) {
       return Center(
           child: Text(
-              'Speaker trim configuration unavailable while powered off'));
+              'Speaker trim configuration unavailable in the current mode'));
     }
     const double arrowSize = 50.0;
     return Table(
