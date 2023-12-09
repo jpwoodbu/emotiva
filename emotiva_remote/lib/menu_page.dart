@@ -66,6 +66,7 @@ class MenuPage extends StatelessWidget {
         backgroundColor = Colors.white;
       }
       if (column.checkbox != null) {
+        final iconSize = 17.0;
         if (column.checkbox!) {
           columns.add(
             Container(
@@ -73,7 +74,8 @@ class MenuPage extends StatelessWidget {
               padding: EdgeInsets.all(inset),
               alignment: Alignment.centerLeft,
               color: backgroundColor,
-              child: Icon(Icons.disabled_by_default_outlined, color: color),
+              child: Icon(Icons.disabled_by_default_outlined,
+                  color: color, size: iconSize),
             ),
           );
         } else {
@@ -83,7 +85,8 @@ class MenuPage extends StatelessWidget {
               padding: EdgeInsets.all(inset),
               alignment: Alignment.centerLeft,
               color: backgroundColor,
-              child: Icon(Icons.check_box_outline_blank, color: color),
+              child: Icon(Icons.check_box_outline_blank,
+                  color: color, size: iconSize),
             ),
           );
         }
@@ -153,20 +156,38 @@ class MenuPage extends StatelessWidget {
   }
 
   Widget _onScreenDisplay(BuildContext context, emotiva.Device device) {
+    const Color borderColor = Colors.white;
+    const padding = 10.0;
     if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
+      const rowHeight = 25.0;
       return SizedBox(
         // 152 is the height of the OSD table, at least with the current font
         // settings.
         height: 152,
-        child: Container(
-          margin: EdgeInsets.all(10.0),
-          color: Theme.of(context).focusColor,
+        child: Padding(
+          padding: const EdgeInsets.all(padding),
+          child: Table(
+            children: [
+              TableRow(children: [SizedBox(height: rowHeight)]),
+              TableRow(
+                children: [SizedBox(height: rowHeight)],
+                decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: borderColor))),
+              ),
+              TableRow(children: [SizedBox(height: rowHeight)]),
+              TableRow(
+                children: [SizedBox(height: rowHeight)],
+                decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: borderColor))),
+              ),
+              TableRow(children: [SizedBox(height: rowHeight)]),
+            ],
+          ),
         ),
       );
     }
-    Color borderColor = Colors.white;
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(padding),
       child: Table(
         columnWidths: {
           0: FixedColumnWidth(25.0),
