@@ -66,7 +66,7 @@ class MenuPage extends StatelessWidget {
         backgroundColor = Colors.white;
       }
       if (column.checkbox != null) {
-        final iconSize = 17.0;
+        const iconSize = 17.0;
         if (column.checkbox!) {
           columns.add(
             Container(
@@ -198,7 +198,6 @@ class MenuPage extends StatelessWidget {
         },
         children: <TableRow>[
           _verticleArrow(device.menuContents, emotiva.Arrow.up),
-          // TODO - For now let's display just rows 4, 5, and 6.
           TableRow(
             children: _row(context, device, 4),
             decoration: BoxDecoration(

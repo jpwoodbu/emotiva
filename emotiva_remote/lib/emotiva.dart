@@ -1130,7 +1130,7 @@ class FakeDevice extends Device {
     zone2Input = 'Optical 1';
     zone2Volume = -40.0;
     tunerBand = TunerBand.fm;
-    tunerSignal = '1 dBmV';
+    tunerSignal = '35 dBuV';
     tunerProgram = 'Classical';
     tunerRds = 'WPCE: Mahler 5';
     tunerChannel = 'FM 89.7';
@@ -1679,13 +1679,13 @@ class FakeDevice extends Device {
             tunerChannel = 'FM 89.7';
             tunerProgram = 'Classical';
             tunerRds = 'WCPE: Mahler 5';
-            tunerSignal = '2 dBmV';
+            tunerSignal = '45 dBuV';
           } else {
             tunerBand = TunerBand.am;
             tunerChannel = 'AM 680';
             tunerProgram = 'News';
             tunerRds = 'Nothing but good news all day long.';
-            tunerSignal = '1 dBmV';
+            tunerSignal = '8 dBuV';
           }
           updatedFields.addAll(
               ['tuner_band', 'tuner_channel', 'tuner_program', 'tuner_RDS', 'tuner_signal']);

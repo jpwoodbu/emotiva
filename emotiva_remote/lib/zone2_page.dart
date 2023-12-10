@@ -305,9 +305,6 @@ class Zone2Page extends StatelessWidget {
           'Input',
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
-        // TODO - What might the value be if the input isn't selected
-        // or Zone 2 is not powered on? We don't want to show just
-        // empty text.
         Text(device.zone2Input,
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
