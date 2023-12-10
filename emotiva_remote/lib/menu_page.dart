@@ -226,10 +226,10 @@ class MenuPage extends StatelessWidget {
     // and default size.
     double iconSize = 100.0;
     if (boxConstraints.maxHeight < 424) {
-      iconSize = boxConstraints.maxHeight / 4.24;
+      iconSize = boxConstraints.maxHeight / 6.0;
     }
     if (boxConstraints.maxWidth < 348) {
-      final newSize = boxConstraints.maxWidth / 3.48;
+      final newSize = boxConstraints.maxWidth / 4.0;
       if (iconSize > newSize) iconSize = newSize;
     }
     return iconSize;
@@ -291,7 +291,7 @@ class MenuPage extends StatelessWidget {
           ],
         ),
         TableRow(children: [
-          SizedBox(height: 10.0),
+          SizedBox(height: 15.0),
           SizedBox(),
           SizedBox(),
         ]),
