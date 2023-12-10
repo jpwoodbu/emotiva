@@ -1,14 +1,9 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
-
-void _addHaptic(Function function) {
-  HapticFeedback.lightImpact();
-  function();
-}
+import 'util.dart';
 
 class TunerPage extends StatelessWidget {
   const TunerPage({super.key});
@@ -35,7 +30,7 @@ class TunerPage extends StatelessWidget {
           Text('Set the Main input to Tuner.'),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed: () => _addHaptic(device.setTuner),
+              onPressed: () => addHaptic(device.setTuner),
               child: Text('Input -> Tuner')),
         ],
       ),
@@ -52,18 +47,6 @@ class TunerPage extends StatelessWidget {
         ),
         Text(device.tunerChannel,
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _inputRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (device.source != 'Tuner') Text('Inopperative until input is Tuner'),
-        ElevatedButton(
-            onPressed: () => _addHaptic(device.setTuner),
-            child: Text('Input -> Tuner')),
       ],
     );
   }
@@ -140,7 +123,7 @@ class TunerPage extends StatelessWidget {
             ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
           ],
           selected: {device.tunerBand},
-          onSelectionChanged: (selection) => _addHaptic(device.toggleTunerBand),
+          onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
         )
       ],
     );
@@ -152,15 +135,15 @@ class TunerPage extends StatelessWidget {
       children: [
         TableRow(children: [
           IconButton(
-              onPressed: () => _addHaptic(device.channelUp),
+              onPressed: () => addHaptic(device.channelUp),
               tooltip: 'preset up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.seekHigher),
+              onPressed: () => addHaptic(device.seekHigher),
               tooltip: 'seek up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.frequencyHigher),
+              onPressed: () => addHaptic(device.frequencyHigher),
               tooltip: 'tune up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
         ]),
@@ -171,15 +154,15 @@ class TunerPage extends StatelessWidget {
         ]),
         TableRow(children: [
           IconButton(
-              onPressed: () => _addHaptic(device.channelDown),
+              onPressed: () => addHaptic(device.channelDown),
               tooltip: 'preset down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.seekLower),
+              onPressed: () => addHaptic(device.seekLower),
               tooltip: 'seek down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.frequencyLower),
+              onPressed: () => addHaptic(device.frequencyLower),
               tooltip: 'tune down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
