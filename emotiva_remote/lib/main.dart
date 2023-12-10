@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'emotiva.dart' as emotiva;
@@ -9,6 +8,7 @@ import 'info_page.dart';
 import 'inputs_page.dart';
 import 'menu_page.dart';
 import 'tuner_page.dart';
+import 'util.dart';
 import 'zone2_page.dart';
 
 void _log(String message) {
@@ -123,18 +123,12 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10),
-          child: Text('Volume',
-              style: TextStyle(
-                fontSize: 20.0,
-              )),
+          child: const Text('Volume', style: TextStyle(fontSize: 20.0)),
         ),
         Row(
           children: [
             ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  volumeFunction(-1.0);
-                },
+                onPressed: () => addHaptic(() => volumeFunction(-1.0)),
                 child: Icon(
                   Icons.remove,
                   size: 30.0,
@@ -142,10 +136,7 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
                 )),
             SizedBox(width: 15.0),
             ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  volumeFunction(1.0);
-                },
+                onPressed: () => addHaptic(() => volumeFunction(1.0)),
                 child: Icon(
                   Icons.add,
                   size: 30.0,
@@ -208,57 +199,62 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceChanges>(
-      builder: (context, deviceChanges, child) {
-        return Scaffold(
-          appBar: _appBar(context),
-          // Using IndexedStack is critical. It preserves the existance (I think) of
-          // the widgets as the user navigates between them so that we don't try to
-          // do something breaking like creating additional listeners for a stream
-          // inside initState perhaps before the prior listeners have been GC'd.
-          body: IndexedStack(
-            index: currentPageIndex,
-            children: [
-              InfoPage(),
-              InputsPage(),
-              MenuPage(),
-              TunerPage(),
-              Zone2Page(),
-            ],
-          ),
-          persistentFooterButtons:
-           _footer(deviceChanges.device, currentPageIndex),
-          bottomNavigationBar: NavigationBar(
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Icons.info),
-                label: 'Info',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.route),
-                label: 'Inputs',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.gamepad),
-                label: 'Menu',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.radio),
-                label: 'Tuner',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.location_on),
-                label: 'Zone 2',
-              ),
-            ],
-            selectedIndex: currentPageIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                currentPageIndex = index;
-              });
-            },
-          ),
-        );
+      builder: (context, deviceChanges, _) {
+        return _build(context, deviceChanges.device);
       },
+    );
+  }
+
+  Widget _build(BuildContext context, emotiva.Device device) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: _appBar(context),
+        // Using IndexedStack is critical. It preserves the existance (I think) of
+        // the widgets as the user navigates between them so that we don't try to
+        // do something breaking like creating additional listeners for a stream
+        // inside initState perhaps before the prior listeners have been GC'd.
+        body: IndexedStack(
+          index: currentPageIndex,
+          children: [
+            InfoPage(),
+            InputsPage(),
+            MenuPage(),
+            TunerPage(),
+            Zone2Page(),
+          ],
+        ),
+        persistentFooterButtons: _footer(device, currentPageIndex),
+        bottomNavigationBar: NavigationBar(
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.info),
+              label: 'Info',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.route),
+              label: 'Inputs',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.gamepad),
+              label: 'Menu',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.radio),
+              label: 'Tuner',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.location_on),
+              label: 'Zone 2',
+            ),
+          ],
+          selectedIndex: currentPageIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+        ),
+      ),
     );
   }
 }
