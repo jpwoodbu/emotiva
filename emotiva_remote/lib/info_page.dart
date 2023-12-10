@@ -172,6 +172,7 @@ class InfoPage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (device.menuDisplayed) menuWarning(context),
                 _nameRow(device),
                 SizedBox(height: 5),
                 _volumeRow(device),

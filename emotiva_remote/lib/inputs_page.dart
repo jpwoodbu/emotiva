@@ -602,6 +602,7 @@ class InputsPage extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       child: ListView(
         children: [
+          if (device.menuDisplayed) menuWarning(context),
           _status(device),
           SizedBox(height: 15),
           _inputs(context, device),

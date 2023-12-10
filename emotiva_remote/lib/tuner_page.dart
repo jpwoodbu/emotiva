@@ -5,18 +5,22 @@ import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 import 'util.dart';
 
-Widget _enableTuner(emotiva.Device device) {
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Tuner controls unavailable.'),
-        Text('Set the Main input to Tuner.'),
-        SizedBox(height: 20),
-        ElevatedButton(
-            onPressed: () => addHaptic(device.setTuner),
-            child: Text('Input -> Tuner')),
-      ],
+Widget _enableTuner(BuildContext context, emotiva.Device device) {
+  return Padding(
+    padding: const EdgeInsets.all(15.0),
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (device.menuDisplayed) menuWarning(context),
+          Text('Tuner controls unavailable.'),
+          Text('Set the Main input to Tuner.'),
+          SizedBox(height: 20),
+          ElevatedButton(
+              onPressed: () => addHaptic(device.setTuner),
+              child: Text('Input -> Tuner')),
+        ],
+      ),
     ),
   );
 }
@@ -163,14 +167,14 @@ class TunerPage extends StatelessWidget {
         builder: (BuildContext context, DeviceChanges deviceChanges, _) {
       final device = deviceChanges.device;
       if (device.source == 'Tuner' || device.audioInput == 'Tuner') {
-        return _build(device);
+        return _build(context, device);
       } else {
-        return _enableTuner(device);
+        return _enableTuner(context, device);
       }
     });
   }
 
-  Widget _build(emotiva.Device device) {
+  Widget _build(BuildContext context, emotiva.Device device) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: ListView(
@@ -178,6 +182,7 @@ class TunerPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (device.menuDisplayed) menuWarning(context),
               _frequencyRow(device),
               SizedBox(height: 5.0),
               _signalRow(device),

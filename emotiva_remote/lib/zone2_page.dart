@@ -350,6 +350,7 @@ class Zone2Page extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (device.menuDisplayed) menuWarning(context),
               _powerRow(device),
               SizedBox(height: 10),
               _volumeRow(device),
