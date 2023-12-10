@@ -408,6 +408,90 @@ Widget _trimControls(emotiva.Device device) {
             Text('Speaker trim configuration unavailable in the current mode'));
   }
   const double arrowSize = 50.0;
+  return Wrap(
+    alignment: WrapAlignment.center,
+    children: [
+      if (device.visibility['center']!)
+        Column(children: [
+          Text('${device.centerTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpCenterTrim(0.5, device),
+              tooltip: 'Center trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Center'),
+          IconButton(
+              onPressed: () => _bumpCenterTrim(-0.5, device),
+              tooltip: 'Center trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      if (device.visibility['subwoofer']!)
+        Column(children: [
+          Text('${device.subwooferTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpSubwooferTrim(0.5, device),
+              tooltip: 'Subwoofer trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Sub'),
+          IconButton(
+              onPressed: () => _bumpSubwooferTrim(-0.5, device),
+              tooltip: 'Subwoofer trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      if (device.visibility['surround']!)
+        Column(children: [
+          Text('${device.surroundTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpSurroundTrim(0.5, device),
+              tooltip: 'Surround trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Surround'),
+          IconButton(
+              onPressed: () => _bumpSurroundTrim(-0.5, device),
+              tooltip: 'Surround trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      if (device.visibility['back']!)
+        Column(children: [
+          Text('${device.backTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpBackTrim(0.5, device),
+              tooltip: 'Back trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Back'),
+          IconButton(
+              onPressed: () => _bumpBackTrim(-0.5, device),
+              tooltip: 'Back trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      if (device.visibility['height']!)
+        Column(children: [
+          Text('${device.heightTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpHeightTrim(0.5, device),
+              tooltip: 'Height trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Height'),
+          IconButton(
+              onPressed: () => _bumpHeightTrim(-0.5, device),
+              tooltip: 'Height trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+      if (device.visibility['width']!)
+        Column(children: [
+          Text('${device.widthTrim}dB'),
+          IconButton(
+              onPressed: () => _bumpWidthTrim(0.5, device),
+              tooltip: 'Width trim up',
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          Text('Width'),
+          IconButton(
+              onPressed: () => _bumpWidthTrim(-0.5, device),
+              tooltip: 'Width trim down',
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        ]),
+    ],
+  );
+  /*
   return Table(
     children: [
       TableRow(
@@ -500,6 +584,7 @@ Widget _trimControls(emotiva.Device device) {
       ]),
     ],
   );
+  */
 }
 
 class InputsPage extends StatelessWidget {
