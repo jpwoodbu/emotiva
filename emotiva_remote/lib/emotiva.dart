@@ -1130,9 +1130,10 @@ class FakeDevice extends Device {
     zone2Input = 'Optical 1';
     zone2Volume = -40.0;
     tunerBand = TunerBand.fm;
-    tunerSignal = '1 mV';
+    tunerSignal = '1 dBmV';
     tunerProgram = 'Classical';
     tunerRds = 'WPCE: Mahler 5';
+    tunerChannel = 'FM 89.7';
   }
 
   Menu _initMenuContent() {
@@ -1672,6 +1673,23 @@ class FakeDevice extends Device {
           zone2Input = 'Tuner';
           updatedFields.add('zone2_input');
           break;
+        case 'zone1_band':
+          if (tunerBand == TunerBand.am) {
+            tunerBand = TunerBand.fm;
+            tunerChannel = 'FM 89.7';
+            tunerProgram = 'Classical';
+            tunerRds = 'WCPE: Mahler 5';
+            tunerSignal = '2 dBmV';
+          } else {
+            tunerBand = TunerBand.am;
+            tunerChannel = 'AM 680';
+            tunerProgram = 'News';
+            tunerRds = 'Nothing but good news all day long.';
+            tunerSignal = '1 dBmV';
+          }
+          updatedFields.addAll(
+              ['tuner_band', 'tuner_channel', 'tuner_program', 'tuner_RDS', 'tuner_signal']);
+          break;
         default:
           _log('FakeDevice does not support: $field');
           break;
@@ -1837,13 +1855,15 @@ class FakeDevice extends Device {
       case 'zone2_input':
         return zone2Input;
       case 'tuner_band':
-        return tunerBand == TunerBand.am ? 'AM' : 'FM';
+        return tunerBand.name.toUpperCase();
       case 'tuner_channel':
         return tunerChannel;
       case 'tuner_signal':
         return tunerSignal;
       case 'tuner_RDS':
         return tunerRds;
+      case 'tuner_program':
+        return tunerProgram;
       default:
         throw 'Unsupported field: $field';
     }
