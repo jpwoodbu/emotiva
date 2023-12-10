@@ -149,7 +149,10 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   ];
 }
 
-AppBar _appBar(BuildContext context) {
+AppBar? _appBar(BuildContext context, int currentPageIndex) {
+  if (currentPageIndex != 0) {
+    return null;
+  }
   return AppBar(
     title: const Center(child: Text('Emotiva Remote')),
     leading: IconButton(
@@ -208,7 +211,7 @@ class _MainViewState extends State<MainView> {
   Widget _build(BuildContext context, emotiva.Device device) {
     return SafeArea(
       child: Scaffold(
-        appBar: _appBar(context),
+        appBar: _appBar(context, currentPageIndex),
         // Using IndexedStack is critical. It preserves the existance (I think) of
         // the widgets as the user navigates between them so that we don't try to
         // do something breaking like creating additional listeners for a stream
@@ -264,34 +267,36 @@ class NoDevicesFoundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('No Emotiva devices were found.'),
-            SizedBox(height: 25.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => Discovery()),
-                    (Route<dynamic> route) => false);
-              },
-              child: Text('Try again'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Discovery(useFake: true)),
-                    (Route<dynamic> route) => false);
-              },
-              child: Text('Demo mode'),
-            ),
-          ],
+    return SafeArea(
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('No Emotiva devices were found.'),
+              SizedBox(height: 25.0),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => Discovery()),
+                      (Route<dynamic> route) => false);
+                },
+                child: Text('Try again'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Discovery(useFake: true)),
+                      (Route<dynamic> route) => false);
+                },
+                child: Text('Demo mode'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -303,15 +308,17 @@ class ScanningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Searching for Emotiva devices...'),
-            SizedBox(height: 25.0),
-            CircularProgressIndicator(),
-          ],
+    return SafeArea(
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Searching for Emotiva devices...'),
+              SizedBox(height: 25.0),
+              CircularProgressIndicator(),
+            ],
+          ),
         ),
       ),
     );
