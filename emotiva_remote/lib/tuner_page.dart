@@ -5,6 +5,155 @@ import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 import 'util.dart';
 
+Widget _enableTuner(emotiva.Device device) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Tuner controls unavailable.'),
+        Text('Set the Main input to Tuner.'),
+        SizedBox(height: 20),
+        ElevatedButton(
+            onPressed: () => addHaptic(device.setTuner),
+            child: Text('Input -> Tuner')),
+      ],
+    ),
+  );
+}
+
+Widget _frequencyRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        'Channel',
+        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+      ),
+      Text(device.tunerChannel,
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
+Widget _signalRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        'Signal',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      Text(device.tunerSignal,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
+Widget _programRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        'Program',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      Text(device.tunerProgram,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
+Widget _rds(emotiva.Device device) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Divider(),
+      Text(
+        device.tunerRds,
+        overflow: TextOverflow.visible,
+        softWrap: true,
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+      ),
+      Divider(),
+    ],
+  );
+}
+
+Widget _volumeRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        'Volume',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      Text('${device.volume.toString()}dB',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
+Widget _bandRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        'Band',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      SegmentedButton<emotiva.TunerBand>(
+        segments: [
+          ButtonSegment(value: emotiva.TunerBand.am, label: Text('AM')),
+          ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
+        ],
+        selected: {device.tunerBand},
+        onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
+      )
+    ],
+  );
+}
+
+Widget _controls(emotiva.Device device) {
+  const double arrowSize = 50.0;
+  return Table(
+    children: [
+      TableRow(children: [
+        IconButton(
+            onPressed: () => addHaptic(device.channelUp),
+            tooltip: 'preset up',
+            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+        IconButton(
+            onPressed: () => addHaptic(device.seekHigher),
+            tooltip: 'seek up',
+            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+        IconButton(
+            onPressed: () => addHaptic(device.frequencyHigher),
+            tooltip: 'tune up',
+            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+      ]),
+      TableRow(children: [
+        Center(child: Text('Preset')),
+        Center(child: Text('Seek')),
+        Center(child: Text('Tune')),
+      ]),
+      TableRow(children: [
+        IconButton(
+            onPressed: () => addHaptic(device.channelDown),
+            tooltip: 'preset down',
+            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        IconButton(
+            onPressed: () => addHaptic(device.seekLower),
+            tooltip: 'seek down',
+            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+        IconButton(
+            onPressed: () => addHaptic(device.frequencyLower),
+            tooltip: 'tune down',
+            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+      ]),
+    ],
+  );
+}
+
 class TunerPage extends StatelessWidget {
   const TunerPage({super.key});
 
@@ -14,163 +163,14 @@ class TunerPage extends StatelessWidget {
         builder: (BuildContext context, DeviceChanges deviceChanges, _) {
       final device = deviceChanges.device;
       if (device.source == 'Tuner' || device.audioInput == 'Tuner') {
-        return _build(context, device);
+        return _build(device);
       } else {
-        return _enableTuner(context, device);
+        return _enableTuner(device);
       }
     });
   }
 
-  Widget _enableTuner(BuildContext context, emotiva.Device device) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Tuner controls unavailable.'),
-          Text('Set the Main input to Tuner.'),
-          SizedBox(height: 20),
-          ElevatedButton(
-              onPressed: () => addHaptic(device.setTuner),
-              child: Text('Input -> Tuner')),
-        ],
-      ),
-    );
-  }
-
-  Widget _frequencyRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Channel',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-        Text(device.tunerChannel,
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _signalRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Signal',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text(device.tunerSignal,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _programRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Program',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text(device.tunerProgram,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _rds(emotiva.Device device) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Divider(),
-        Text(
-          device.tunerRds,
-          overflow: TextOverflow.visible,
-          softWrap: true,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-        ),
-        Divider(),
-      ],
-    );
-  }
-
-  Widget _volumeRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Volume',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text('${device.volume.toString()}dB',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _bandRow(emotiva.Device device) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Band',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        SegmentedButton<emotiva.TunerBand>(
-          segments: [
-            ButtonSegment(value: emotiva.TunerBand.am, label: Text('AM')),
-            ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
-          ],
-          selected: {device.tunerBand},
-          onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
-        )
-      ],
-    );
-  }
-
-  Widget _controls(emotiva.Device device) {
-    const double arrowSize = 50.0;
-    return Table(
-      children: [
-        TableRow(children: [
-          IconButton(
-              onPressed: () => addHaptic(device.channelUp),
-              tooltip: 'preset up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          IconButton(
-              onPressed: () => addHaptic(device.seekHigher),
-              tooltip: 'seek up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          IconButton(
-              onPressed: () => addHaptic(device.frequencyHigher),
-              tooltip: 'tune up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-        ]),
-        TableRow(children: [
-          Center(child: Text('Preset')),
-          Center(child: Text('Seek')),
-          Center(child: Text('Tune')),
-        ]),
-        TableRow(children: [
-          IconButton(
-              onPressed: () => addHaptic(device.channelDown),
-              tooltip: 'preset down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-          IconButton(
-              onPressed: () => addHaptic(device.seekLower),
-              tooltip: 'seek down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-          IconButton(
-              onPressed: () => addHaptic(device.frequencyLower),
-              tooltip: 'tune down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
-        ]),
-      ],
-    );
-  }
-
-  Widget _build(BuildContext context, emotiva.Device device) {
+  Widget _build(emotiva.Device device) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: ListView(

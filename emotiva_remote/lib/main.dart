@@ -15,7 +15,7 @@ void _log(String message) {
   developer.log(message, name: 'main');
 }
 
-void showErrorSnackBar(BuildContext context, String error) {
+void _showErrorSnackBar(BuildContext context, String error) {
   final snackBar = SnackBar(content: Text(error));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
