@@ -289,10 +289,10 @@ class Zone2Page extends StatelessWidget {
       children: [
         Text(
           'Volume',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         Text('${device.zone2Volume.toString()}dB',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -303,13 +303,13 @@ class Zone2Page extends StatelessWidget {
       children: [
         Text(
           'Input',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         // TODO - What might the value be if the input isn't selected
         // or Zone 2 is not powered on? We don't want to show just
         // empty text.
         Text(device.zone2Input,
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -391,7 +391,7 @@ class Zone2Page extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _powerRow(device),
-              SizedBox(height: 5),
+              SizedBox(height: 10),
               _volumeRow(device),
               SizedBox(height: 10),
               _inputRow(device),
