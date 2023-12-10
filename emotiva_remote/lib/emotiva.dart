@@ -1626,7 +1626,7 @@ class FakeDevice extends Device {
           updatedFields.add('zone2_input');
           break;
         case 'zone2_follow_main':
-          zone2Input = 'HDMI ARC';
+          zone2Input = audioInput;
           updatedFields.add('zone2_input');
           break;
         case 'zone2_coax1':
