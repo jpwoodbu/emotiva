@@ -110,9 +110,11 @@ class MyApp extends StatelessWidget {
 }
 
 List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
+  // Disable the footer on the menu page to make more room.
   if (currentPageIndex == 2) {
     return null;
   }
+  // Change the volume controls to actuate zone 2 when on the zone 2 page.
   final volumeFunction =
       currentPageIndex == 4 ? device.zone2VolumeDelta : device.volumeDelta;
   return [
@@ -156,6 +158,43 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   ];
 }
 
+AppBar _appBar(BuildContext context) {
+  return AppBar(
+    title: const Center(child: Text('Emotiva Remote')),
+    leading: IconButton(
+      icon: Icon(Icons.help),
+      tooltip: 'Show help',
+      onPressed: () => showHelp(context),
+    ),
+    actions: [
+      PopupMenuButton(
+        itemBuilder: (BuildContext context) => [
+          PopupMenuItem(
+            child: Text('Rediscover Emotiva device'),
+            onTap: () {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Discovery(
+                            rediscover: true,
+                          )),
+                  (Route<dynamic> route) => false);
+            },
+          ),
+          PopupMenuItem(
+            child: Text('Known issues'),
+            onTap: () => showKnownIssus(context),
+          ),
+          PopupMenuItem(
+            child: Text('Road map'),
+            onTap: () => showRoadMap(context),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
 class MainView extends StatefulWidget {
   MainView({super.key});
 
@@ -171,40 +210,7 @@ class _MainViewState extends State<MainView> {
     return Consumer<DeviceChanges>(
       builder: (context, deviceChanges, child) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Center(child: Text('Emotiva Remote')),
-            leading: IconButton(
-              icon: Icon(Icons.help),
-              tooltip: 'Show help',
-              onPressed: () => showHelp(context),
-            ),
-            actions: [
-              PopupMenuButton(
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    child: Text('Rediscover Emotiva device'),
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Discovery(
-                                    rediscover: true,
-                                  )),
-                          (Route<dynamic> route) => false);
-                    },
-                  ),
-                  PopupMenuItem(
-                    child: Text('Known issues'),
-                    onTap: () => showKnownIssus(context),
-                  ),
-                  PopupMenuItem(
-                    child: Text('Road map'),
-                    onTap: () => showRoadMap(context),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          appBar: _appBar(context),
           // Using IndexedStack is critical. It preserves the existance (I think) of
           // the widgets as the user navigates between them so that we don't try to
           // do something breaking like creating additional listeners for a stream
@@ -220,7 +226,7 @@ class _MainViewState extends State<MainView> {
             ],
           ),
           persistentFooterButtons:
-              _footer(deviceChanges.device, currentPageIndex),
+           _footer(deviceChanges.device, currentPageIndex),
           bottomNavigationBar: NavigationBar(
             destinations: [
               NavigationDestination(
@@ -228,7 +234,6 @@ class _MainViewState extends State<MainView> {
                 label: 'Info',
               ),
               NavigationDestination(
-                // icon: Icon(Icons.settings_remote),
                 icon: Icon(Icons.route),
                 label: 'Inputs',
               ),
@@ -370,7 +375,7 @@ class _DiscoveryState extends State<Discovery> {
             create: (context) {
               _log('Found Emotiva device.');
               device = snapshot.data!;
-              // Initialing DeviceChanges to set up the UDP port listeners
+              // Initializing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in
               // populating the attributes of device.
               final deviceChanges = DeviceChanges(device!);

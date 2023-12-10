@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
-import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'emotiva.dart' as emotiva;
 
 void _log(String message) {
   developer.log(message, name: 'DeviceChanges');

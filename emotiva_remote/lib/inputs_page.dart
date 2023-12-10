@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 
 class InputsPage extends StatelessWidget {

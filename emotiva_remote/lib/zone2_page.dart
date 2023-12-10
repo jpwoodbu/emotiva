@@ -2,8 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:emotiva_remote/emotiva.dart' as emotiva;
-
+import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 
 const double sheetPadding = 15.0;
@@ -16,7 +15,6 @@ Future<void> futureUpdateAll(emotiva.Device device) async {
 void updateAll(emotiva.Device device) async {
   await futureUpdateAll(device);
 }
-
 
 // This is a workaround for not getting notify messages when changing inputs for
 // zone 2.
