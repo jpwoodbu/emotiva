@@ -493,6 +493,107 @@ Widget _trimControls(emotiva.Device device) {
   );
 }
 
+Widget _inputs(BuildContext context, emotiva.Device device) {
+  return Table(
+    children: [
+      TableRow(children: [
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _sourceBottomSheet(context, device),
+            icon: Icon(Icons.person),
+            label: Text('Source'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _hdmiBottomSheet(context, device),
+            icon: Icon(Icons.settings_input_hdmi),
+            label: Text('HDMI'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+      ]),
+      TableRow(children: [
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _opticalBottomSheet(context, device),
+            icon: Icon(Icons.lightbulb),
+            label: Text('Optical'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _coaxBottomSheet(context, device),
+            icon: Icon(Icons.settings_input_composite),
+            label: Text('Coax'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+      ]),
+      TableRow(children: [
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _analogBottomSheet(context, device),
+            icon: Icon(Icons.settings_input_component),
+            label: Text('Analog'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _xlrBottomSheet(context, device),
+            icon: Icon(Icons.donut_large),
+            label: Text('XLR'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+      ]),
+      TableRow(children: [
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _otherBottomSheet(context, device),
+            icon: Icon(Icons.more),
+            label: Text('Other'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(_tableCellPadding),
+          child: ElevatedButton.icon(
+            onPressed: () => _modeBottomSheet(context, device),
+            icon: Icon(Icons.surround_sound),
+            label: Text('Mode'),
+            style: ButtonStyle(alignment: Alignment.centerLeft),
+          ),
+        ),
+      ]),
+    ],
+  );
+}
+
+Widget _status(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        device.source,
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      Text(device.mode,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
 class InputsPage extends StatelessWidget {
   const InputsPage({super.key});
 
@@ -501,90 +602,9 @@ class InputsPage extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       child: ListView(
         children: [
-          Table(
-            children: [
-              TableRow(children: [
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _sourceBottomSheet(context, device),
-                    icon: Icon(Icons.person),
-                    label: Text('Source'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _hdmiBottomSheet(context, device),
-                    icon: Icon(Icons.settings_input_hdmi),
-                    label: Text('HDMI'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-              ]),
-              TableRow(children: [
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _opticalBottomSheet(context, device),
-                    icon: Icon(Icons.lightbulb),
-                    label: Text('Optical'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _coaxBottomSheet(context, device),
-                    icon: Icon(Icons.settings_input_composite),
-                    label: Text('Coax'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-              ]),
-              TableRow(children: [
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _analogBottomSheet(context, device),
-                    icon: Icon(Icons.settings_input_component),
-                    label: Text('Analog'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _xlrBottomSheet(context, device),
-                    icon: Icon(Icons.donut_large),
-                    label: Text('XLR'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-              ]),
-              TableRow(children: [
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _otherBottomSheet(context, device),
-                    icon: Icon(Icons.more),
-                    label: Text('Other'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_tableCellPadding),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _modeBottomSheet(context, device),
-                    icon: Icon(Icons.surround_sound),
-                    label: Text('Mode'),
-                    style: ButtonStyle(alignment: Alignment.centerLeft),
-                  ),
-                ),
-              ]),
-            ],
-          ),
+          _status(device),
+          SizedBox(height: 15),
+          _inputs(context, device),
           SizedBox(height: 25),
           _trimControls(device),
         ],
