@@ -17,9 +17,30 @@ class TunerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, child) {
-      return _build(context, deviceChanges.device);
+        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
+      final device = deviceChanges.device;
+      if (device.source == 'Tuner' || device.audioInput == 'Tuner') {
+        return _build(context, device);
+      } else {
+        return _enableTuner(context, device);
+      }
     });
+  }
+
+  Widget _enableTuner(BuildContext context, emotiva.Device device) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Tuner controls unavailable.'),
+          Text('Set the Main input to Tuner.'),
+          SizedBox(height: 20),
+          ElevatedButton(
+              onPressed: () => _addHaptic(device.setTuner),
+              child: Text('Input -> Tuner')),
+        ],
+      ),
+    );
   }
 
   Widget _frequencyRow(emotiva.Device device) {
@@ -32,6 +53,18 @@ class TunerPage extends StatelessWidget {
         ),
         Text(device.tunerChannel,
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _inputRow(emotiva.Device device) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        if (device.source != 'Tuner') Text('Inopperative until input is Tuner'),
+        ElevatedButton(
+            onPressed: () => _addHaptic(device.setTuner),
+            child: Text('Input -> Tuner')),
       ],
     );
   }
@@ -120,35 +153,35 @@ class TunerPage extends StatelessWidget {
       children: [
         TableRow(children: [
           IconButton(
-              onPressed: () => _addHaptic(device.frequencyHigher),
-              tooltip: 'frequency up',
+              onPressed: () => _addHaptic(device.channelUp),
+              tooltip: 'preset up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
           IconButton(
               onPressed: () => _addHaptic(device.seekHigher),
               tooltip: 'seek up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.channelUp),
-              tooltip: 'channel up',
+              onPressed: () => _addHaptic(device.frequencyHigher),
+              tooltip: 'tune up',
               icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
         ]),
         TableRow(children: [
-          Center(child: Text('Frequency')),
+          Center(child: Text('Preset')),
           Center(child: Text('Seek')),
-          Center(child: Text('Channel')),
+          Center(child: Text('Tune')),
         ]),
         TableRow(children: [
           IconButton(
-              onPressed: () => _addHaptic(device.frequencyLower),
-              tooltip: 'frequency down',
+              onPressed: () => _addHaptic(device.channelDown),
+              tooltip: 'preset down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
           IconButton(
               onPressed: () => _addHaptic(device.seekLower),
               tooltip: 'seek down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
           IconButton(
-              onPressed: () => _addHaptic(device.channelDown),
-              tooltip: 'channel down',
+              onPressed: () => _addHaptic(device.frequencyLower),
+              tooltip: 'tune down',
               icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       ],
