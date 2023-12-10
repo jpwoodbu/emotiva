@@ -77,13 +77,6 @@ void setUsb(BuildContext context, emotiva.Device device) async {
   delayedUpdateAll(device);
 }
 
-void setTuner(BuildContext context, emotiva.Device device) async {
-  HapticFeedback.lightImpact();
-  device.zone2SetTuner();
-  Navigator.pop(context);
-  delayedUpdateAll(device);
-}
-
 void setFront(BuildContext context, emotiva.Device device) async {
   HapticFeedback.lightImpact();
   device.zone2SetFront();
@@ -221,10 +214,6 @@ void otherBottomSheet(BuildContext context, emotiva.Device device) {
                 onPressed: () => setUsb(context, device),
                 icon: Icon(Icons.usb),
                 label: Text('USB')),
-            ElevatedButton.icon(
-                onPressed: () => setTuner(context, device),
-                icon: Icon(Icons.radio),
-                label: Text('Tuner')),
             ElevatedButton.icon(
                 onPressed: () => setFront(context, device),
                 icon: Icon(Icons.smartphone),
