@@ -1,11 +1,9 @@
-import 'dart:developer' as developer;
+import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 
 import 'emotiva.dart' as emotiva;
 
-void _log(String message) {
-  developer.log(message, name: 'DeviceChanges');
-}
+final _log = Logger('DeviceChanges');
 
 class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
@@ -18,11 +16,11 @@ class DeviceChanges with ChangeNotifier {
     notifyPortStream = device.notifyPortStream(device.address!);
     menuNotifyPortStream = device.menuNotifyPortStream(device.address!);
     handleControlPackets();
-    _log('handling control packets');
+    _log.info('handling control packets');
     handleNotifyPackets();
-    _log('handling notify packets');
+    _log.info('handling notify packets');
     handleMenuNotifyPackets();
-    _log('handling menu notify packets');
+    _log.info('handling menu notify packets');
   }
 
   Future<void> handleControlPackets() async {

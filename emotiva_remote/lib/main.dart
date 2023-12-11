@@ -1,5 +1,6 @@
-import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'emotiva.dart' as emotiva;
@@ -11,9 +12,7 @@ import 'tuner_page.dart';
 import 'util.dart';
 import 'zone2_page.dart';
 
-void _log(String message) {
-  developer.log(message, name: 'main');
-}
+final _log = Logger('main');
 
 void _showErrorSnackBar(BuildContext context, String error) {
   final snackBar = SnackBar(content: Text(error));
@@ -85,6 +84,11 @@ Future<void> _showRoadMap(BuildContext context) {
 }
 
 void main() {
+  Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+  Logger.root.onRecord.listen((record) {
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+   });
   runApp(const MyApp());
 }
 
@@ -336,7 +340,7 @@ class _DiscoveryState extends State<Discovery> {
   initState() {
     super.initState();
     if (widget.useFake) {
-      _log('Using fake device.');
+      _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
     } else {
       _device = emotiva.discovery(3);
@@ -347,9 +351,9 @@ class _DiscoveryState extends State<Discovery> {
   void dispose() async {
     super.dispose();
     if (device != null) {
-      _log('Unsubscribing from all fields.');
+      _log.info('Unsubscribing from all fields.');
       await device!.unsubscribeAll();
-      _log('Closing sockets for device.');
+      _log.info('Closing sockets for device.');
       await device!.closeSockets();
     }
   }
@@ -370,7 +374,7 @@ class _DiscoveryState extends State<Discovery> {
           }
           return ChangeNotifierProvider(
             create: (context) {
-              _log('Found Emotiva device.');
+              _log.info('Found Emotiva device.');
               device = snapshot.data!;
               // Initializing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in

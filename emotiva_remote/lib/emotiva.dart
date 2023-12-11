@@ -1,20 +1,17 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math';
 
+import 'package:logging/logging.dart';
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
 
+final _log = Logger('Emotiva');
 const int _pingPort = 7000;
 const int _transponderPort = 7001;
 const String _broadcastAddress = '255.255.255.255';
 // The highest protocol version this library supports.
 const String _protocolVersion = '3.0';
-
-void _log(String message) {
-  developer.log(message, name: 'emotiva');
-}
 
 String _pingRequest() {
   final builder = XmlBuilder();
@@ -42,13 +39,13 @@ Future<Device> discovery(int timeoutSec) async {
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
-        _log('sent: $ping');
+        _log.fine('sent: $ping');
         break;
       case RawSocketEvent.read:
         final datagram = stream.receive();
         stream.close();
         final data = String.fromCharCodes(datagram!.data);
-        _log('received: $data');
+        _log.fine('received: $data');
         final device = _parseTransponder(data);
         device.address = datagram.address;
         return device;
@@ -270,11 +267,11 @@ class Device {
           final datagram = stream.receive();
           // Drop packets not from the address of the discovered Emotiva device.
           if (datagram!.address != address) {
-            _log('Ignoring packet from ${datagram.address}');
+            _log.warning('Ignoring packet from ${datagram.address}');
             break;
           }
           final packet = String.fromCharCodes(datagram.data);
-          _log('received: $packet');
+          _log.fine('received: $packet');
           yield packet;
         case RawSocketEvent.closed:
           break;
@@ -316,7 +313,7 @@ class Device {
     await for (final event in stream) {
       switch (event) {
         case RawSocketEvent.write:
-          _log('sending: $request');
+          _log.fine('sending: $request');
           final bytesSent =
               stream.send(request.codeUnits, address!, destinationPort);
           stream.close();
@@ -489,7 +486,7 @@ class Device {
         // double.parse().
         return double.parse(trim.replaceAll(r' ', ''));
       } catch (e) {
-        _log(
+        _log.severe(
             'Casting trim value to double failed for ${element.toXmlString()}: $e');
       }
     }
@@ -528,13 +525,13 @@ class Device {
     final packetType = root.name.toString();
     if (packetType == 'emotivaAck') {
       // We don't currently do anything with acks.
-      _log('Received an ack message: ${root.toXmlString()}');
+      _log.fine('Received an ack message: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaUnsubscribe') {
       // If we get a response from an unsubscribe request before we tear down
       // the socket, catch it and do nothing.
-      _log('Recieved an unsubscribe request: ${root.toXmlString()}');
+      _log.fine('Recieved an unsubscribe request: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaNotify' || packetType == 'emotivaMenuNotify') {
@@ -548,7 +545,7 @@ class Device {
           // Set the initial sequence number.
           _sequenceNumber = serverSequence;
         } else if (delta > 1) {
-          _log("It looks like we're behind one or more messages. "
+          _log.warning("It looks like we're behind one or more messages. "
               "Updating all fields.");
           _sequenceNumber = serverSequence;
           updateAll();
@@ -561,9 +558,9 @@ class Device {
             // lower than our's, let's assume we've rolled over and adopt the
             // remote sequence number.
             _sequenceNumber = serverSequence;
-            _log('Sequence rollover heuristic has kicked in.');
+            _log.info('Sequence rollover heuristic has kicked in.');
           }
-          _log("Received a message with an old sequence number. "
+          _log.warning("Received a message with an old sequence number. "
               "Calling updateAll() in case we've missed something.");
           updateAll();
           return;
@@ -571,7 +568,7 @@ class Device {
       } catch (e) {
         // If we can't find a sequence number, just assume we should continue
         // processing this packet.
-        _log('Sequence number missing: ${root.toXmlString()}');
+        _log.severe('Sequence number missing: ${root.toXmlString()}');
       }
     }
     if (packetType == 'emotivaMenuNotify') {
@@ -625,7 +622,7 @@ class Device {
             }
           } catch (e) {
             // If parsing fails, that could mean the device is in standby.
-            _log('Unable to parse message: $e');
+            _log.severe('Unable to parse message: $e');
           }
           break;
         case 'loudness':
@@ -716,7 +713,7 @@ class Device {
             }
           } catch (e) {
             // If parsing fails, that could mean the device is in standby.
-            _log('Unable to parse message: $e');
+            _log.severe('Unable to parse message: $e');
           }
           break;
         case 'zone2_input':
@@ -729,7 +726,7 @@ class Device {
           } else if (band == 'fm') {
             tunerBand = TunerBand.fm;
           } else {
-            _log('Unrecognized tuner band: $band');
+            _log.severe('Unrecognized tuner band: $band');
           }
           break;
         case 'tuner_channel':
@@ -770,7 +767,7 @@ class Device {
           // TODO - remove this if Emotiva fixes the interface.
           break;
         default:
-          _log('Could not parse ${element.toXmlString()}');
+          _log.severe('Could not parse ${element.toXmlString()}');
           break;
       }
     }
@@ -1202,7 +1199,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log('response: $response');
+    _log.fine('response: $response');
     _controlStream.add(response);
   }
 
@@ -1230,7 +1227,7 @@ class FakeDevice extends Device {
         }
       }
     } catch (e) {
-      _log('Unable to get value from ${element.toXmlString()}: $e');
+      _log.severe('Unable to get value from ${element.toXmlString()}: $e');
     }
     return '';
   }
@@ -1339,7 +1336,7 @@ class FakeDevice extends Device {
             muted = false;
             updatedFields.add(field);
           } catch (e) {
-            _log('Unable to parse volume delta: ${element.toXmlString()}');
+            _log.severe('Unable to parse volume delta: ${element.toXmlString()}');
           }
           break;
         case 'loudness':
@@ -1595,7 +1592,7 @@ class FakeDevice extends Device {
             zone2Muted = false;
             updatedFields.add(field);
           } catch (e) {
-            _log(
+            _log.severe(
                 'Unable to parse zone 2 volume delta: ${element.toXmlString()}');
           }
           break;
@@ -1699,7 +1696,7 @@ class FakeDevice extends Device {
           ]);
           break;
         default:
-          _log('FakeDevice does not support: $field');
+          _log.warning('FakeDevice does not support: $field');
           break;
       }
     }
@@ -1735,7 +1732,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log('response: $response');
+    _log.info('response: $response');
     _sequence++;
     _menuNotifyStream.add(response);
   }
@@ -1755,7 +1752,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log('response: $response');
+    _log.fine('response: $response');
     _sequence++;
     _notifyStream.add(response);
   }
@@ -1903,7 +1900,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log('response: $response');
+    _log.fine('response: $response');
     _controlStream.add(response);
   }
 
@@ -1927,7 +1924,7 @@ class FakeDevice extends Device {
     final root = document.rootElement;
     final requestType = root.name.toString();
     final fields = _elementsToFields(root.childElements);
-    _log('request: $request');
+    _log.fine('request: $request');
     switch (requestType) {
       case 'emotivaControl':
         _parseControlRequest(root.childElements);
@@ -2015,7 +2012,7 @@ class Menu {
 Menu _parseMenuNotify(XmlElement element) {
   final menu = Menu();
   if (element.name.toString() != 'emotivaMenuNotify') {
-    _log('Invalid menu notify message: ${element.toXmlString()}');
+    _log.severe('Invalid menu notify message: ${element.toXmlString()}');
     return menu;
   }
   for (final e in element.childElements) {
@@ -2027,17 +2024,17 @@ Menu _parseMenuNotify(XmlElement element) {
 Row _parseMenuNotifyRow(XmlElement element) {
   final row = Row(0);
   if (element.name.toString() != 'row') {
-    _log('Invalid menu notify row: ${element.toXmlString()}');
+    _log.severe('Invalid menu notify row: ${element.toXmlString()}');
     return row;
   }
   for (final a in element.attributes) {
     if (a.name.toString() != 'number') {
-      _log('Unexpected attribute in row: ${a.toString()}');
+      _log.severe('Unexpected attribute in row: ${a.toString()}');
     }
     try {
       row.number = int.parse(a.value);
     } catch (e) {
-      _log('Unable to parse row number: ${a.toXmlString()}');
+      _log.severe('Unable to parse row number: ${a.toXmlString()}');
     }
   }
   for (final e in element.childElements) {
@@ -2049,7 +2046,7 @@ Row _parseMenuNotifyRow(XmlElement element) {
 Column _parseMenuNotifyColumn(XmlElement element) {
   final column = Column(0, false, Arrow.no, false);
   if (element.name.toString() != 'col') {
-    _log('Invalid menu notify column: ${element.toXmlString()}');
+    _log.severe('Invalid menu notify column: ${element.toXmlString()}');
     return column;
   }
   for (final a in element.attributes) {
@@ -2060,7 +2057,7 @@ Column _parseMenuNotifyColumn(XmlElement element) {
         try {
           column.highlight = bool.parse(value);
         } catch (e) {
-          _log('Unable to parse highlight as bool: ${a.toXmlString()}');
+          _log.severe('Unable to parse highlight as bool: ${a.toXmlString()}');
         }
         break;
       case 'arrow':
@@ -2081,21 +2078,21 @@ Column _parseMenuNotifyColumn(XmlElement element) {
             column.arrow = Arrow.left;
             break;
           default:
-            _log('Unexpected value for "arcolumn": $value');
+            _log.severe('Unexpected value for "arrow": $value');
             break;
         }
       case 'fixedWidth':
         try {
           column.fixedWidth = bool.parse(value);
         } catch (e) {
-          _log('Unable to parse fixedWidth as bool: ${a.toXmlString()}');
+          _log.severe('Unable to parse fixedWidth as bool: ${a.toXmlString()}');
         }
         break;
       case 'offset':
         try {
           column.offset = int.parse(value);
         } catch (e) {
-          _log('Unable to parse offset as int: ${a.toXmlString()}');
+          _log.severe('Unable to parse offset as int: ${a.toXmlString()}');
         }
         break;
       case 'checkbox':
@@ -2107,7 +2104,7 @@ Column _parseMenuNotifyColumn(XmlElement element) {
             column.checkbox = false;
             break;
           default:
-            _log('Unable to parse checkbox as bool: ${a.toXmlString()}');
+            _log.severe('Unable to parse checkbox as bool: ${a.toXmlString()}');
             break;
         }
         break;
@@ -2118,11 +2115,11 @@ Column _parseMenuNotifyColumn(XmlElement element) {
         try {
           column.number = int.parse(value);
         } catch (e) {
-          _log('Unable to parse numbr as int: ${a.toXmlString()}');
+          _log.severe('Unable to parse number as int: ${a.toXmlString()}');
         }
         break;
       default:
-        _log('Unexpected attribute name in menu notify message: $name');
+        _log.severe('Unexpected attribute name in menu notify message: $name');
         break;
     }
   }
