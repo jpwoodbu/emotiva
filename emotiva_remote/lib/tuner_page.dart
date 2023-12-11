@@ -10,7 +10,6 @@ Widget _enableTuner(BuildContext context, emotiva.Device device) {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (device.menuDisplayed) menuWarning(context),
         Text('Tuner controls unavailable.'),
         Text('Set the Main input to Tuner.'),
         SizedBox(height: 20),
