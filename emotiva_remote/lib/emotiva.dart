@@ -429,8 +429,7 @@ class Device {
   /// message if it received the command. An ack message does not indicate that
   /// it understood and acted on the command; only that the command message was
   /// received. This library currently ignores ack messages.
-  void control(String command,
-      {String value = '0', bool ack = false}) async {
+  void control(String command, {String value = '0', bool ack = false}) async {
     final request = _controlRequest(command, value, ack);
     await _send(request, controlPort);
   }
@@ -613,7 +612,11 @@ class Device {
           break;
         case 'volume':
           try {
-            final reportedVolume = _valueAttribute(element.attributes);
+            final reportedVolume = _valueAttribute(element.attributes)
+                // Trim any whitespace characters. When the volume is above
+                // -10dB, there is whitespace between the value and the sign,
+                // which breaks the double parser.
+                .replaceAll(RegExp(r'\s+'), '');
             if (reportedVolume == 'Mute') {
               muted = true;
             } else {
@@ -1687,8 +1690,13 @@ class FakeDevice extends Device {
             tunerRds = 'Nothing but good news all day long.';
             tunerSignal = '8 dBuV';
           }
-          updatedFields.addAll(
-              ['tuner_band', 'tuner_channel', 'tuner_program', 'tuner_RDS', 'tuner_signal']);
+          updatedFields.addAll([
+            'tuner_band',
+            'tuner_channel',
+            'tuner_program',
+            'tuner_RDS',
+            'tuner_signal'
+          ]);
           break;
         default:
           _log('FakeDevice does not support: $field');
