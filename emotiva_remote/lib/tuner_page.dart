@@ -6,21 +6,18 @@ import 'device_changes.dart';
 import 'util.dart';
 
 Widget _enableTuner(BuildContext context, emotiva.Device device) {
-  return Padding(
-    padding: const EdgeInsets.all(15.0),
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (device.menuDisplayed) menuWarning(context),
-          Text('Tuner controls unavailable.'),
-          Text('Set the Main input to Tuner.'),
-          SizedBox(height: 20),
-          ElevatedButton(
-              onPressed: () => addHaptic(device.setTuner),
-              child: Text('Input -> Tuner')),
-        ],
-      ),
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (device.menuDisplayed) menuWarning(context),
+        Text('Tuner controls unavailable.'),
+        Text('Set the Main input to Tuner.'),
+        SizedBox(height: 20),
+        ElevatedButton(
+            onPressed: () => addHaptic(device.setTuner),
+            child: Text('Input -> Tuner')),
+      ],
     ),
   );
 }
@@ -111,14 +108,23 @@ Widget _bandRow(emotiva.Device device) {
           ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
         ],
         selected: {device.tunerBand},
-        onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
+        onSelectionChanged: _tunerActiveInput(device)
+            ? (selection) => addHaptic(device.toggleTunerBand)
+            : null,
       )
     ],
   );
 }
 
-Widget _controls(emotiva.Device device) {
+Widget _controls(BuildContext context, emotiva.Device device) {
   const double arrowSize = 50.0;
+  TextStyle? textStyle;
+  if (!_tunerActiveInput(device)) {
+    textStyle = TextStyle(
+      color: Theme.of(context).colorScheme.error,
+      decoration: TextDecoration.lineThrough,
+    );
+  }
   return Table(
     children: [
       TableRow(children: [
@@ -136,9 +142,9 @@ Widget _controls(emotiva.Device device) {
             icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
       ]),
       TableRow(children: [
-        Center(child: Text('Preset')),
-        Center(child: Text('Seek')),
-        Center(child: Text('Tune')),
+        Center(child: Text('Preset', style: textStyle)),
+        Center(child: Text('Seek', style: textStyle)),
+        Center(child: Text('Tune', style: textStyle)),
       ]),
       TableRow(children: [
         IconButton(
@@ -158,6 +164,10 @@ Widget _controls(emotiva.Device device) {
   );
 }
 
+bool _tunerActiveInput(emotiva.Device device) {
+  return device.source == 'Tuner' || device.audioInput == 'Tuner';
+}
+
 class TunerPage extends StatelessWidget {
   const TunerPage({super.key});
 
@@ -166,11 +176,7 @@ class TunerPage extends StatelessWidget {
     return Consumer<DeviceChanges>(
         builder: (BuildContext context, DeviceChanges deviceChanges, _) {
       final device = deviceChanges.device;
-      if (device.source == 'Tuner' || device.audioInput == 'Tuner') {
-        return _build(context, device);
-      } else {
-        return _enableTuner(context, device);
-      }
+      return _build(context, device);
     });
   }
 
@@ -195,7 +201,8 @@ class TunerPage extends StatelessWidget {
               SizedBox(height: 15.0),
               _bandRow(device),
               SizedBox(height: 5.0),
-              _controls(device),
+              _controls(context, device),
+              if (!_tunerActiveInput(device)) _enableTuner(context, device),
             ],
           )
         ],
