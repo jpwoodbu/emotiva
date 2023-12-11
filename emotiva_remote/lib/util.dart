@@ -8,12 +8,17 @@ dynamic addHaptic(Function function) {
 
 Widget menuWarning(BuildContext context) {
   final errorColor = Theme.of(context).colorScheme.error;
-  return Column(children: [
-    Icon(Icons.warning, color: errorColor),
-    Text(
-      'Many settings cannot be changed while the OSD menu is active.',
-      style: TextStyle(fontWeight: FontWeight.bold, color: errorColor),
-    ),
-    SizedBox(height: 10),
-  ]);
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.warning, color: errorColor),
+      SizedBox(width: 15.0),
+      Flexible(
+        child: Text(
+          'Many settings cannot be changed while the OSD menu is active.',
+          style: TextStyle(fontWeight: FontWeight.bold, color: errorColor),
+        ),
+      ),
+    ],
+  );
 }
