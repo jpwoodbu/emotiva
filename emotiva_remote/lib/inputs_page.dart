@@ -405,7 +405,7 @@ Widget _trimControls(emotiva.Device device) {
       device.visibility['width']!)) {
     return Center(
         child:
-            Text('Speaker trim configuration unavailable in the current mode'));
+            Text('Speaker trim configuration unavailable in the current mode.'));
   }
   const double arrowSize = 50.0;
   return Wrap(
@@ -584,12 +584,16 @@ Widget _status(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
-        device.source,
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      Flexible(
+        child: Text(
+          device.source,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
       ),
-      Text(device.mode,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      Flexible(
+        child: Text(device.mode,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ),
     ],
   );
 }

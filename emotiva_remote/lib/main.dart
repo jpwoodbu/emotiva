@@ -165,9 +165,7 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Discovery(
-                            rediscover: true,
-                          )),
+                      builder: (context) => Discovery(rediscover: true)),
                   (Route<dynamic> route) => false);
             },
           ),
