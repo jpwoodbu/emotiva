@@ -25,7 +25,12 @@ Widget _nameRow(emotiva.Device device) {
             ),
           ),
           IconButton(
-            onPressed: () => addHaptic(device.togglePower),
+            onPressed: () {
+              addHaptic(device.togglePower);
+              // Workaround for no notification when the devices powers on and
+              // sets the initial power-on config.
+              Future.delayed(Duration(seconds: 2), device.updateAll);
+            },
             icon: Icon(
               Icons.power_settings_new,
               color: device.power == 'On' ? Colors.blue : Colors.amber,
