@@ -45,15 +45,11 @@ Future<void> showHelp(BuildContext context) {
 }
 
 const String knownIssues = '''
-1) Changing inputs does not properly update all the fields on the Info page. Workaround: Click the refresh icon after changing inputs.
+1) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
 
-2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
+2) HDMI color space, chroma subsamping, and HDR state are missing.
 
-3) HDMI color space, chroma subsamping, and HDR state are missing.
-
-4) While the Emotiva menu is acive, many functions are disabled.
-
-5) Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.
+3) Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.
 ''';
 
 Future<void> showKnownIssus(BuildContext context) {
