@@ -20,7 +20,7 @@ void _showErrorSnackBar(BuildContext context, String error) {
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-const String helpText = '''
+const String _helpText = '''
 Tip 1: Click the power icon in the top right to turn On/Off your processor. Enable "Video on Standby" on your Emotiva processor so that it can be turned on using this app when in standby.
 
 Tip 2: When changes happen on the Emotiva processor, data in the app should update automatically. But if you think the app is out-of-sync with the processor, click the refresh icon next to the power icon to refresh all data. Or swipe down on the info page to refresh.
@@ -30,12 +30,12 @@ Tip 3: Turn on "Touch feedback" in your system settings (under Vibration & hapti
 Tip 4: Data in the app are ONLY changed when updates are receieved from the Emotiva processor. If you see lag between clicking a button and seeing a field being updated, it's likely because it takes the Emotiva processor a moment to process the change and send the update.
 ''';
 
-Future<void> showHelp(BuildContext context) {
+Future<void> _showHelp(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       scrollable: true,
-      content: Text(helpText.trim()),
+      content: Text(_helpText.trim()),
       actions: <Widget>[
         TextButton(
             onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
@@ -44,7 +44,7 @@ Future<void> showHelp(BuildContext context) {
   );
 }
 
-const String knownIssues = '''
+const String _knownIssues = '''
 1) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
 
 2) HDMI color space, chroma subsamping, and HDR state are missing.
@@ -52,12 +52,12 @@ const String knownIssues = '''
 3) Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.
 ''';
 
-Future<void> showKnownIssus(BuildContext context) {
+Future<void> _showKnownIssus(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       scrollable: true,
-      content: Text(knownIssues.trim()),
+      content: Text(_knownIssues.trim()),
       actions: <Widget>[
         TextButton(
             onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
@@ -66,16 +66,16 @@ Future<void> showKnownIssus(BuildContext context) {
   );
 }
 
-const String roadMap = '''
+const String _roadMap = '''
 1) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
 ''';
 
-Future<void> showRoadMap(BuildContext context) {
+Future<void> _showRoadMap(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) => AlertDialog(
       scrollable: true,
-      content: Text(roadMap.trim()),
+      content: Text(_roadMap.trim()),
       actions: <Widget>[
         TextButton(
             onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
@@ -154,7 +154,7 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
     leading: IconButton(
       icon: Icon(Icons.help),
       tooltip: 'Show help',
-      onPressed: () => showHelp(context),
+      onPressed: () => _showHelp(context),
     ),
     actions: [
       PopupMenuButton(
@@ -173,11 +173,11 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
           ),
           PopupMenuItem(
             child: Text('Known issues'),
-            onTap: () => showKnownIssus(context),
+            onTap: () => _showKnownIssus(context),
           ),
           PopupMenuItem(
             child: Text('Road map'),
-            onTap: () => showRoadMap(context),
+            onTap: () => _showRoadMap(context),
           ),
         ],
       ),
