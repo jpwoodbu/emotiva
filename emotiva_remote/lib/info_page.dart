@@ -79,9 +79,11 @@ Widget _speakerPresetRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
-        'Speaker preset',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      Flexible(
+        child: Text(
+          'Speaker preset',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
       ),
       PopupMenuButton(
         child: Row(
@@ -140,8 +142,10 @@ Widget _frontDisplayBrightnessRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text('Front display brightness:  ${device.dim}%',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      Flexible(
+        child: Text('Front display brightness:  ${device.dim}%',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ),
       IconButton(
           onPressed: () => addHaptic(device.cycleFrontDisplayBrightness),
           icon: Icon(Icons.light_mode))
