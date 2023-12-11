@@ -6,12 +6,14 @@ import 'device_changes.dart';
 import 'util.dart';
 
 Widget _enableTuner(BuildContext context, emotiva.Device device) {
+  final textStyle = TextStyle(
+      fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.error);
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Tuner controls unavailable.'),
-        Text('Set the Main input to Tuner.'),
+        Text('Tuner controls unavailable.', style: textStyle),
+        Text('Set the Main input to Tuner.', style: textStyle),
         SizedBox(height: 20),
         ElevatedButton(
             onPressed: () => addHaptic(device.setTuner),
