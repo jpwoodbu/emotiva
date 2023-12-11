@@ -6,11 +6,11 @@ import 'dart:math';
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
 
-const int pingPort = 7000;
-const int transponderPort = 7001;
-const String broadcastAddress = '255.255.255.255';
+const int _pingPort = 7000;
+const int _transponderPort = 7001;
+const String _broadcastAddress = '255.255.255.255';
 // The highest protocol version this library supports.
-const String protocolVersion = '3.0';
+const String _protocolVersion = '3.0';
 
 void _log(String message) {
   developer.log(message, name: 'emotiva');
@@ -19,7 +19,7 @@ void _log(String message) {
 String _pingRequest() {
   final builder = XmlBuilder();
   builder.processing('xml', 'version="1.0"');
-  builder.element('emotivaPing', attributes: {'protocol': protocolVersion});
+  builder.element('emotivaPing', attributes: {'protocol': _protocolVersion});
   return builder.buildDocument().toXmlString();
 }
 
@@ -30,7 +30,7 @@ String _pingRequest() {
 /// socket waits for [timeoutSec] before giving up and throwing an exception.
 Future<Device> discovery(int timeoutSec) async {
   final stream =
-      await RawDatagramSocket.bind(InternetAddress.anyIPv4, transponderPort);
+      await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
   final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
   stream.broadcastEnabled = true;
   final ping = _pingRequest();
@@ -38,7 +38,7 @@ Future<Device> discovery(int timeoutSec) async {
     switch (event) {
       case RawSocketEvent.write:
         final bytesSent = stream.send(
-            ping.codeUnits, InternetAddress(broadcastAddress), pingPort);
+            ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
@@ -253,9 +253,9 @@ class Device {
   int _sequenceNumber = -1;
 
   /// The protocol version to request after device discovery.
-  String _protocolVersion() {
+  String __protocolVersion() {
     // We currently only support minor version 0 of major version 3.
-    if (controlVersion.startsWith('3.')) return protocolVersion;
+    if (controlVersion.startsWith('3.')) return _protocolVersion;
     // Fall back to 2.0 otherwise.
     return '2.0';
   }
@@ -339,7 +339,7 @@ class Device {
   String _requestWithFields(String requestType, Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element(requestType, attributes: {'protocol': _protocolVersion()},
+    builder.element(requestType, attributes: {'protocol': __protocolVersion()},
         nest: () {
       for (final f in fields) {
         builder.element(f);
@@ -409,7 +409,7 @@ class Device {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('emotivaControl',
-        attributes: {'protocol': _protocolVersion()}, nest: () {
+        attributes: {'protocol': __protocolVersion()}, nest: () {
       builder.element(command,
           attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
     });
