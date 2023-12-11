@@ -429,7 +429,7 @@ class Device {
   /// message if it received the command. An ack message does not indicate that
   /// it understood and acted on the command; only that the command message was
   /// received. This library currently ignores ack messages.
-  Future<void> control(String command,
+  void control(String command,
       {String value = '0', bool ack = false}) async {
     final request = _controlRequest(command, value, ack);
     await _send(request, controlPort);
@@ -774,191 +774,191 @@ class Device {
   }
 
   /// Changes the volume by [delta]dBs.
-  void volumeDelta(double delta) async {
-    await control('volume', value: delta.toString());
+  void volumeDelta(double delta) {
+    control('volume', value: delta.toString());
   }
 
   /// Sets the volume to [level]dBs.
-  void volumeSet(int level) async {
-    await control('set_volume', value: level.toString());
+  void volumeSet(int level) {
+    control('set_volume', value: level.toString());
   }
 
-  void togglePower() async {
+  void togglePower() {
     if (power == 'On') {
-      await control('power_off');
+      control('power_off');
     } else {
-      await control('power_on');
+      control('power_on');
     }
   }
 
-  void toggleLoudness() async {
-    await control('loudness');
+  void toggleLoudness() {
+    control('loudness');
   }
 
-  void toggleMute() async {
-    await control('mute');
+  void toggleMute() {
+    control('mute');
   }
 
   /// Cycles the front display brightness.
   ///
   /// Brightness values cycle through 0%, 20%, 40%, 60%, 80%, and 100%.
-  void cycleFrontDisplayBrightness() async {
-    await control('dim');
+  void cycleFrontDisplayBrightness() {
+    control('dim');
   }
 
-  void toggleMenu() async {
-    await control('menu');
+  void toggleMenu() {
+    control('menu');
   }
 
-  void menuUp() async {
-    await control('up');
+  void menuUp() {
+    control('up');
   }
 
-  void menuDown() async {
-    await control('down');
+  void menuDown() {
+    control('down');
   }
 
-  void menuLeft() async {
-    await control('left');
+  void menuLeft() {
+    control('left');
   }
 
-  void menuRight() async {
-    await control('right');
+  void menuRight() {
+    control('right');
   }
 
-  void menuEnter() async {
-    await control('enter');
+  void menuEnter() {
+    control('enter');
   }
 
   /// Displays the info table on OSD.
-  void info() async {
-    await control('info');
+  void info() {
+    control('info');
   }
 
   /// Sets the source to the user configurable inputs.
-  void setSource(int input) async {
-    await control('source_$input');
+  void setSource(int input) {
+    control('source_$input');
   }
 
   /// Sets the source to the HDMI input corresponding to [input].
-  void setHdmi(int input) async {
-    await control('hdmi$input');
+  void setHdmi(int input) {
+    control('hdmi$input');
   }
 
   /// Sets the audio source to the coax input corresponding to [input].
-  void setCoax(int input) async {
-    await control('coax$input');
+  void setCoax(int input) {
+    control('coax$input');
   }
 
   /// Sets the audio source to the balanced digital input.
-  void setAesEbu() async {
+  void setAesEbu() {
     // coax5 pulls up the AES/EBU input on the RMC-1.
-    await control('coax5');
+    control('coax5');
   }
 
   /// Sets the audio source to the optical input corresponding to [input].
-  void setOptical(int input) async {
-    await control('optical$input');
+  void setOptical(int input) {
+    control('optical$input');
   }
 
-  void setArc() async {
-    await control('ARC');
+  void setArc() {
+    control('ARC');
   }
 
-  void setUsb() async {
-    await control('usb_stream');
+  void setUsb() {
+    control('usb_stream');
   }
 
-  void setTuner() async {
-    await control('tuner');
+  void setTuner() {
+    control('tuner');
   }
 
   /// Sets the audio source to the analog input corresponding to [input].
-  void setAnalog(int input) async {
-    await control('analog$input');
+  void setAnalog(int input) {
+    control('analog$input');
   }
 
   /// Sets the audio source to the balanced analog input.
-  void setBalancedInput() async {
+  void setBalancedInput() {
     // analog5 bring up the balanced input on the RMC-1.
-    await control('analog5');
+    control('analog5');
   }
 
   /// Sets the audio source to the front analog input.
-  void setFront() async {
-    await control('front_in');
+  void setFront() {
+    control('front_in');
   }
 
-  void modeAuto() async {
-    await control('auto');
+  void modeAuto() {
+    control('auto');
   }
 
-  void modeStereo() async {
-    await control('stereo');
+  void modeStereo() {
+    control('stereo');
   }
 
-  void modeDirect() async {
-    await control('direct');
+  void modeDirect() {
+    control('direct');
   }
 
-  void modeReferenceStereo() async {
-    await control('reference_stereo');
+  void modeReferenceStereo() {
+    control('reference_stereo');
   }
 
-  void modeDolby() async {
-    await control('dolby');
+  void modeDolby() {
+    control('dolby');
   }
 
-  void modeDts() async {
-    await control('dts');
+  void modeDts() {
+    control('dts');
   }
 
-  void modeAllStereo() async {
-    await control('all_stereo');
+  void modeAllStereo() {
+    control('all_stereo');
   }
 
-  void speakerPreset1() async {
-    await control('preset1');
+  void speakerPreset1() {
+    control('preset1');
   }
 
-  void speakerPreset2() async {
-    await control('preset2');
+  void speakerPreset2() {
+    control('preset2');
   }
 
   /// Adjusts the center speaker trim.
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimCenter(double trim) async {
+  void trimCenter(double trim) {
     trim = trim * 2;
-    await control('center_trim_set', value: trim.toString());
+    control('center_trim_set', value: trim.toString());
   }
 
   /// Adjusts the subwoofer trim.
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimSubwoofer(double trim) async {
+  void trimSubwoofer(double trim) {
     trim = trim * 2;
-    await control('subwoofer_trim_set', value: trim.toString());
+    control('subwoofer_trim_set', value: trim.toString());
   }
 
   /// Adjusts the trim for surround speakers.
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimSurround(double trim) async {
+  void trimSurround(double trim) {
     trim = trim * 2;
-    await control('surround_trim_set', value: trim.toString());
+    control('surround_trim_set', value: trim.toString());
   }
 
   /// Adjusts the trim for back (i.e. rear) speakers.
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimBack(double trim) async {
+  void trimBack(double trim) {
     trim = trim * 2;
-    await control('back_trim_set', value: trim.toString());
+    control('back_trim_set', value: trim.toString());
   }
 
   /// Adjusts the trim for height speakers.
@@ -966,9 +966,9 @@ class Device {
   /// Only available in protocol version >= 3.0.
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimHeight(double trim) async {
+  void trimHeight(double trim) {
     trim = trim * 2;
-    await control('height_trim_set', value: trim.toString());
+    control('height_trim_set', value: trim.toString());
   }
 
   /// Adjusts the trim for width speakers.
@@ -976,111 +976,111 @@ class Device {
   /// Only available in protocol version >= 3.0.
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  void trimWidth(double trim) async {
+  void trimWidth(double trim) {
     trim = trim * 2;
-    await control('width_trim_set', value: trim.toString());
+    control('width_trim_set', value: trim.toString());
   }
 
-  void zone2TogglePower() async {
-    await control('zone2_power');
+  void zone2TogglePower() {
+    control('zone2_power');
   }
 
   /// Changes the zone 2 volume by [delta]dBs.
-  void zone2VolumeDelta(double delta) async {
-    await control('zone2_volume', value: delta.toString());
+  void zone2VolumeDelta(double delta) {
+    control('zone2_volume', value: delta.toString());
   }
 
   /// Sets the volume to [level]dBs.
-  void zone2VolumeSet(int level) async {
-    await control('zone2_set_volume', value: level.toString());
+  void zone2VolumeSet(int level) {
+    control('zone2_set_volume', value: level.toString());
   }
 
   // This does not appear to work.
-  void zone2ToggleMute() async {
-    await control('zone2_mute');
+  void zone2ToggleMute() {
+    control('zone2_mute');
   }
 
-  void zone2SetAnalog(int input) async {
-    await control('zone2_analog$input');
+  void zone2SetAnalog(int input) {
+    control('zone2_analog$input');
   }
 
-  void zone2SetBalancedInput() async {
+  void zone2SetBalancedInput() {
     // analog5 bring up the balanced input on the RMC-1.
-    await control('zone2_analog5');
+    control('zone2_analog5');
   }
 
-  void zone2SetFront() async {
-    await control('zone2_front_in');
+  void zone2SetFront() {
+    control('zone2_front_in');
   }
 
   /// Sets the zone 2 input to follow the main (i.e. zone 1) input.
-  void zone2FollowMain() async {
-    await control('zone2_follow_main');
+  void zone2FollowMain() {
+    control('zone2_follow_main');
   }
 
-  void zone2SetCoax(int input) async {
-    await control('zone2_coax$input');
+  void zone2SetCoax(int input) {
+    control('zone2_coax$input');
   }
 
-  void zone2SetOptical(int input) async {
-    await control('zone2_optical$input');
-  }
-
-  // Not in the API docs.
-  void zone2SetUsb() async {
-    await control('zone2_usb_stream');
+  void zone2SetOptical(int input) {
+    control('zone2_optical$input');
   }
 
   // Not in the API docs.
-  void zone2SetAesEbu() async {
+  void zone2SetUsb() {
+    control('zone2_usb_stream');
+  }
+
+  // Not in the API docs.
+  void zone2SetAesEbu() {
     // coax5 pulls up the AES/EBU input on the RMC-1.
-    await control('zone2_coax5');
+    control('zone2_coax5');
   }
 
   // Not in the API docs.
-  void zone2SetTuner() async {
-    await control('zone2_tuner');
+  void zone2SetTuner() {
+    control('zone2_tuner');
   }
 
-  void toggleTunerBand() async {
+  void toggleTunerBand() {
     // Applies to both zones.
-    await control('zone1_band');
+    control('zone1_band');
   }
 
-  void setBand(TunerBand band) async {
+  void setBand(TunerBand band) {
     if (band == TunerBand.am) {
-      await control('band_am');
+      control('band_am');
     } else {
-      await control('band_fm');
+      control('band_fm');
     }
   }
 
-  void frequencyHigher() async {
-    await control('frequency', value: '1');
+  void frequencyHigher() {
+    control('frequency', value: '1');
   }
 
-  void frequencyLower() async {
-    await control('frequency', value: '-1');
+  void frequencyLower() {
+    control('frequency', value: '-1');
   }
 
-  void seekHigher() async {
-    await control('seek', value: '1');
+  void seekHigher() {
+    control('seek', value: '1');
   }
 
-  void seekLower() async {
-    await control('seek', value: '-1');
+  void seekLower() {
+    control('seek', value: '-1');
   }
 
-  void channelUp() async {
-    await control('channel', value: '1');
+  void channelUp() {
+    control('channel', value: '1');
   }
 
-  void channelDown() async {
-    await control('channel', value: '-1');
+  void channelDown() {
+    control('channel', value: '-1');
   }
 
-  void setChannel(int channel) async {
-    await control('channel_$channel');
+  void setChannel(int channel) {
+    control('channel_$channel');
   }
 }
 
@@ -1941,7 +1941,7 @@ class FakeDevice extends Device {
   @override
   Future<void> _send(String request, int destinationPort) async {
     // destinationPort seems to always be controlPort.
-    return _parseRequest(request);
+    _parseRequest(request);
   }
 
   @override
@@ -1971,6 +1971,7 @@ Future<FakeDevice> futureFakeDevice() async {
   return FakeDevice();
 }
 
+// These enums represet the UI elements of the on-screen display menu.
 enum Arrow {
   no,
   up,
