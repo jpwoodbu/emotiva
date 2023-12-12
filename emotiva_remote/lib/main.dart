@@ -14,11 +14,6 @@ import 'zone2_page.dart';
 
 final _log = Logger('main');
 
-void _showErrorSnackBar(BuildContext context, String error) {
-  final snackBar = SnackBar(content: Text(error));
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
 const String _helpText = '''
 Tip 1: Click the power icon in the top right to turn On/Off your processor. Enable "Video on Standby" on your Emotiva processor so that it can be turned on using this app when in standby.
 
@@ -44,11 +39,13 @@ Future<void> _showHelp(BuildContext context) {
 }
 
 const String _knownIssues = '''
-1) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
+1) Some settings changes on Emotiva processors take around 10 seconds before they're communicated to the app. E.g. changing inputs.
 
-2) HDMI color space, chroma subsamping, and HDR state are missing.
+2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
 
-3) Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.
+3) HDMI color space, chroma subsamping, and HDR state are missing.
+
+4) Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.
 ''';
 
 Future<void> _showKnownIssus(BuildContext context) {
@@ -67,6 +64,8 @@ Future<void> _showKnownIssus(BuildContext context) {
 
 const String _roadMap = '''
 1) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
+
+2) If there's enough interest, making an iOS version of this app.
 ''';
 
 Future<void> _showRoadMap(BuildContext context) {
