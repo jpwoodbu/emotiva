@@ -2125,3 +2125,27 @@ Column _parseMenuNotifyColumn(XmlElement element) {
   }
   return column;
 }
+
+/// Provide the column/row position for an [arrowType].
+/// 
+/// A value of -1 means that [arrowType] is not currently visible.  If the
+/// [arrowType] is left or right, the returned value respresents which row
+/// should display the arrow. If the [arrowType] is up or down, the returned
+/// value represents which column should display the arrow.
+int arrowPosition(Menu menu, Arrow arrowType) {
+  for (final row in menu.rows) {
+    for (final column in row.columns) {
+      switch (arrowType) {
+        case Arrow.up || Arrow.down:
+          if (column.arrow == arrowType) return column.number;
+          break;
+        case Arrow.left || Arrow.right:
+          if (column.arrow == arrowType) return row.number;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  return -1;
+}

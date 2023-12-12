@@ -5,25 +5,6 @@ import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 import 'util.dart';
 
-// TODO - Should this function be in the emotiva module?
-int _arrowPosition(emotiva.Menu menu, emotiva.Arrow arrowType) {
-  for (final row in menu.rows) {
-    for (final column in row.columns) {
-      switch (arrowType) {
-        case emotiva.Arrow.up || emotiva.Arrow.down:
-          if (column.arrow == arrowType) return column.number;
-          break;
-        case emotiva.Arrow.left || emotiva.Arrow.right:
-          if (column.arrow == arrowType) return row.number;
-          break;
-        default:
-          break;
-      }
-    }
-  }
-  return -1;
-}
-
 double _iconSize(BoxConstraints boxConstraints) {
   // At 100, the controls table will be 348w x 424h. That will be our max
   // and default size.
@@ -66,9 +47,9 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
   const inset = 2.0;
   const arrowSize = 25.0;
   final leftArrowPosition =
-      _arrowPosition(device.menuContents, emotiva.Arrow.left);
+      emotiva.arrowPosition(device.menuContents, emotiva.Arrow.left);
   final rightArrowPosition =
-      _arrowPosition(device.menuContents, emotiva.Arrow.right);
+      emotiva.arrowPosition(device.menuContents, emotiva.Arrow.right);
   // Leave space for a potential arrow.
   List<Widget> columns = [SizedBox(width: arrowSize)];
   if (rowIndex == leftArrowPosition) {
@@ -138,7 +119,7 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
 
 TableRow _verticleArrow(emotiva.Menu menu, emotiva.Arrow arrowType) {
   const height = 25.0;
-  final arrowPosition = _arrowPosition(menu, arrowType);
+  final arrowPosition = emotiva.arrowPosition(menu, arrowType);
   final List<Widget> children = [SizedBox(width: 25.0)];
   for (int i = 0; i < 4; i++) {
     if (arrowPosition == i) {
