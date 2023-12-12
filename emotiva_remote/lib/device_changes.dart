@@ -7,38 +7,38 @@ final _log = Logger('DeviceChanges');
 
 class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
-  late Stream<String> controlPortStream;
-  late Stream<String> notifyPortStream;
-  late Stream<String> menuNotifyPortStream;
+  late Stream<String> _controlPortStream;
+  late Stream<String> _notifyPortStream;
+  late Stream<String> _menuNotifyPortStream;
 
   DeviceChanges(this.device) {
-    controlPortStream = device.controlPortStream(device.address!);
-    notifyPortStream = device.notifyPortStream(device.address!);
-    menuNotifyPortStream = device.menuNotifyPortStream(device.address!);
-    handleControlPackets();
+    _controlPortStream = device.controlPortStream(device.address!);
+    _notifyPortStream = device.notifyPortStream(device.address!);
+    _menuNotifyPortStream = device.menuNotifyPortStream(device.address!);
+    _handleControlPackets();
     _log.info('handling control packets');
-    handleNotifyPackets();
+    _handleNotifyPackets();
     _log.info('handling notify packets');
-    handleMenuNotifyPackets();
+    _handleMenuNotifyPackets();
     _log.info('handling menu notify packets');
   }
 
-  Future<void> handleControlPackets() async {
-    await for (final packet in controlPortStream) {
+  Future<void> _handleControlPackets() async {
+    await for (final packet in _controlPortStream) {
       device.parsePacket(packet);
       notifyListeners();
     }
   }
 
-  Future<void> handleNotifyPackets() async {
-    await for (final packet in notifyPortStream) {
+  Future<void> _handleNotifyPackets() async {
+    await for (final packet in _notifyPortStream) {
       device.parsePacket(packet);
       notifyListeners();
     }
   }
 
-  Future<void> handleMenuNotifyPackets() async {
-    await for (final packet in menuNotifyPortStream) {
+  Future<void> _handleMenuNotifyPackets() async {
+    await for (final packet in _menuNotifyPortStream) {
       device.parsePacket(packet);
       notifyListeners();
     }
