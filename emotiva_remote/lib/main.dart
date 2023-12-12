@@ -88,7 +88,7 @@ void main() {
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
     print('${record.level.name}: ${record.time}: ${record.message}');
-   });
+  });
   runApp(const MyApp());
 }
 
@@ -343,7 +343,11 @@ class _DiscoveryState extends State<Discovery> {
       _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
     } else {
-      _device = emotiva.discovery(3);
+      // Discovery is usually very fast... O(ms). To avoid the scanning widget
+      // being displayed for such a short time that they user can't read it
+      // (which would be janky), delay discovery for a couple of seconds.
+      _device = Future<emotiva.Device>.delayed(
+          Duration(seconds: 2), () => emotiva.discovery(3));
     }
   }
 
