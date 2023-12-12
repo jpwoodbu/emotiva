@@ -692,8 +692,12 @@ class Device {
           selectedMovieMusic = _valueAttribute(element.attributes);
           break;
         case 'treble':
+          // 'treble' is in the API docs, but my RMC-1L doesn't appear to have
+          // this control.
           break;
         case 'bass':
+          // 'bass' is in the API docs, but my RMC-1L doesn't appear to have
+          // this control.
           break;
         case 'zone2_power':
           final value = _valueAttribute(element.attributes);
@@ -761,6 +765,8 @@ class Device {
           }
           break;
         case 'menu_update':
+          // There's no data in these tags that we need. Menu contents come from
+          // MenuNotify messages.
           break;
         case 'source_tuner':
           // I don't know what this one is. It's listed as a command in their
@@ -1139,12 +1145,16 @@ class FakeDevice extends Device {
 
   Menu _initMenuContent() {
     final menu = Menu();
+    // Their API docs say there are always 11 rows.
     for (int i = 0; i < 11; i++) {
       final row = Row(i);
+      // Their API docs say there are always 3 columns.
       for (int j = 0; j < 3; j++) {
         final column = Column(j, false, Arrow.no, false);
         row.columns.add(column);
       }
+      // We only display rows 4, 5, and 6. The actual front display of the
+      // RMC-1L does the same thing.
       if (i == 4) {
         row.columns[1].value = 'Lip Synch Auto';
         row.columns[1].arrow = Arrow.up;
