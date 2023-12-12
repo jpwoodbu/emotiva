@@ -446,8 +446,9 @@ class Device {
         return bool.parse(a.value.trim(), caseSensitive: false);
       }
     }
-    // TODO - Maybe just log and return true?
-    throw 'Element missing visible attribute';
+    _log.severe('Element missing visible attribute: $attributes');
+    // Usually visible is set to true. Default to assuming it is.
+    return true;
   }
 
   String _nameAttribute(List<XmlAttribute> attributes) {
@@ -456,8 +457,8 @@ class Device {
         return a.value.trim();
       }
     }
-    // TODO - Maybe just log and return true?
-    throw 'Element missing name attribute';
+    _log.severe('Element missing name attribute: $attributes');
+    return 'Unknown';
   }
 
   int _getSequence(XmlElement element) {
