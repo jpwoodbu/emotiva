@@ -394,7 +394,7 @@ void _modeBottomSheet(BuildContext context, emotiva.Device device) {
   );
 }
 
-Widget _trimControls(emotiva.Device device) {
+Widget _trimControls(BuildContext context, emotiva.Device device) {
   // If no trims are visible, don't try to render an empty table. That
   // would throw an error.
   if (!(device.visibility['center']! ||
@@ -404,8 +404,11 @@ Widget _trimControls(emotiva.Device device) {
       device.visibility['height']! ||
       device.visibility['width']!)) {
     return Center(
-        child:
-            Text('Speaker trim configuration unavailable in the current mode.'));
+        child: Text(
+            'Speaker trim configuration unavailable in the current mode.',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.error)));
   }
   const double arrowSize = 50.0;
   return Wrap(
@@ -611,7 +614,7 @@ class InputsPage extends StatelessWidget {
           SizedBox(height: 15),
           _inputs(context, device),
           SizedBox(height: 25),
-          _trimControls(device),
+          _trimControls(context, device),
         ],
       ),
     );
