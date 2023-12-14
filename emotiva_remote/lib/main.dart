@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -333,11 +334,23 @@ class Discovery extends StatefulWidget {
 
 class _DiscoveryState extends State<Discovery> {
   late Future<emotiva.Device> _device;
+  late final AppLifecycleListener _listener;
   emotiva.Device? device;
 
   @override
   initState() {
     super.initState();
+    _listener = AppLifecycleListener(
+      onExitRequested: () async {
+        if (device != null) {
+          _log.info('Unsubscribing from all fields.');
+          await device!.unsubscribeAll();
+          _log.info('Closing sockets for device.');
+          await device!.closeSockets();
+        }
+        return AppExitResponse.exit;
+      },
+    );
     if (widget.useFake) {
       _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
@@ -353,12 +366,7 @@ class _DiscoveryState extends State<Discovery> {
   @override
   void dispose() async {
     super.dispose();
-    if (device != null) {
-      _log.info('Unsubscribing from all fields.');
-      await device!.unsubscribeAll();
-      _log.info('Closing sockets for device.');
-      await device!.closeSockets();
-    }
+    _listener.dispose();
   }
 
   @override
