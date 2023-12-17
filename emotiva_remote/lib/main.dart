@@ -20,7 +20,7 @@ Tip 1: Click the power icon in the top right to turn On/Off your processor. Enab
 
 Tip 2: When changes happen on the Emotiva processor, data in the app should update automatically. But if you think the app is out-of-sync with the processor, click the refresh icon next to the power icon to refresh all data. Or swipe down on the info page to refresh.
 
-Tip 3: Turn on "Touch feedback" in your system settings (under Vibration & haptics). Everytime the app sends a network packet to the Emotiva processor, it makes a slight vibration.
+Tip 3: Turn on "Touch feedback" in your phone/tablet system settings (under Vibration & haptics). Everytime the app sends a network packet to the Emotiva processor, it makes a slight vibration.
 
 Tip 4: Data in the app are ONLY changed when updates are receieved from the Emotiva processor. If you see lag between clicking a button and seeing a field being updated, it's likely because it takes the Emotiva processor a moment to process the change and send the update.
 ''';
@@ -40,9 +40,9 @@ Future<void> _showHelp(BuildContext context) {
 }
 
 const String _knownIssues = '''
-1) Some settings changes on Emotiva processors take around 10 seconds before they're communicated to the app. E.g. changing inputs.
+1) Some setting changes on Emotiva processors take around 10 seconds before they're communicated to the app. E.g. changing inputs.
 
-2) Speaker trim fields are not updated if the speaker trim is changed using another remote (e.g. another app or the IR remote).
+2) Speaker trim levels are not updated in the app if the level is changed using another remote. E.g. another app or the IR remote.
 
 3) HDMI color space, chroma subsamping, and HDR state are missing.
 
@@ -344,9 +344,9 @@ class _DiscoveryState extends State<Discovery> {
       onExitRequested: () async {
         if (device != null) {
           _log.info('Unsubscribing from all fields.');
-          await device!.unsubscribeAll();
+          await device?.unsubscribeAll();
           _log.info('Closing sockets for device.');
-          await device!.closeSockets();
+          await device?.closeSockets();
         }
         return AppExitResponse.exit;
       },
@@ -386,12 +386,12 @@ class _DiscoveryState extends State<Discovery> {
           return ChangeNotifierProvider(
             create: (context) {
               _log.info('Found Emotiva device.');
-              device = snapshot.data!;
+              device = snapshot.data;
               // Initializing DeviceChanges to set up the UDP port listeners
               // before calling subscribeAll(), which should result in
               // populating the attributes of device.
               final deviceChanges = DeviceChanges(device!);
-              device!.subscribeAll();
+              device?.subscribeAll();
               return deviceChanges;
             },
             child: MainView(),
