@@ -384,7 +384,7 @@ class _DiscoveryState extends State<Discovery> {
             return NoDevicesFoundPage();
           }
           return ChangeNotifierProvider(
-            create: (context) {
+            create: (_) {
               _log.info('Found Emotiva device.');
               device = snapshot.data;
               // Initializing DeviceChanges to set up the UDP port listeners
