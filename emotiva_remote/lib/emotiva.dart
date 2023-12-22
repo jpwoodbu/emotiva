@@ -244,6 +244,7 @@ class Device {
     'tuner_RDS',
   };
   final List<RawDatagramSocket> _sockets = [];
+  RawDatagramSocket? _sendSocket;
   final Set<String> _subscribedFields = {};
   // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
   // not yet gotten a real sequence number.
@@ -303,33 +304,19 @@ class Device {
     for (RawDatagramSocket s in _sockets) {
       s.close();
     }
+    if (_sendSocket != null) _sendSocket!.close();
   }
 
   Future<void> _send(String request, int destinationPort) async {
     if (address == null) {
       throw 'Address needs to be set first.';
     }
-    final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-    await for (final event in stream) {
-      switch (event) {
-        case RawSocketEvent.write:
-          _log.fine('sending: $request');
-          final bytesSent =
-              stream.send(request.codeUnits, address!, destinationPort);
-          stream.close();
-          if (bytesSent == 0) {
-            throw 'No bytes were sent';
-          }
-          break;
-        case RawSocketEvent.read:
-          break;
-        case RawSocketEvent.closed:
-          break;
-        case RawSocketEvent.readClosed:
-          break;
-        default:
-          throw 'Unexpected event $event';
-      }
+    _sendSocket ??= await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+    _log.fine('sending: $request');
+    final bytesSent =
+        _sendSocket!.send(request.codeUnits, address!, destinationPort);
+    if (bytesSent == 0) {
+      throw 'No bytes were sent';
     }
   }
 
@@ -1347,7 +1334,8 @@ class FakeDevice extends Device {
             muted = false;
             updatedFields.add(field);
           } catch (e) {
-            _log.severe('Unable to parse volume delta: ${element.toXmlString()}');
+            _log.severe(
+                'Unable to parse volume delta: ${element.toXmlString()}');
           }
           break;
         case 'loudness':
@@ -2140,7 +2128,7 @@ Column _parseMenuNotifyColumn(XmlElement element) {
 }
 
 /// Provide the column/row position for an [arrowType].
-/// 
+///
 /// A value of -1 means that [arrowType] is not currently visible.  If the
 /// [arrowType] is left or right, the returned value respresents which row
 /// should display the arrow. If the [arrowType] is up or down, the returned
