@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
@@ -88,6 +90,11 @@ void main() {
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
     print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+  GoogleFonts.config.allowRuntimeFetching = false;
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('google_fonts/LICENSE.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
   runApp(const MyApp());
 }
@@ -180,6 +187,10 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
           PopupMenuItem(
             child: Text('Road map'),
             onTap: () => _showRoadMap(context),
+          ),
+          PopupMenuItem(
+            child: Text('Licenses'),
+            onTap: () => showLicensePage(context: context),
           ),
         ],
       ),

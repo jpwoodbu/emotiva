@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 import 'emotiva.dart' as emotiva;
@@ -88,10 +89,8 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
         );
       }
     } else {
-      // TODO - fixed width and offset features. This might require including
-      // fonts from Google Fonts in my assets.
-      const fontSize = 12.0;
-      const fontWeight = FontWeight.w400;
+      final textStyle =
+          TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0, color: color);
       columns.add(
         Container(
           margin: EdgeInsets.all(inset),
@@ -99,11 +98,9 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
           color: backgroundColor,
           child: Text(
             column.value,
-            style: TextStyle(
-              fontWeight: fontWeight,
-              fontSize: fontSize,
-              color: color,
-            ),
+            style: column.fixedWidth
+                ? GoogleFonts.robotoMono(textStyle: textStyle)
+                : textStyle,
           ),
         ),
       );
@@ -199,8 +196,7 @@ Widget _onScreenDisplay(emotiva.Device device) {
   );
 }
 
-Widget _controls(emotiva.Device device,
-    BoxConstraints boxConstraints) {
+Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
   final iconSize = _iconSize(boxConstraints);
   return Table(
     defaultColumnWidth: IntrinsicColumnWidth(),

@@ -2001,6 +2001,8 @@ class Column {
   bool highlight = false;
   Arrow arrow = Arrow.no;
   bool fixedWidth = false;
+  // The offset seems to be only informational. It's only used when fixedWidth
+  // is true and the contents of "value" already includes the offset padding.
   int? offset;
   bool? checkbox;
   String value;
