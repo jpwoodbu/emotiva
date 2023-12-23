@@ -127,7 +127,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
       widgets.add(
         ElevatedButton.icon(
           onPressed: () => _setSource(context, device, i),
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.person),
           label: Text(name),
         ),
       );
@@ -163,36 +163,36 @@ void _hdmiBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 1),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 1')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 1')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 2),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 2')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 2')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 3),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 3')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 3')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 4),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 4')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 4')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 5),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 5')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 5')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 6),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 6')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 6')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 7),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 7')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 7')),
             ElevatedButton.icon(
                 onPressed: () => _setHdmi(context, device, 8),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI 8')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('HDMI 8')),
           ],
         ),
       );
@@ -211,20 +211,20 @@ void _coaxBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 1),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 1')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 1')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 2),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 2')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 2')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 3),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 3')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 3')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 4),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 4')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 4')),
           ],
         ),
       );
@@ -243,20 +243,20 @@ void _opticalBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 1),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 1')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 1')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 2),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 2')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 2')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 3),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 3')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 3')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 4),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 4')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 4')),
           ],
         ),
       );
@@ -275,12 +275,12 @@ void _xlrBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setAesEbu(context, device),
-                icon: Icon(Icons.developer_board),
-                label: Text('AES/EBU')),
+                icon: const Icon(Icons.developer_board),
+                label: const Text('AES/EBU')),
             ElevatedButton.icon(
                 onPressed: () => _setBalancedInput(context, device),
-                icon: Icon(Icons.album),
-                label: Text('Balanced Input')),
+                icon: const Icon(Icons.album),
+                label: const Text('Balanced Input')),
           ],
         ),
       );
@@ -299,16 +299,16 @@ void _analogBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 1),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 1')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 1')),
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 2),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 2')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 2')),
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 3),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 3')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 3')),
           ],
         ),
       );
@@ -328,20 +328,20 @@ void _otherBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setArc(context, device),
-                icon: Icon(Icons.settings_input_hdmi),
-                label: Text('ARC')),
+                icon: const Icon(Icons.settings_input_hdmi),
+                label: const Text('ARC')),
             ElevatedButton.icon(
                 onPressed: () => _setUsb(context, device),
-                icon: Icon(Icons.usb),
-                label: Text('USB')),
+                icon: const Icon(Icons.usb),
+                label: const Text('USB')),
             ElevatedButton.icon(
                 onPressed: () => _setTuner(context, device),
-                icon: Icon(Icons.radio),
-                label: Text('Tuner')),
+                icon: const Icon(Icons.radio),
+                label: const Text('Tuner')),
             ElevatedButton.icon(
                 onPressed: () => _setFront(context, device),
-                icon: Icon(Icons.smartphone),
-                label: Text('Front')),
+                icon: const Icon(Icons.smartphone),
+                label: const Text('Front')),
           ],
         ),
       );
@@ -361,32 +361,32 @@ void _modeBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setModeAuto(context, device),
-                icon: Icon(Icons.surround_sound),
-                label: Text('Auto')),
+                icon: const Icon(Icons.surround_sound),
+                label: const Text('Auto')),
             ElevatedButton.icon(
                 onPressed: () => _setModeStereo(context, device),
-                icon: Icon(Icons.speaker_group),
-                label: Text('Stereo')),
+                icon: const Icon(Icons.speaker_group),
+                label: const Text('Stereo')),
             ElevatedButton.icon(
                 onPressed: () => _setModeDirect(context, device),
-                icon: Icon(Icons.arrow_forward),
-                label: Text('Direct')),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Direct')),
             ElevatedButton.icon(
                 onPressed: () => _setModeReferenceStereo(context, device),
-                icon: Icon(Icons.hearing),
-                label: Text('Reference Stereo')),
+                icon: const Icon(Icons.hearing),
+                label: const Text('Reference Stereo')),
             ElevatedButton.icon(
                 onPressed: () => _setModeDolby(context, device),
-                icon: Icon(Icons.surround_sound),
-                label: Text('Dolby')),
+                icon: const Icon(Icons.surround_sound),
+                label: const Text('Dolby')),
             ElevatedButton.icon(
                 onPressed: () => _setModeDts(context, device),
-                icon: Icon(Icons.surround_sound),
-                label: Text('DTS')),
+                icon: const Icon(Icons.surround_sound),
+                label: const Text('DTS')),
             ElevatedButton.icon(
                 onPressed: () => _setModeAllStereo(context, device),
-                icon: Icon(Icons.hub),
-                label: Text('All Stereo')),
+                icon: const Icon(Icons.hub),
+                label: const Text('All Stereo')),
           ],
         ),
       );
@@ -420,12 +420,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpCenterTrim(0.5, device),
               tooltip: 'Center trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Center'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Center'),
           IconButton(
               onPressed: () => _bumpCenterTrim(-0.5, device),
               tooltip: 'Center trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       if (device.visibility['subwoofer']!)
         Column(children: [
@@ -433,12 +433,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpSubwooferTrim(0.5, device),
               tooltip: 'Subwoofer trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Sub'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Sub'),
           IconButton(
               onPressed: () => _bumpSubwooferTrim(-0.5, device),
               tooltip: 'Subwoofer trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       if (device.visibility['surround']!)
         Column(children: [
@@ -446,12 +446,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpSurroundTrim(0.5, device),
               tooltip: 'Surround trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Surround'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Surround'),
           IconButton(
               onPressed: () => _bumpSurroundTrim(-0.5, device),
               tooltip: 'Surround trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       if (device.visibility['back']!)
         Column(children: [
@@ -459,12 +459,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpBackTrim(0.5, device),
               tooltip: 'Back trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Back'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Back'),
           IconButton(
               onPressed: () => _bumpBackTrim(-0.5, device),
               tooltip: 'Back trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       if (device.visibility['height']!)
         Column(children: [
@@ -472,12 +472,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpHeightTrim(0.5, device),
               tooltip: 'Height trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Height'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Height'),
           IconButton(
               onPressed: () => _bumpHeightTrim(-0.5, device),
               tooltip: 'Height trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
       if (device.visibility['width']!)
         Column(children: [
@@ -485,12 +485,12 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
           IconButton(
               onPressed: () => _bumpWidthTrim(0.5, device),
               tooltip: 'Width trim up',
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
-          Text('Width'),
+              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+          const Text('Width'),
           IconButton(
               onPressed: () => _bumpWidthTrim(-0.5, device),
               tooltip: 'Width trim down',
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         ]),
     ],
   );
@@ -504,18 +504,18 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _sourceBottomSheet(context, device),
-            icon: Icon(Icons.person),
-            label: Text('Source'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.person),
+            label: const Text('Source'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _hdmiBottomSheet(context, device),
-            icon: Icon(Icons.settings_input_hdmi),
-            label: Text('HDMI'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.settings_input_hdmi),
+            label: const Text('HDMI'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -524,18 +524,18 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _opticalBottomSheet(context, device),
-            icon: Icon(Icons.lightbulb),
-            label: Text('Optical'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.lightbulb),
+            label: const Text('Optical'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _coaxBottomSheet(context, device),
-            icon: Icon(Icons.settings_input_composite),
-            label: Text('Coax'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.settings_input_composite),
+            label: const Text('Coax'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -544,18 +544,18 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _analogBottomSheet(context, device),
-            icon: Icon(Icons.settings_input_component),
-            label: Text('Analog'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.settings_input_component),
+            label: const Text('Analog'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _xlrBottomSheet(context, device),
-            icon: Icon(Icons.donut_large),
-            label: Text('XLR'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.donut_large),
+            label: const Text('XLR'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -564,18 +564,18 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _otherBottomSheet(context, device),
-            icon: Icon(Icons.more),
-            label: Text('Other'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.more),
+            label: const Text('Other'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _modeBottomSheet(context, device),
-            icon: Icon(Icons.surround_sound),
-            label: Text('Mode'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.surround_sound),
+            label: const Text('Mode'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -590,12 +590,12 @@ Widget _status(emotiva.Device device) {
       Flexible(
         child: Text(
           device.source,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
       Flexible(
         child: Text(device.mode,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ),
     ],
   );
@@ -611,9 +611,9 @@ class InputsPage extends StatelessWidget {
         children: [
           if (device.menuDisplayed) menuWarning(context),
           _status(device),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           _inputs(context, device),
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
           _trimControls(context, device),
         ],
       ),

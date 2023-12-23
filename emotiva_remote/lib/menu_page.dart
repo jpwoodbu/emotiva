@@ -52,7 +52,7 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
   final rightArrowPosition =
       emotiva.arrowPosition(device.menuContents, emotiva.Arrow.right);
   // Leave space for a potential arrow.
-  List<Widget> columns = [SizedBox(width: arrowSize)];
+  List<Widget> columns = [const SizedBox(width: arrowSize)];
   if (rowIndex == leftArrowPosition) {
     columns[0] = _arrowWidget(emotiva.Arrow.left, arrowSize);
   }
@@ -68,8 +68,8 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
       if (column.checkbox!) {
         columns.add(
           Container(
-            margin: EdgeInsets.all(inset),
-            padding: EdgeInsets.all(inset),
+            margin: const EdgeInsets.all(inset),
+            padding: const EdgeInsets.all(inset),
             alignment: Alignment.centerLeft,
             color: backgroundColor,
             child: Icon(Icons.disabled_by_default_outlined,
@@ -79,8 +79,8 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
       } else {
         columns.add(
           Container(
-            margin: EdgeInsets.all(inset),
-            padding: EdgeInsets.all(inset),
+            margin: const EdgeInsets.all(inset),
+            padding: const EdgeInsets.all(inset),
             alignment: Alignment.centerLeft,
             color: backgroundColor,
             child: Icon(Icons.check_box_outline_blank,
@@ -93,8 +93,8 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
           TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0, color: color);
       columns.add(
         Container(
-          margin: EdgeInsets.all(inset),
-          padding: EdgeInsets.all(inset),
+          margin: const EdgeInsets.all(inset),
+          padding: const EdgeInsets.all(inset),
           color: backgroundColor,
           child: Text(
             column.value,
@@ -109,7 +109,7 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
   if (rowIndex == rightArrowPosition) {
     columns.add(_arrowWidget(emotiva.Arrow.right, arrowSize));
   } else {
-    columns.add(SizedBox(width: arrowSize));
+    columns.add(const SizedBox(width: arrowSize));
   }
   return columns;
 }
@@ -117,14 +117,14 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
 TableRow _verticleArrow(emotiva.Menu menu, emotiva.Arrow arrowType) {
   const height = 25.0;
   final arrowPosition = emotiva.arrowPosition(menu, arrowType);
-  final List<Widget> children = [SizedBox(width: 25.0)];
+  final List<Widget> children = [const SizedBox(width: 25.0)];
   for (int i = 0; i < 4; i++) {
     if (arrowPosition == i) {
       children.add(_arrowWidget(arrowType, height));
     } else {
       // Setting this height makes sure the menu table doesn't move on the
       // screen if the up arrow is not visible.
-      children.add(SizedBox(height: height));
+      children.add(const SizedBox(height: height));
     }
   }
   return TableRow(children: children);
@@ -142,7 +142,7 @@ Widget _onScreenDisplay(emotiva.Device device) {
       child: Padding(
         padding: const EdgeInsets.all(padding),
         child: Table(
-          children: [
+          children: const [
             TableRow(children: [SizedBox(height: rowHeight)]),
             TableRow(
               children: [SizedBox(height: rowHeight)],
@@ -164,7 +164,7 @@ Widget _onScreenDisplay(emotiva.Device device) {
   return Padding(
     padding: const EdgeInsets.all(padding),
     child: Table(
-      columnWidths: {
+      columnWidths: const {
         0: FixedColumnWidth(25.0),
         1: FlexColumnWidth(),
         2: FlexColumnWidth(),
@@ -175,7 +175,7 @@ Widget _onScreenDisplay(emotiva.Device device) {
         _verticleArrow(device.menuContents, emotiva.Arrow.up),
         TableRow(
           children: _row(device, 4),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: Border(
               top: BorderSide(color: borderColor),
             ),
@@ -183,7 +183,7 @@ Widget _onScreenDisplay(emotiva.Device device) {
         ),
         TableRow(children: _row(device, 5)),
         TableRow(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: Border(
               bottom: BorderSide(color: borderColor),
             ),
@@ -199,16 +199,16 @@ Widget _onScreenDisplay(emotiva.Device device) {
 Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
   final iconSize = _iconSize(boxConstraints);
   return Table(
-    defaultColumnWidth: IntrinsicColumnWidth(),
+    defaultColumnWidth: const IntrinsicColumnWidth(),
     children: <TableRow>[
       TableRow(
         children: [
-          Text(''),
+          const Text(''),
           IconButton(
               onPressed: () => addHaptic(device.menuUp),
               tooltip: 'Up',
               icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
-          Text(''),
+          const Text(''),
         ],
       ),
       TableRow(
@@ -229,12 +229,12 @@ Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
       ),
       TableRow(
         children: [
-          Text(''),
+          const Text(''),
           IconButton(
               onPressed: () => addHaptic(device.menuDown),
               tooltip: 'Down',
               icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
-          Text(''),
+          const Text(''),
         ],
       ),
       TableRow(
@@ -243,14 +243,14 @@ Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
               onPressed: () => addHaptic(device.info),
               tooltip: 'Show on screen display info table',
               icon: Icon(Icons.info, size: iconSize * 0.50)),
-          Text(''),
+          const Text(''),
           IconButton(
               onPressed: () => addHaptic(device.toggleMenu),
               tooltip: 'Toggles entering and exiting the Emotiva menu',
               icon: Icon(Icons.menu, size: iconSize * 0.50)),
         ],
       ),
-      TableRow(children: [
+      const TableRow(children: [
         SizedBox(height: 15.0),
         SizedBox(),
         SizedBox(),

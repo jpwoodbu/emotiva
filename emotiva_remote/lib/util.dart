@@ -12,7 +12,7 @@ Widget menuWarning(BuildContext context) {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Icon(Icons.warning, color: errorColor),
-      SizedBox(width: 15.0),
+      const SizedBox(width: 15.0),
       Flexible(
         child: Text(
           'Many settings cannot be changed while the OSD menu is active.',

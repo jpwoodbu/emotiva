@@ -12,13 +12,13 @@ Widget _nameRow(emotiva.Device device) {
     children: [
       Text(
         device.name,
-        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
       ),
       Row(
         children: [
           IconButton(
             onPressed: () => addHaptic(device.updateAll),
-            icon: Icon(
+            icon: const Icon(
               Icons.refresh,
               size: 30,
               semanticLabel: 'Refresh data',
@@ -29,7 +29,7 @@ Widget _nameRow(emotiva.Device device) {
               addHaptic(device.togglePower);
               // Workaround for no notification when the devices powers on and
               // sets the initial power-on config.
-              Future.delayed(Duration(seconds: 2), device.updateAll);
+              Future.delayed(const Duration(seconds: 2), device.updateAll);
             },
             icon: Icon(
               Icons.power_settings_new,
@@ -48,12 +48,12 @@ Widget _volumeRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Volume',
         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
       ),
       Text('${device.volume.toString()}dB',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -64,7 +64,7 @@ Widget _infoTable(emotiva.Device device) {
       TableRow(children: [
         Text(device.source),
         Text(device.mode, overflow: TextOverflow.visible, softWrap: false),
-        Text(''),
+        const Text(''),
       ]),
       TableRow(children: [
         Text('A: ${device.audioInput}'),
@@ -84,7 +84,7 @@ Widget _speakerPresetRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Flexible(
+      const Flexible(
         child: Text(
           'Speaker preset',
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
@@ -94,18 +94,19 @@ Widget _speakerPresetRow(emotiva.Device device) {
         child: Row(
           children: [
             Text(device.speakerPreset,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            SizedBox(width: 5),
-            Icon(Icons.more_vert),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 5),
+            const Icon(Icons.more_vert),
           ],
         ),
         itemBuilder: (BuildContext context) => [
           PopupMenuItem(
-            child: Text('Preset 1'),
+            child: const Text('Preset 1'),
             onTap: () => addHaptic(device.speakerPreset1),
           ),
           PopupMenuItem(
-            child: Text('Preset 2'),
+            child: const Text('Preset 2'),
             onTap: () => addHaptic(device.speakerPreset2),
           ),
         ],
@@ -118,7 +119,7 @@ Widget _loudnessRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Loudness',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
@@ -134,7 +135,8 @@ Widget _muteRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text('Mute', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      const Text('Mute',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       Switch(
         value: device.muted ? true : false,
         onChanged: (bool _) => addHaptic(device.toggleMute),
@@ -149,17 +151,17 @@ Widget _frontDisplayBrightnessRow(emotiva.Device device) {
     children: [
       Flexible(
         child: Text('Front display brightness:  ${device.dim}%',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ),
       IconButton(
           onPressed: () => addHaptic(device.cycleFrontDisplayBrightness),
-          icon: Icon(Icons.light_mode))
+          icon: const Icon(Icons.light_mode))
     ],
   );
 }
 
 class InfoPage extends StatelessWidget {
-  InfoPage({super.key});
+  const InfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -183,17 +185,17 @@ class InfoPage extends StatelessWidget {
               children: [
                 if (device.menuDisplayed) menuWarning(context),
                 _nameRow(device),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 _volumeRow(device),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _infoTable(device),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 _speakerPresetRow(device),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _loudnessRow(device),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _muteRow(device),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _frontDisplayBrightnessRow(device),
               ],
             ),

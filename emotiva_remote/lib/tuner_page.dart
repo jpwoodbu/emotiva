@@ -14,10 +14,10 @@ Widget _enableTuner(BuildContext context, emotiva.Device device) {
       children: [
         Text('Tuner controls unavailable.', style: textStyle),
         Text('Set the Main input to Tuner.', style: textStyle),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
             onPressed: () => addHaptic(device.setTuner),
-            child: Text('Input -> Tuner')),
+            child: const Text('Input -> Tuner')),
       ],
     ),
   );
@@ -27,12 +27,12 @@ Widget _frequencyRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Channel',
         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
       ),
       Text(device.tunerChannel,
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -41,12 +41,12 @@ Widget _signalRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Signal',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       Text(device.tunerSignal,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -55,12 +55,12 @@ Widget _programRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Program',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       Text(device.tunerProgram,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -69,14 +69,14 @@ Widget _rds(emotiva.Device device) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Divider(),
+      const Divider(),
       Text(
         device.tunerRds,
         overflow: TextOverflow.visible,
         softWrap: true,
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
       ),
-      Divider(),
+      const Divider(),
     ],
   );
 }
@@ -85,12 +85,12 @@ Widget _volumeRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Volume',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       Text('${device.volume.toString()}dB',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -99,12 +99,12 @@ Widget _bandRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Band',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       SegmentedButton<emotiva.TunerBand>(
-        segments: [
+        segments: const [
           ButtonSegment(value: emotiva.TunerBand.am, label: Text('AM')),
           ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
         ],
@@ -132,15 +132,15 @@ Widget _controls(BuildContext context, emotiva.Device device) {
         IconButton(
             onPressed: () => addHaptic(device.channelUp),
             tooltip: 'preset up',
-            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
         IconButton(
             onPressed: () => addHaptic(device.seekHigher),
             tooltip: 'seek up',
-            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
         IconButton(
             onPressed: () => addHaptic(device.frequencyHigher),
             tooltip: 'tune up',
-            icon: Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
       ]),
       TableRow(children: [
         Center(child: Text('Preset', style: textStyle)),
@@ -151,15 +151,15 @@ Widget _controls(BuildContext context, emotiva.Device device) {
         IconButton(
             onPressed: () => addHaptic(device.channelDown),
             tooltip: 'preset down',
-            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         IconButton(
             onPressed: () => addHaptic(device.seekLower),
             tooltip: 'seek down',
-            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
         IconButton(
             onPressed: () => addHaptic(device.frequencyLower),
             tooltip: 'tune down',
-            icon: Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
       ]),
     ],
   );
@@ -191,17 +191,17 @@ class TunerPage extends StatelessWidget {
             children: [
               if (device.menuDisplayed) menuWarning(context),
               _frequencyRow(device),
-              SizedBox(height: 5.0),
+              const SizedBox(height: 5.0),
               _signalRow(device),
-              SizedBox(height: 5.0),
+              const SizedBox(height: 5.0),
               _programRow(device),
-              SizedBox(height: 5.0),
+              const SizedBox(height: 5.0),
               _rds(device),
-              SizedBox(height: 5.0),
+              const SizedBox(height: 5.0),
               _volumeRow(device),
-              SizedBox(height: 15.0),
+              const SizedBox(height: 15.0),
               _bandRow(device),
-              SizedBox(height: 5.0),
+              const SizedBox(height: 5.0),
               _controls(context, device),
               if (!_tunerActiveInput(device)) _enableTuner(context, device),
             ],

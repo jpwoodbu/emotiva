@@ -10,7 +10,7 @@ const double _sheetPadding = 15.0;
 // This is a workaround for not getting notify messages when changing inputs for
 // zone 2.
 void _delayedUpdateAll(emotiva.Device device) {
-  Future.delayed(Duration(seconds: 2), device.updateAll);
+  Future.delayed(const Duration(seconds: 2), device.updateAll);
 }
 
 void _setFollowMain(emotiva.Device device) {
@@ -71,20 +71,20 @@ void _opticalBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 1),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 1')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 1')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 2),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 2')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 2')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 3),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 3')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 3')),
             ElevatedButton.icon(
                 onPressed: () => _setOptical(context, device, 4),
-                icon: Icon(Icons.lightbulb),
-                label: Text('Optical 4')),
+                icon: const Icon(Icons.lightbulb),
+                label: const Text('Optical 4')),
           ],
         ),
       );
@@ -103,20 +103,20 @@ void _coaxBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 1),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 1')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 1')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 2),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 2')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 2')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 3),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 3')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 3')),
             ElevatedButton.icon(
                 onPressed: () => _setCoax(context, device, 4),
-                icon: Icon(Icons.settings_input_composite),
-                label: Text('Coax 4')),
+                icon: const Icon(Icons.settings_input_composite),
+                label: const Text('Coax 4')),
           ],
         ),
       );
@@ -135,16 +135,16 @@ void _analogBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 1),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 1')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 1')),
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 2),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 2')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 2')),
             ElevatedButton.icon(
                 onPressed: () => _setAnalog(context, device, 3),
-                icon: Icon(Icons.settings_input_component),
-                label: Text('Analog 3')),
+                icon: const Icon(Icons.settings_input_component),
+                label: const Text('Analog 3')),
           ],
         ),
       );
@@ -163,12 +163,12 @@ void _xlrBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setAesEbu(context, device),
-                icon: Icon(Icons.developer_board),
-                label: Text('AES/EBU')),
+                icon: const Icon(Icons.developer_board),
+                label: const Text('AES/EBU')),
             ElevatedButton.icon(
                 onPressed: () => _setBalancedInput(context, device),
-                icon: Icon(Icons.album),
-                label: Text('Balanced Input')),
+                icon: const Icon(Icons.album),
+                label: const Text('Balanced Input')),
           ],
         ),
       );
@@ -188,12 +188,12 @@ void _otherBottomSheet(BuildContext context, emotiva.Device device) {
           children: <Widget>[
             ElevatedButton.icon(
                 onPressed: () => _setUsb(context, device),
-                icon: Icon(Icons.usb),
-                label: Text('USB')),
+                icon: const Icon(Icons.usb),
+                label: const Text('USB')),
             ElevatedButton.icon(
                 onPressed: () => _setFront(context, device),
-                icon: Icon(Icons.smartphone),
-                label: Text('Front')),
+                icon: const Icon(Icons.smartphone),
+                label: const Text('Front')),
           ],
         ),
       );
@@ -206,7 +206,7 @@ Widget _powerRow(emotiva.Device device) {
     mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Zone 2',
         style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
       ),
@@ -214,7 +214,7 @@ Widget _powerRow(emotiva.Device device) {
         children: [
           IconButton(
             onPressed: () => addHaptic(device.updateAll),
-            icon: Icon(
+            icon: const Icon(
               Icons.refresh,
               size: 30,
               semanticLabel: 'Refresh data',
@@ -239,12 +239,12 @@ Widget _volumeRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Volume',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       Text('${device.zone2Volume.toString()}dB',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -253,12 +253,12 @@ Widget _inputRow(emotiva.Device device) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
+      const Text(
         'Input',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       Text(device.zone2Input,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
     ],
   );
 }
@@ -272,18 +272,18 @@ Widget _inputSelection(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _opticalBottomSheet(context, device),
-            icon: Icon(Icons.lightbulb),
-            label: Text('Optical'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.lightbulb),
+            label: const Text('Optical'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _coaxBottomSheet(context, device),
-            icon: Icon(Icons.settings_input_composite),
-            label: Text('Coax'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.settings_input_composite),
+            label: const Text('Coax'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -292,18 +292,18 @@ Widget _inputSelection(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _analogBottomSheet(context, device),
-            icon: Icon(Icons.settings_input_component),
-            label: Text('Analog'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.settings_input_component),
+            label: const Text('Analog'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _xlrBottomSheet(context, device),
-            icon: Icon(Icons.donut_large),
-            label: Text('XLR'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.donut_large),
+            label: const Text('XLR'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -312,18 +312,18 @@ Widget _inputSelection(BuildContext context, emotiva.Device device) {
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _otherBottomSheet(context, device),
-            icon: Icon(Icons.more),
-            label: Text('Other'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.more),
+            label: const Text('Other'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(tableCellPadding),
           child: ElevatedButton.icon(
             onPressed: () => _setFollowMain(device),
-            icon: Icon(Icons.sync_alt),
-            label: Text('Follow Main'),
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            icon: const Icon(Icons.sync_alt),
+            label: const Text('Follow Main'),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
           ),
         ),
       ]),
@@ -352,11 +352,11 @@ class Zone2Page extends StatelessWidget {
             children: [
               if (device.menuDisplayed) menuWarning(context),
               _powerRow(device),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _volumeRow(device),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _inputRow(device),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _inputSelection(context, device),
             ],
           ),

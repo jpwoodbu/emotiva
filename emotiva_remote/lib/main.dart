@@ -35,7 +35,8 @@ Future<void> _showHelp(BuildContext context) {
       content: Text(_helpText.trim()),
       actions: <Widget>[
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Dismiss')),
       ],
     ),
   );
@@ -59,7 +60,8 @@ Future<void> _showKnownIssus(BuildContext context) {
       content: Text(_knownIssues.trim()),
       actions: <Widget>[
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Dismiss')),
       ],
     ),
   );
@@ -79,7 +81,8 @@ Future<void> _showRoadMap(BuildContext context) {
       content: Text(_roadMap.trim()),
       actions: <Widget>[
         TextButton(
-            onPressed: () => Navigator.pop(context), child: Text('Dismiss')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Dismiss')),
       ],
     ),
   );
@@ -128,23 +131,23 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
     Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: const Text('Volume', style: TextStyle(fontSize: 20.0)),
+        const Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: Text('Volume', style: TextStyle(fontSize: 20.0)),
         ),
         Row(
           children: [
             ElevatedButton(
                 onPressed: () => addHaptic(() => volumeFunction(-1.0)),
-                child: Icon(
+                child: const Icon(
                   Icons.remove,
                   size: 30.0,
                   semanticLabel: 'Volume down',
                 )),
-            SizedBox(width: 15.0),
+            const SizedBox(width: 15.0),
             ElevatedButton(
                 onPressed: () => addHaptic(() => volumeFunction(1.0)),
-                child: Icon(
+                child: const Icon(
                   Icons.add,
                   size: 30.0,
                   semanticLabel: 'Volume up',
@@ -163,7 +166,7 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
   return AppBar(
     title: const Center(child: Text('Emotiva Remote')),
     leading: IconButton(
-      icon: Icon(Icons.help),
+      icon: const Icon(Icons.help),
       tooltip: 'Show help',
       onPressed: () => _showHelp(context),
     ),
@@ -171,25 +174,25 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
       PopupMenuButton(
         itemBuilder: (BuildContext context) => [
           PopupMenuItem(
-            child: Text('Rediscover Emotiva device'),
+            child: const Text('Rediscover Emotiva device'),
             onTap: () {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Discovery(rediscover: true)),
+                      builder: (context) => const Discovery(rediscover: true)),
                   (Route<dynamic> route) => false);
             },
           ),
           PopupMenuItem(
-            child: Text('Known issues'),
+            child: const Text('Known issues'),
             onTap: () => _showKnownIssus(context),
           ),
           PopupMenuItem(
-            child: Text('Road map'),
+            child: const Text('Road map'),
             onTap: () => _showRoadMap(context),
           ),
           PopupMenuItem(
-            child: Text('Licenses'),
+            child: const Text('Licenses'),
             onTap: () => showLicensePage(context: context),
           ),
         ],
@@ -199,7 +202,7 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
 }
 
 class MainView extends StatefulWidget {
-  MainView({super.key});
+  const MainView({super.key});
 
   @override
   State<MainView> createState() => _MainViewState();
@@ -227,7 +230,7 @@ class _MainViewState extends State<MainView> {
         // inside initState perhaps before the prior listeners have been GC'd.
         body: IndexedStack(
           index: currentPageIndex,
-          children: [
+          children: const [
             InfoPage(),
             InputsPage(),
             MenuPage(),
@@ -237,7 +240,7 @@ class _MainViewState extends State<MainView> {
         ),
         persistentFooterButtons: _footer(device, currentPageIndex),
         bottomNavigationBar: NavigationBar(
-          destinations: [
+          destinations: const [
             NavigationDestination(
               icon: Icon(Icons.info),
               label: 'Info',
@@ -282,27 +285,28 @@ class NoDevicesFoundPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('No Emotiva devices were found.'),
-              SizedBox(height: 25.0),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => Discovery()),
-                      (Route<dynamic> route) => false);
-                },
-                child: Text('Try again'),
-              ),
-              SizedBox(height: 20),
+              const Text('No Emotiva devices were found.'),
+              const SizedBox(height: 25.0),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => Discovery(useFake: true)),
+                          builder: (context) => const Discovery()),
                       (Route<dynamic> route) => false);
                 },
-                child: Text('Demo mode'),
+                child: const Text('Try again'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Discovery(useFake: true)),
+                      (Route<dynamic> route) => false);
+                },
+                child: const Text('Demo mode'),
               ),
             ],
           ),
@@ -317,7 +321,7 @@ class ScanningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return const SafeArea(
       child: Scaffold(
         body: Center(
           child: Column(
@@ -370,7 +374,7 @@ class _DiscoveryState extends State<Discovery> {
       // being displayed for such a short time that they user can't read it
       // (which would be janky), delay discovery for a second.
       _device = Future<emotiva.Device>.delayed(
-          Duration(seconds: 1), () => emotiva.discovery(3));
+          const Duration(seconds: 1), () => emotiva.discovery(3));
     }
   }
 
@@ -387,12 +391,12 @@ class _DiscoveryState extends State<Discovery> {
       // doing work before the old Device object has been disposed.  E.g. The
       // old Device might unsubscribe the new Device from notification.
       future: widget.rediscover
-          ? Future.delayed(Duration(seconds: 1), () => _device)
+          ? Future.delayed(const Duration(seconds: 1), () => _device)
           : _device,
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
-            return NoDevicesFoundPage();
+            return const NoDevicesFoundPage();
           }
           return ChangeNotifierProvider(
             create: (_) {
@@ -405,10 +409,10 @@ class _DiscoveryState extends State<Discovery> {
               device?.subscribeAll();
               return deviceChanges;
             },
-            child: MainView(),
+            child: const MainView(),
           );
         } else {
-          return ScanningPage();
+          return const ScanningPage();
         }
       },
     );
