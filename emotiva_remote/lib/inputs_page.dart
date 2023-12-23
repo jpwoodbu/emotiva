@@ -601,6 +601,20 @@ Widget _status(emotiva.Device device) {
   );
 }
 
+Widget _volumeRow(emotiva.Device device) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        'Volume',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      Text('${device.volume.toString()}dB',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
+
 class InputsPage extends StatelessWidget {
   const InputsPage({super.key});
 
@@ -611,6 +625,8 @@ class InputsPage extends StatelessWidget {
         children: [
           if (device.menuDisplayed) menuWarning(context),
           _status(device),
+          const SizedBox(height: 15),
+          _volumeRow(device),
           const SizedBox(height: 15),
           _inputs(context, device),
           const SizedBox(height: 25),
