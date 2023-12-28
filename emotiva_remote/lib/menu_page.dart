@@ -203,51 +203,79 @@ Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
     children: <TableRow>[
       TableRow(
         children: [
-          const Text(''),
+          const SizedBox(),
           IconButton(
-              onPressed: () => addHaptic(device.menuUp),
-              tooltip: 'Up',
-              icon: Icon(Icons.keyboard_arrow_up, size: iconSize)),
-          const Text(''),
+            onPressed: () => addHaptic(device.menuUp),
+            icon: Icon(
+              Icons.keyboard_arrow_up,
+              size: iconSize,
+              semanticLabel: 'up',
+            ),
+          ),
+          const SizedBox(),
         ],
       ),
       TableRow(
         children: [
           IconButton(
-              onPressed: () => addHaptic(device.menuLeft),
-              tooltip: 'Left',
-              icon: Icon(Icons.keyboard_arrow_left, size: iconSize)),
+            onPressed: () => addHaptic(device.menuLeft),
+            icon: Icon(
+              Icons.keyboard_arrow_left,
+              size: iconSize,
+              semanticLabel: 'left',
+            ),
+          ),
           IconButton(
-              onPressed: () => addHaptic(device.menuEnter),
-              tooltip: 'Enter',
-              icon: Icon(Icons.circle_outlined, size: iconSize)),
+            onPressed: () => addHaptic(device.menuEnter),
+            icon: Icon(
+              Icons.circle_outlined,
+              size: iconSize,
+              semanticLabel: 'enter',
+            ),
+          ),
           IconButton(
-              tooltip: 'Right',
-              onPressed: () => addHaptic(device.menuRight),
-              icon: Icon(Icons.keyboard_arrow_right, size: iconSize)),
+            onPressed: () => addHaptic(device.menuRight),
+            icon: Icon(
+              Icons.keyboard_arrow_right,
+              size: iconSize,
+              semanticLabel: 'right',
+            ),
+          ),
         ],
       ),
       TableRow(
         children: [
-          const Text(''),
+          const SizedBox(),
           IconButton(
-              onPressed: () => addHaptic(device.menuDown),
-              tooltip: 'Down',
-              icon: Icon(Icons.keyboard_arrow_down, size: iconSize)),
-          const Text(''),
+            onPressed: () => addHaptic(device.menuDown),
+            icon: Icon(
+              Icons.keyboard_arrow_down,
+              size: iconSize,
+              semanticLabel: 'down',
+            ),
+          ),
+          const SizedBox(),
         ],
       ),
       TableRow(
         children: [
           IconButton(
-              onPressed: () => addHaptic(device.info),
-              tooltip: 'Show on screen display info table',
-              icon: Icon(Icons.info, size: iconSize * 0.50)),
-          const Text(''),
+            onPressed: () => addHaptic(device.info),
+            icon: Icon(
+              Icons.info,
+              size: iconSize * 0.50,
+              semanticLabel: 'show on screen display info table',
+            ),
+          ),
+          const SizedBox(),
           IconButton(
-              onPressed: () => addHaptic(device.toggleMenu),
-              tooltip: 'Toggles entering and exiting the Emotiva menu',
-              icon: Icon(Icons.menu, size: iconSize * 0.50)),
+            onPressed: () => addHaptic(device.toggleMenu),
+            icon: Icon(
+              Icons.menu,
+              size: iconSize * 0.50,
+              semanticLabel: 'toggles entering and exiting the Emotiva menu',
+            ),
+          ),
         ],
       ),
       const TableRow(children: [
