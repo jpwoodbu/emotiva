@@ -120,27 +120,35 @@ Widget _bandRow(emotiva.Device device) {
 Widget _controls(BuildContext context, emotiva.Device device) {
   const double arrowSize = 50.0;
   TextStyle? textStyle;
+  Color? iconColor;
   if (!_tunerActiveInput(device)) {
-    textStyle = TextStyle(
-      color: Theme.of(context).colorScheme.error,
-      decoration: TextDecoration.lineThrough,
-    );
+    textStyle = TextStyle(color: Theme.of(context).colorScheme.error);
+    iconColor = Theme.of(context).colorScheme.onSecondary;
   }
   return Table(
     children: [
       TableRow(children: [
         IconButton(
-            onPressed: () => addHaptic(device.channelUp),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.channelUp)
+                : null,
             tooltip: 'preset up',
-            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_up,
+                color: iconColor, size: arrowSize)),
         IconButton(
-            onPressed: () => addHaptic(device.seekHigher),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.seekHigher)
+                : null,
             tooltip: 'seek up',
-            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_up,
+                color: iconColor, size: arrowSize)),
         IconButton(
-            onPressed: () => addHaptic(device.frequencyHigher),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.frequencyHigher)
+                : null,
             tooltip: 'tune up',
-            icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_up,
+                color: iconColor, size: arrowSize)),
       ]),
       TableRow(children: [
         Center(child: Text('Preset', style: textStyle)),
@@ -149,17 +157,26 @@ Widget _controls(BuildContext context, emotiva.Device device) {
       ]),
       TableRow(children: [
         IconButton(
-            onPressed: () => addHaptic(device.channelDown),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.channelDown)
+                : null,
             tooltip: 'preset down',
-            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_down,
+                color: iconColor, size: arrowSize)),
         IconButton(
-            onPressed: () => addHaptic(device.seekLower),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.seekLower)
+                : null,
             tooltip: 'seek down',
-            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_down,
+                color: iconColor, size: arrowSize)),
         IconButton(
-            onPressed: () => addHaptic(device.frequencyLower),
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.frequencyLower)
+                : null,
             tooltip: 'tune down',
-            icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            icon: Icon(Icons.keyboard_arrow_down,
+                color: iconColor, size: arrowSize)),
       ]),
     ],
   );
