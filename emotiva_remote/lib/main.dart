@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -166,8 +167,10 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
   return AppBar(
     title: const Center(child: Text('Emotiva Remote')),
     leading: IconButton(
-      icon: const Icon(Icons.help),
-      tooltip: 'Show help',
+      icon: const Icon(
+        Icons.help,
+        semanticLabel: 'show help',
+      ),
       onPressed: () => _showHelp(context),
     ),
     actions: [

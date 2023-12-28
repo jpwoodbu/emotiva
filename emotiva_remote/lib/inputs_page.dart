@@ -418,79 +418,127 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
         Column(children: [
           Text('${device.centerTrim}dB'),
           IconButton(
-              onPressed: () => _bumpCenterTrim(0.5, device),
-              tooltip: 'Center trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpCenterTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'center trim up',
+            ),
+          ),
           const Text('Center'),
           IconButton(
-              onPressed: () => _bumpCenterTrim(-0.5, device),
-              tooltip: 'Center trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpCenterTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'center trim down',
+            ),
+          ),
         ]),
       if (device.visibility['subwoofer']!)
         Column(children: [
           Text('${device.subwooferTrim}dB'),
           IconButton(
-              onPressed: () => _bumpSubwooferTrim(0.5, device),
-              tooltip: 'Subwoofer trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpSubwooferTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'subwoofer trim up',
+            ),
+          ),
           const Text('Sub'),
           IconButton(
-              onPressed: () => _bumpSubwooferTrim(-0.5, device),
-              tooltip: 'Subwoofer trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpSubwooferTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'subwoofer trim down',
+            ),
+          ),
         ]),
       if (device.visibility['surround']!)
         Column(children: [
           Text('${device.surroundTrim}dB'),
           IconButton(
-              onPressed: () => _bumpSurroundTrim(0.5, device),
-              tooltip: 'Surround trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpSurroundTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'surround trim up',
+            ),
+          ),
           const Text('Surround'),
           IconButton(
-              onPressed: () => _bumpSurroundTrim(-0.5, device),
-              tooltip: 'Surround trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpSurroundTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'surround trim down',
+            ),
+          ),
         ]),
       if (device.visibility['back']!)
         Column(children: [
           Text('${device.backTrim}dB'),
           IconButton(
-              onPressed: () => _bumpBackTrim(0.5, device),
-              tooltip: 'Back trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpBackTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'back trim up',
+            ),
+          ),
           const Text('Back'),
           IconButton(
-              onPressed: () => _bumpBackTrim(-0.5, device),
-              tooltip: 'Back trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpBackTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'back trim down',
+            ),
+          ),
         ]),
       if (device.visibility['height']!)
         Column(children: [
           Text('${device.heightTrim}dB'),
           IconButton(
-              onPressed: () => _bumpHeightTrim(0.5, device),
-              tooltip: 'Height trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpHeightTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'height trim up',
+            ),
+          ),
           const Text('Height'),
           IconButton(
-              onPressed: () => _bumpHeightTrim(-0.5, device),
-              tooltip: 'Height trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpHeightTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'height trim down',
+            ),
+          ),
         ]),
       if (device.visibility['width']!)
         Column(children: [
           Text('${device.widthTrim}dB'),
           IconButton(
-              onPressed: () => _bumpWidthTrim(0.5, device),
-              tooltip: 'Width trim up',
-              icon: const Icon(Icons.keyboard_arrow_up, size: arrowSize)),
+            onPressed: () => _bumpWidthTrim(0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'width trim up',
+            ),
+          ),
           const Text('Width'),
           IconButton(
-              onPressed: () => _bumpWidthTrim(-0.5, device),
-              tooltip: 'Width trim down',
-              icon: const Icon(Icons.keyboard_arrow_down, size: arrowSize)),
+            onPressed: () => _bumpWidthTrim(-0.5, device),
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'width trim down',
+            ),
+          ),
         ]),
     ],
   );

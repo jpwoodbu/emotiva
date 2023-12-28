@@ -154,8 +154,12 @@ Widget _frontDisplayBrightnessRow(emotiva.Device device) {
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ),
       IconButton(
-          onPressed: () => addHaptic(device.cycleFrontDisplayBrightness),
-          icon: const Icon(Icons.light_mode))
+        onPressed: () => addHaptic(device.cycleFrontDisplayBrightness),
+        icon: const Icon(
+          Icons.light_mode,
+          semanticLabel: 'cycle front display brightness',
+        ),
+      )
     ],
   );
 }

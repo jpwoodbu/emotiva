@@ -129,26 +129,38 @@ Widget _controls(BuildContext context, emotiva.Device device) {
     children: [
       TableRow(children: [
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.channelUp)
-                : null,
-            tooltip: 'preset up',
-            icon: Icon(Icons.keyboard_arrow_up,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.channelUp)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_up,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'preset up',
+          ),
+        ),
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.seekHigher)
-                : null,
-            tooltip: 'seek up',
-            icon: Icon(Icons.keyboard_arrow_up,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.seekHigher)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_up,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'seek up',
+          ),
+        ),
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.frequencyHigher)
-                : null,
-            tooltip: 'tune up',
-            icon: Icon(Icons.keyboard_arrow_up,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.frequencyHigher)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_up,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'tune up',
+          ),
+        ),
       ]),
       TableRow(children: [
         Center(child: Text('Preset', style: textStyle)),
@@ -157,26 +169,38 @@ Widget _controls(BuildContext context, emotiva.Device device) {
       ]),
       TableRow(children: [
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.channelDown)
-                : null,
-            tooltip: 'preset down',
-            icon: Icon(Icons.keyboard_arrow_down,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.channelDown)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'preset down',
+          ),
+        ),
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.seekLower)
-                : null,
-            tooltip: 'seek down',
-            icon: Icon(Icons.keyboard_arrow_down,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.seekLower)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'seek down',
+          ),
+        ),
         IconButton(
-            onPressed: _tunerActiveInput(device)
-                ? () => addHaptic(device.frequencyLower)
-                : null,
-            tooltip: 'tune down',
-            icon: Icon(Icons.keyboard_arrow_down,
-                color: iconColor, size: arrowSize)),
+          onPressed: _tunerActiveInput(device)
+              ? () => addHaptic(device.frequencyLower)
+              : null,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: iconColor,
+            size: arrowSize,
+            semanticLabel: 'tune down',
+          ),
+        ),
       ]),
     ],
   );
