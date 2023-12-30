@@ -5,5 +5,14 @@
     },
     "dart.analysisExcludedFolders": [
         "bazel-emotiva"
-    ]
+    ],
+    "dart.flutterSdkPath": "emotiva_remote/.fvm/flutter_sdk",
+    // Remove .fvm files from search
+    "search.exclude": {
+        "**/.fvm": true
+    },
+    // Remove from file watching
+    "files.watcherExclude": {
+        "**/.fvm": true
+    }
 }

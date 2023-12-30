@@ -3,3 +3,4 @@
 /bazel-*
 *.exe
 /.idea
+/emotiva_remote/.fvm/flutter_sdk
