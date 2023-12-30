@@ -108,7 +108,10 @@ Widget _bandRow(emotiva.Device device) {
           ButtonSegment(value: emotiva.TunerBand.am, label: Text('AM')),
           ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
         ],
-        selected: {device.tunerBand},
+        emptySelectionAllowed: true,
+        selected: device.tunerBand == emotiva.TunerBand.unknown
+            ? {}
+            : {device.tunerBand},
         onSelectionChanged: _tunerActiveInput(device)
             ? (selection) => addHaptic(device.toggleTunerBand)
             : null,
