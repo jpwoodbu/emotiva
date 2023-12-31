@@ -122,86 +122,107 @@ Widget _bandRow(emotiva.Device device) {
 
 Widget _controls(BuildContext context, emotiva.Device device) {
   const double arrowSize = 50.0;
-  TextStyle? textStyle;
-  Color? iconColor;
-  if (!_tunerActiveInput(device)) {
-    textStyle = TextStyle(color: Theme.of(context).colorScheme.error);
-    iconColor = Theme.of(context).colorScheme.onSecondary;
-  }
+  // opacity of 1.0 is the default. Reduce the pacity of these controls to 38%
+  // when disabled. This is based on how Material 3 describes how to change the
+  // opacity for disabled inputs. I looked for this could be done more directly,
+  // but didn't find a way.
+  double opacity = 1.0;
+  if (!_tunerActiveInput(device)) opacity = 0.38;
   return Table(
     children: [
       TableRow(children: [
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.channelUp)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'preset up',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.channelUp)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'preset up',
+            ),
           ),
         ),
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.seekHigher)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'seek up',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.seekHigher)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'seek up',
+            ),
           ),
         ),
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.frequencyHigher)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'tune up',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.frequencyHigher)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_up,
+              size: arrowSize,
+              semanticLabel: 'tune up',
+            ),
           ),
         ),
       ]),
       TableRow(children: [
-        Center(child: Text('Preset', style: textStyle)),
-        Center(child: Text('Seek', style: textStyle)),
-        Center(child: Text('Tune', style: textStyle)),
+        Opacity(
+          opacity: opacity,
+          child: const Center(child: Text('Preset')),
+        ),
+        Opacity(
+          opacity: opacity,
+          child: const Center(child: Text('Seek')),
+        ),
+        Opacity(
+          opacity: opacity,
+          child: const Center(child: Text('Tune')),
+        ),
       ]),
       TableRow(children: [
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.channelDown)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'preset down',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.channelDown)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'preset down',
+            ),
           ),
         ),
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.seekLower)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'seek down',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.seekLower)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'seek down',
+            ),
           ),
         ),
-        IconButton(
-          onPressed: _tunerActiveInput(device)
-              ? () => addHaptic(device.frequencyLower)
-              : null,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: iconColor,
-            size: arrowSize,
-            semanticLabel: 'tune down',
+        Opacity(
+          opacity: opacity,
+          child: IconButton(
+            onPressed: _tunerActiveInput(device)
+                ? () => addHaptic(device.frequencyLower)
+                : null,
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              size: arrowSize,
+              semanticLabel: 'tune down',
+            ),
           ),
         ),
       ]),
