@@ -1949,21 +1949,21 @@ class FakeDevice extends Device {
   }
 
   @override
-  Stream<String> controlPortStream(InternetAddress _) async* {
+  Stream<String> controlPortStream(InternetAddress address) async* {
     await for (final data in _controlStream.stream) {
       yield data;
     }
   }
 
   @override
-  Stream<String> notifyPortStream(InternetAddress _) async* {
+  Stream<String> notifyPortStream(InternetAddress address) async* {
     await for (final data in _notifyStream.stream) {
       yield data;
     }
   }
 
   @override
-  Stream<String> menuNotifyPortStream(InternetAddress _) async* {
+  Stream<String> menuNotifyPortStream(InternetAddress address) async* {
     await for (final data in _menuNotifyStream.stream) {
       yield data;
     }
