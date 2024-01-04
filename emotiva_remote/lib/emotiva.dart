@@ -1126,7 +1126,7 @@ class FakeDevice extends Device {
     tunerBand = TunerBand.fm;
     tunerSignal = '35 dBuV';
     tunerProgram = 'Classical';
-    tunerRds = 'WPCE: Mahler 5';
+    tunerRds = 'WCPE: Mahler 5';
     tunerChannel = 'FM 89.7';
   }
 
