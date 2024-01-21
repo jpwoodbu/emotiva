@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
@@ -17,6 +18,7 @@ import 'util.dart';
 import 'zone2_page.dart';
 
 final _log = Logger('main');
+const String settingMultiDevice = 'multiDeviceEnabled';
 
 const String _helpText = '''
 Tip 1: Click the power icon in the top right to turn On/Off your processor. Enable "Video on Standby" on your Emotiva processor so that it can be turned on using this app when in standby.
@@ -89,7 +91,7 @@ Future<void> _showRoadMap(BuildContext context) {
   );
 }
 
-void main() {
+void main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
@@ -100,11 +102,15 @@ void main() {
     final license = await rootBundle.loadString('google_fonts/LICENSE.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-  runApp(const MyApp());
+  final preferences = await SharedPreferences.getInstance();
+  final enableMultiDevice = preferences.getBool(settingMultiDevice) ?? false;
+  _log.fine('multi-device mode: $enableMultiDevice');
+  runApp(MyApp(enableMultiDevice));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool enableMultiDevice;
+  const MyApp(this.enableMultiDevice, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +120,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
-      home: const Discovery(),
+      home:
+          enableMultiDevice ? const MultiDeviceDiscovery() : const Discovery(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -160,10 +167,7 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   ];
 }
 
-AppBar? _appBar(BuildContext context, int currentPageIndex) {
-  if (currentPageIndex != 0) {
-    return null;
-  }
+AppBar? _appBar(BuildContext context) {
   return AppBar(
     title: const Center(child: Text('Emotiva Remote')),
     leading: IconButton(
@@ -182,6 +186,8 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
+                    // TODO - Make a Rediscovery widget that looks at settings
+                    // and chooses which discovery process to follow.
                       builder: (context) => const Discovery(rediscover: true)),
                   (Route<dynamic> route) => false);
             },
@@ -198,10 +204,76 @@ AppBar? _appBar(BuildContext context, int currentPageIndex) {
             child: const Text('Licenses'),
             onTap: () => showLicensePage(context: context),
           ),
+          const PopupMenuItem(child: MultiDeviceSetting()),
         ],
       ),
     ],
   );
+}
+
+class MultiDeviceSetting extends StatefulWidget {
+  const MultiDeviceSetting({super.key});
+
+  @override
+  State<MultiDeviceSetting> createState() => _MultiDeviceSettingState();
+}
+
+class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
+  late Future<SharedPreferences> _preferences;
+
+  @override
+  void initState() {
+    super.initState();
+    _preferences = SharedPreferences.getInstance();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _preferences,
+      builder:
+          (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          case ConnectionState.waiting:
+            return const CircularProgressIndicator();
+          case ConnectionState.active:
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              _log.severe(
+                  'Error fetching multi-device setting: ${snapshot.error}');
+              return const Text('Error fetching settings.');
+            } else {
+              final p = snapshot.data!;
+              final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
+              return multiDeviceEnable ? _disable(p) : _enable(p);
+            }
+        }
+      },
+    );
+  }
+
+  void setSetting(SharedPreferences p, bool value) async {
+    await p.setBool(settingMultiDevice, value);
+    _log.fine('setting: ${p.getBool(settingMultiDevice)}');
+    setState(() {});
+  }
+
+  Widget _disable(SharedPreferences p) {
+    return TextButton.icon(
+      onPressed: () => setSetting(p, false),
+      icon: const Icon(Icons.check_box),
+      label: const Text('Multi-device mode'),
+    );
+  }
+
+  Widget _enable(SharedPreferences p) {
+    return TextButton.icon(
+      onPressed: () => setSetting(p, true),
+      icon: const Icon(Icons.check_box_outline_blank),
+      label: const Text('Multi-device mode'),
+    );
+  }
 }
 
 class MainView extends StatefulWidget {
@@ -226,7 +298,7 @@ class _MainViewState extends State<MainView> {
   Widget _build(BuildContext context, emotiva.Device device) {
     return SafeArea(
       child: Scaffold(
-        appBar: _appBar(context, _currentPageIndex),
+        appBar: _currentPageIndex == 0 ? _appBar(context) : null,
         // Using IndexedStack is critical. It preserves the existance (I think) of
         // the widgets as the user navigates between them so that we don't try to
         // do something breaking like creating additional listeners for a stream
@@ -491,7 +563,21 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
           padding: const EdgeInsets.all(15.0),
           child: Center(
             child: Column(
-              children: _devices(devices),
+              children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const Discovery(useFake: true)),
+                            (Route<dynamic> route) => false);
+                      },
+                      child: const Text('Demo mode'),
+                    ),
+                    const SizedBox(height: 15.0,)
+                  ] +
+                  _devices(devices),
             ),
           ),
         ),
