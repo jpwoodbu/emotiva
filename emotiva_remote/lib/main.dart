@@ -70,27 +70,6 @@ Future<void> _showKnownIssus(BuildContext context) {
   );
 }
 
-const String _roadMap = '''
-1) Support choosing between multiple Emotiva processors on the same network. Does anyone have more than one?
-
-2) If there's enough interest, making an iOS version of this app.
-''';
-
-Future<void> _showRoadMap(BuildContext context) {
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      scrollable: true,
-      content: Text(_roadMap.trim()),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Dismiss')),
-      ],
-    ),
-  );
-}
-
 void main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
@@ -181,24 +160,17 @@ AppBar? _appBar(BuildContext context) {
       PopupMenuButton(
         itemBuilder: (BuildContext context) => [
           PopupMenuItem(
-            child: const Text('Rediscover Emotiva device'),
+            child: const Text('Device discovery'),
             onTap: () {
               Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    // TODO - Make a Rediscovery widget that looks at settings
-                    // and chooses which discovery process to follow.
-                      builder: (context) => const Discovery(rediscover: true)),
+                  MaterialPageRoute(builder: (context) => const Rediscovery()),
                   (Route<dynamic> route) => false);
             },
           ),
           PopupMenuItem(
             child: const Text('Known issues'),
             onTap: () => _showKnownIssus(context),
-          ),
-          PopupMenuItem(
-            child: const Text('Road map'),
-            onTap: () => _showRoadMap(context),
           ),
           PopupMenuItem(
             child: const Text('Licenses'),
@@ -209,6 +181,51 @@ AppBar? _appBar(BuildContext context) {
       ),
     ],
   );
+}
+
+class Rediscovery extends StatefulWidget {
+  const Rediscovery({super.key});
+
+  @override
+  State<Rediscovery> createState() => _RediscoverState();
+}
+
+class _RediscoverState extends State<Rediscovery> {
+  late Future<SharedPreferences> _preferences;
+
+  @override
+  void initState() {
+    super.initState();
+    _preferences = SharedPreferences.getInstance();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _preferences,
+      builder:
+          (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          case ConnectionState.waiting:
+            return const CircularProgressIndicator();
+          case ConnectionState.active:
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              _log.severe(
+                  'Error fetching multi-device setting: ${snapshot.error}');
+              return const Text('Error fetching settings.');
+            } else {
+              final p = snapshot.data!;
+              final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
+              return multiDeviceEnable
+                  ? const MultiDeviceDiscovery()
+                  : const Discovery(rediscover: true);
+            }
+        }
+      },
+    );
+  }
 }
 
 class MultiDeviceSetting extends StatefulWidget {
@@ -558,12 +575,14 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
   Widget _page(Set<emotiva.Device> devices) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Center(
-            child: Column(
-              children: <Widget>[
+        body: ListView(
+          padding: const EdgeInsets.all(25.0),
+          children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Device selection',
+                        style: Theme.of(context).textTheme.titleMedium),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pushAndRemoveUntil(
@@ -575,11 +594,13 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                       },
                       child: const Text('Demo mode'),
                     ),
-                    const SizedBox(height: 15.0,)
-                  ] +
-                  _devices(devices),
-            ),
-          ),
+                  ],
+                ),
+                const SizedBox(height: 15.0),
+                const LinearProgressIndicator(),
+                const SizedBox(height: 15.0),
+              ] +
+              _devices(devices),
         ),
       ),
     );
@@ -590,7 +611,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       return const [
         Text('Searching for Emotiva devices...'),
         SizedBox(height: 25.0),
-        CircularProgressIndicator(),
+        LinearProgressIndicator(),
       ];
     } else {
       return devices
