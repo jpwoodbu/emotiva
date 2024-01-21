@@ -212,7 +212,7 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  int currentPageIndex = 0;
+  int _currentPageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -226,13 +226,13 @@ class _MainViewState extends State<MainView> {
   Widget _build(BuildContext context, emotiva.Device device) {
     return SafeArea(
       child: Scaffold(
-        appBar: _appBar(context, currentPageIndex),
+        appBar: _appBar(context, _currentPageIndex),
         // Using IndexedStack is critical. It preserves the existance (I think) of
         // the widgets as the user navigates between them so that we don't try to
         // do something breaking like creating additional listeners for a stream
         // inside initState perhaps before the prior listeners have been GC'd.
         body: IndexedStack(
-          index: currentPageIndex,
+          index: _currentPageIndex,
           children: const [
             InfoPage(),
             InputsPage(),
@@ -241,7 +241,7 @@ class _MainViewState extends State<MainView> {
             Zone2Page(),
           ],
         ),
-        persistentFooterButtons: _footer(device, currentPageIndex),
+        persistentFooterButtons: _footer(device, _currentPageIndex),
         bottomNavigationBar: NavigationBar(
           destinations: const [
             NavigationDestination(
@@ -265,10 +265,10 @@ class _MainViewState extends State<MainView> {
               label: 'Zone 2',
             ),
           ],
-          selectedIndex: currentPageIndex,
+          selectedIndex: _currentPageIndex,
           onDestinationSelected: (int index) {
             setState(() {
-              currentPageIndex = index;
+              _currentPageIndex = index;
             });
           },
         ),
@@ -344,7 +344,14 @@ class ScanningPage extends StatelessWidget {
 class Discovery extends StatefulWidget {
   final bool useFake;
   final bool rediscover;
-  const Discovery({super.key, this.useFake = false, this.rediscover = false});
+  // provideDevice allows an external discovery process to provide an already
+  // discovered device. E.g. the multi-device discovery feature.
+  final emotiva.Device? providedDevice;
+  const Discovery(
+      {super.key,
+      this.useFake = false,
+      this.rediscover = false,
+      this.providedDevice});
 
   @override
   State<Discovery> createState() => _DiscoveryState();
@@ -354,6 +361,10 @@ class _DiscoveryState extends State<Discovery> {
   late Future<emotiva.Device> _device;
   late final AppLifecycleListener _listener;
   emotiva.Device? device;
+
+  Future<emotiva.Device> _futureProvidedDevice() async {
+    return widget.providedDevice!;
+  }
 
   @override
   initState() {
@@ -372,12 +383,14 @@ class _DiscoveryState extends State<Discovery> {
     if (widget.useFake) {
       _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
+    } else if (widget.providedDevice != null) {
+      _device = _futureProvidedDevice();
     } else {
       // Discovery is usually very fast... O(ms). To avoid the scanning widget
       // being displayed for such a short time that they user can't read it
       // (which would be janky), delay discovery for a second.
       _device = Future<emotiva.Device>.delayed(
-          const Duration(seconds: 1), () => emotiva.discovery(3));
+          const Duration(milliseconds: 750), () => emotiva.discover(3));
     }
   }
 
@@ -418,6 +431,106 @@ class _DiscoveryState extends State<Discovery> {
           return const ScanningPage();
         }
       },
+    );
+  }
+}
+
+class MultiDeviceDiscoveryChanges with ChangeNotifier {
+  final emotiva.MultiDeviceDiscover _discover;
+  late Stream<emotiva.Device> _stream;
+  final Set<emotiva.Device> devices = {};
+
+  MultiDeviceDiscoveryChanges(this._discover) {
+    _stream = _discover.listen();
+    _handleDevices();
+  }
+
+  Future<void> _handleDevices() async {
+    await for (final device in _stream) {
+      devices.add(device);
+      notifyListeners();
+    }
+  }
+}
+
+class MultiDeviceDiscovery extends StatefulWidget {
+  const MultiDeviceDiscovery({super.key});
+
+  @override
+  State<MultiDeviceDiscovery> createState() => _MultiDeviceDiscoveryState();
+}
+
+class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
+  late emotiva.MultiDeviceDiscover _discover;
+
+  @override
+  void initState() {
+    super.initState();
+    _discover = emotiva.MultiDeviceDiscover();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => MultiDeviceDiscoveryChanges(_discover),
+      child: _consumer(),
+    );
+  }
+
+  Widget _consumer() {
+    return Consumer<MultiDeviceDiscoveryChanges>(
+      builder: (context, changes, _) => _page(changes.devices),
+    );
+  }
+
+  Widget _page(Set<emotiva.Device> devices) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(),
+        body: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Center(
+            child: Column(
+              children: _devices(devices),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _devices(Set<emotiva.Device> devices) {
+    if (devices.isEmpty) {
+      return const [
+        Text('Searching for Emotiva devices...'),
+        SizedBox(height: 25.0),
+        CircularProgressIndicator(),
+      ];
+    } else {
+      return devices
+          .map((e) => Card(
+                child: SizedBox(
+                  width: 300,
+                  height: 75,
+                  child: ListTile(
+                    leading: const Icon(Icons.album),
+                    title: Text(e.name),
+                    subtitle: Text(e.address.address),
+                    onTap: () => _connect(_discover, e),
+                  ),
+                ),
+              ))
+          .toList();
+    }
+  }
+
+  void _connect(emotiva.MultiDeviceDiscover discover, emotiva.Device device) {
+    discover.close();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+          builder: (context) => Discovery(providedDevice: device)),
+      (Route<dynamic> route) => false,
     );
   }
 }
