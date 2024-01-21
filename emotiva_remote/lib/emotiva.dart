@@ -25,16 +25,16 @@ String _pingRequest() {
 /// A socket is opened to listen for a transponder packet from an Emotiva
 /// device. While open, a ping packet is broadcast on the network. The listening
 /// socket waits for [timeoutSec] before giving up and throwing an exception.
-Future<Device> discovery(int timeoutSec) async {
-  final stream =
+Future<Device> discover(int timeoutSec) async {
+  final socket =
       await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
-  final streamWithTimeout = stream.timeout(Duration(seconds: timeoutSec));
-  stream.broadcastEnabled = true;
+  socket.broadcastEnabled = true;
+  final stream = socket.timeout(Duration(seconds: timeoutSec));
   final ping = _pingRequest();
-  await for (final event in streamWithTimeout) {
+  await for (final event in stream) {
     switch (event) {
       case RawSocketEvent.write:
-        final bytesSent = stream.send(
+        final bytesSent = socket.send(
             ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
@@ -42,12 +42,11 @@ Future<Device> discovery(int timeoutSec) async {
         _log.fine('sent: $ping');
         break;
       case RawSocketEvent.read:
-        final datagram = stream.receive();
-        stream.close();
+        final datagram = socket.receive();
+        socket.close();
         final data = String.fromCharCodes(datagram!.data);
         _log.fine('received: $data');
-        final device = _parseTransponder(data);
-        device.address = datagram.address;
+        final device = _parseTransponder(data, datagram.address);
         return device;
       case RawSocketEvent.closed:
         break;
@@ -58,6 +57,48 @@ Future<Device> discovery(int timeoutSec) async {
     }
   }
   throw 'Socket closed before receiving a transponder response from a device.';
+}
+
+class MultiDeviceDiscover {
+  RawDatagramSocket? _socket;
+
+  void close() {
+    if (_socket != null) {
+      _socket!.close();
+      _log.info('No longer listening for Emotiva transponder packets.');
+    }
+  }
+
+  Stream<Device> listen() async* {
+    _socket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
+    _socket!.broadcastEnabled = true;
+    final ping = _pingRequest();
+    await for (final event in _socket!) {
+      switch (event) {
+        case RawSocketEvent.write:
+          final bytesSent = _socket!.send(
+              ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+          if (bytesSent == 0) {
+            throw 'Unable to send broadcast ping.';
+          }
+          _log.fine('sent: $ping');
+          break;
+        case RawSocketEvent.read:
+          final datagram = _socket!.receive();
+          final data = String.fromCharCodes(datagram!.data);
+          _log.fine('received: $data');
+          final device = _parseTransponder(data, datagram.address);
+          yield device;
+        case RawSocketEvent.closed:
+          break;
+        case RawSocketEvent.readClosed:
+          break;
+        default:
+          throw 'Unexpected event $event';
+      }
+    }
+  }
 }
 
 String _textFromElement(XmlNode node, String xpath) {
@@ -79,14 +120,14 @@ int _intFromElement(XmlNode node, String xpath) {
   }
 }
 
-Device _parseTransponder(String data) {
+Device _parseTransponder(String data, InternetAddress address) {
   final document = XmlDocument.parse(data);
   final root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
     throw Exception(
         'Received improperly formatted emotivaTransponder response.');
   }
-  final device = Device();
+  final device = Device(address);
   device.model = _textFromElement(root, 'model');
   device.name = _textFromElement(root, 'name');
   device.dataRevision = _textFromElement(root, 'dataRevision');
@@ -104,6 +145,7 @@ enum TunerBand { unknown, am, fm }
 
 /// A model of an Emotiva device.
 class Device {
+  InternetAddress address;
   String model = '';
   String dataRevision = '';
   String name = '';
@@ -115,7 +157,6 @@ class Device {
   int menuNotifyPort = 0;
   int setupXmlVersion = 0;
   int keepAlive = 0;
-  InternetAddress? address;
   String power = '';
   String source = '';
   String mode = '';
@@ -250,6 +291,20 @@ class Device {
   // not yet gotten a real sequence number.
   int _sequenceNumber = -1;
 
+  Device(this.address);
+
+  // The hashCode and == operator override allow Device to be placed into a Set.
+  // This is useful when discoverying multiple Emotiva devices on a network.
+  // This assuption is that each unique device will have its own IP address.
+  @override
+  int get hashCode => address.address.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Device && address.address == other.address.address;
+  }
+
   /// The protocol version to request after device discovery.
   String __protocolVersion() {
     // We currently only support minor version 0 of major version 3.
@@ -308,13 +363,10 @@ class Device {
   }
 
   Future<void> _send(String request, int destinationPort) async {
-    if (address == null) {
-      throw 'Address needs to be set first.';
-    }
     _sendSocket ??= await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     _log.fine('sending: $request');
     final bytesSent =
-        _sendSocket!.send(request.codeUnits, address!, destinationPort);
+        _sendSocket!.send(request.codeUnits, address, destinationPort);
     if (bytesSent == 0) {
       throw 'No bytes were sent';
     }
@@ -1088,7 +1140,7 @@ class FakeDevice extends Device {
   final _menuNotifyStream = StreamController<String>();
   int _sequence = 0;
 
-  FakeDevice() {
+  FakeDevice(super.address) {
     model = 'Fake Emotiva';
     name = 'Fake name';
     controlVersion = '3.0';
@@ -1117,7 +1169,6 @@ class FakeDevice extends Device {
     loudness = 'Off';
     dim = 0;
     speakerPreset = 'Preset 1';
-    address = InternetAddress('192.168.42.1');
     names['input_1'] = 'Blu-Ray analog';
     names['input_2'] = 'Fancy pants DAC';
     menuContents = _initMenuContent();
@@ -1972,7 +2023,7 @@ class FakeDevice extends Device {
 
 /// This function is meant to be mostly a stand-in replacement for [discovery].
 Future<FakeDevice> futureFakeDevice() async {
-  return FakeDevice();
+  return FakeDevice(InternetAddress('192.168.42.1'));
 }
 
 // These enums represet the UI elements of the on-screen display menu.

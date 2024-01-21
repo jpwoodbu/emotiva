@@ -12,9 +12,9 @@ class DeviceChanges with ChangeNotifier {
   late Stream<String> _menuNotifyPortStream;
 
   DeviceChanges(this.device) {
-    _controlPortStream = device.controlPortStream(device.address!);
-    _notifyPortStream = device.notifyPortStream(device.address!);
-    _menuNotifyPortStream = device.menuNotifyPortStream(device.address!);
+    _controlPortStream = device.controlPortStream(device.address);
+    _notifyPortStream = device.notifyPortStream(device.address);
+    _menuNotifyPortStream = device.menuNotifyPortStream(device.address);
     _handleControlPackets();
     _log.info('handling control packets');
     _handleNotifyPackets();
