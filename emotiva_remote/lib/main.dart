@@ -588,6 +588,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                         style: Theme.of(context).textTheme.titleMedium),
                     ElevatedButton(
                       onPressed: () {
+                        _discover.close();
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(

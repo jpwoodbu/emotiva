@@ -61,11 +61,26 @@ Future<Device> discover(int timeoutSec) async {
 
 class MultiDeviceDiscover {
   RawDatagramSocket? _socket;
+  Timer? _pinger;
 
   void close() {
     if (_socket != null) {
       _socket!.close();
       _log.info('No longer listening for Emotiva transponder packets.');
+    }
+    if (_pinger != null) {
+      _pinger!.cancel();
+    }
+  }
+
+  void _ping() {
+    final ping = _pingRequest();
+    final bytesSent = _socket!.send(
+        ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+    if (bytesSent == 0) {
+      _log.severe('Unable to send broadcast ping.');
+    } else {
+      _log.fine('sent: $ping');
     }
   }
 
@@ -73,16 +88,11 @@ class MultiDeviceDiscover {
     _socket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
     _socket!.broadcastEnabled = true;
-    final ping = _pingRequest();
+    _ping();
+    _pinger = Timer.periodic(const Duration(seconds: 5), (_) => _ping());
     await for (final event in _socket!) {
       switch (event) {
         case RawSocketEvent.write:
-          final bytesSent = _socket!.send(
-              ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
-          if (bytesSent == 0) {
-            throw 'Unable to send broadcast ping.';
-          }
-          _log.fine('sent: $ping');
           break;
         case RawSocketEvent.read:
           final datagram = _socket!.receive();
