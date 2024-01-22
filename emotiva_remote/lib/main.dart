@@ -81,15 +81,11 @@ void main() async {
     final license = await rootBundle.loadString('google_fonts/LICENSE.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-  final preferences = await SharedPreferences.getInstance();
-  final enableMultiDevice = preferences.getBool(settingMultiDevice) ?? false;
-  _log.fine('multi-device mode: $enableMultiDevice');
-  runApp(MyApp(enableMultiDevice));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool enableMultiDevice;
-  const MyApp(this.enableMultiDevice, {super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +95,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
-      home:
-          enableMultiDevice ? const MultiDeviceDiscovery() : const Discovery(),
+      home: const DiscoverySwitch(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -146,7 +141,7 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   ];
 }
 
-AppBar? _appBar(BuildContext context) {
+AppBar? _appBar(BuildContext context, emotiva.Device device) {
   return AppBar(
     title: const Center(child: Text('Emotiva Remote')),
     leading: IconButton(
@@ -162,9 +157,16 @@ AppBar? _appBar(BuildContext context) {
           PopupMenuItem(
             child: const Text('Device discovery'),
             onTap: () {
+              // The analyzer throws warnings if we await for unsubscribeAll()
+              // while then passing context in the next call. Unsubscribing is
+              // kind, but not imperitive. It's OK to do it optimistically.
+              device.unsubscribeAll();
               Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const Rediscovery()),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const DiscoverySwitch(rediscover: true),
+                  ),
                   (Route<dynamic> route) => false);
             },
           ),
@@ -183,14 +185,15 @@ AppBar? _appBar(BuildContext context) {
   );
 }
 
-class Rediscovery extends StatefulWidget {
-  const Rediscovery({super.key});
+class DiscoverySwitch extends StatefulWidget {
+  final bool rediscover;
+  const DiscoverySwitch({super.key, this.rediscover = false});
 
   @override
-  State<Rediscovery> createState() => _RediscoverState();
+  State<DiscoverySwitch> createState() => _RediscoverState();
 }
 
-class _RediscoverState extends State<Rediscovery> {
+class _RediscoverState extends State<DiscoverySwitch> {
   late Future<SharedPreferences> _preferences;
 
   @override
@@ -220,7 +223,7 @@ class _RediscoverState extends State<Rediscovery> {
               final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
               return multiDeviceEnable
                   ? const MultiDeviceDiscovery()
-                  : const Discovery(rediscover: true);
+                  : Discovery(rediscover: widget.rediscover);
             }
         }
       },
@@ -272,7 +275,7 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
 
   void setSetting(SharedPreferences p, bool value) async {
     await p.setBool(settingMultiDevice, value);
-    _log.fine('setting: ${p.getBool(settingMultiDevice)}');
+    _log.fine('multi-device mode -> ${p.getBool(settingMultiDevice)}');
     setState(() {});
   }
 
@@ -315,7 +318,7 @@ class _MainViewState extends State<MainView> {
   Widget _build(BuildContext context, emotiva.Device device) {
     return SafeArea(
       child: Scaffold(
-        appBar: _currentPageIndex == 0 ? _appBar(context) : null,
+        appBar: _currentPageIndex == 0 ? _appBar(context, device) : null,
         // Using IndexedStack is critical. It preserves the existance (I think) of
         // the widgets as the user navigates between them so that we don't try to
         // do something breaking like creating additional listeners for a stream
@@ -377,7 +380,7 @@ class NoDevicesFoundPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('No Emotiva devices were found.'),
+              const Text('No Emotiva device was found.'),
               const SizedBox(height: 25.0),
               ElevatedButton(
                 onPressed: () {
@@ -419,7 +422,7 @@ class ScanningPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Searching for Emotiva devices...'),
+              Text('Searching for an Emotiva device...'),
               SizedBox(height: 25.0),
               CircularProgressIndicator(),
             ],
@@ -608,11 +611,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
 
   List<Widget> _devices(Set<emotiva.Device> devices) {
     if (devices.isEmpty) {
-      return const [
-        Text('Searching for Emotiva devices...'),
-        SizedBox(height: 25.0),
-        LinearProgressIndicator(),
-      ];
+      return const [Text('No devices found so far...')];
     } else {
       return devices
           .map((e) => Card(
