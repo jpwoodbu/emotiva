@@ -14,9 +14,9 @@ const String _broadcastAddress = '255.255.255.255';
 const String _protocolVersion = '3.0';
 
 String _pingRequest() {
-  final builder = XmlBuilder();
-  builder.processing('xml', 'version="1.0"');
-  builder.element('emotivaPing', attributes: {'protocol': _protocolVersion});
+  final builder = XmlBuilder()
+    ..processing('xml', 'version="1.0"')
+    ..element('emotivaPing', attributes: {'protocol': _protocolVersion});
   return builder.buildDocument().toXmlString();
 }
 
@@ -59,6 +59,14 @@ Future<Device> discover(int timeoutSec) async {
   throw 'Socket closed before receiving a transponder response from a device.';
 }
 
+/// Continuously discovers Emotiva devices on the network.
+///
+/// [listen] yields [Device] objects as they are discovered. A ping request is
+/// broadcast on the network every 5s once [listen] is called and until [close]
+/// is called. [close] also tears down the listening socket.
+///
+/// It is up to the caller of [listen] to deduplicate yielded devices. The
+/// [Device] objects can be added to a [Set] to acheve this.
 class MultiDeviceDiscover {
   RawDatagramSocket? _socket;
   Timer? _pinger;
@@ -75,8 +83,8 @@ class MultiDeviceDiscover {
 
   void _ping() {
     final ping = _pingRequest();
-    final bytesSent = _socket!.send(
-        ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+    final bytesSent = _socket!
+        .send(ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
     if (bytesSent == 0) {
       _log.severe('Unable to send broadcast ping.');
     } else {
@@ -305,7 +313,7 @@ class Device {
 
   // The hashCode and == operator override allow Device to be placed into a Set.
   // This is useful when discoverying multiple Emotiva devices on a network.
-  // This assuption is that each unique device will have its own IP address.
+  // The assuption is that each unique device will have its own IP address.
   @override
   int get hashCode => address.address.hashCode;
 
@@ -369,7 +377,7 @@ class Device {
     for (RawDatagramSocket s in _sockets) {
       s.close();
     }
-    if (_sendSocket != null) _sendSocket!.close();
+    _sendSocket?.close();
   }
 
   Future<void> _send(String request, int destinationPort) async {
@@ -383,8 +391,7 @@ class Device {
   }
 
   String _requestWithFields(String requestType, Iterable<String> fields) {
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    final builder = XmlBuilder()..processing('xml', 'version="1.0"');
     builder.element(requestType, attributes: {'protocol': __protocolVersion()},
         nest: () {
       for (final f in fields) {
@@ -561,7 +568,7 @@ class Device {
     throw 'Element has no name attribute: ${element.toXmlString()}';
   }
 
-  /// Parses all messages types other than transponder messages.
+  /// Parses all message types other than transponder messages.
   ///
   /// This method is made public so that callers can inject logic around a
   /// stream yielding a message and the message being parsed (which might update
@@ -830,81 +837,39 @@ class Device {
   }
 
   /// Changes the volume by [delta]dBs.
-  void volumeDelta(double delta) {
-    control('volume', value: delta.toString());
-  }
+  void volumeDelta(double delta) => control('volume', value: delta.toString());
 
   /// Sets the volume to [level]dBs.
-  void volumeSet(int level) {
-    control('set_volume', value: level.toString());
-  }
+  void volumeSet(int level) => control('set_volume', value: level.toString());
 
-  void togglePower() {
-    if (power == 'On') {
-      control('power_off');
-    } else {
-      control('power_on');
-    }
-  }
-
-  void toggleLoudness() {
-    control('loudness');
-  }
-
-  void toggleMute() {
-    control('mute');
-  }
+  void togglePower() =>
+      power == 'On' ? control('power_off') : control('power_on');
+  void toggleLoudness() => control('loudness');
+  void toggleMute() => control('mute');
 
   /// Cycles the front display brightness.
   ///
   /// Brightness values cycle through 0%, 20%, 40%, 60%, 80%, and 100%.
-  void cycleFrontDisplayBrightness() {
-    control('dim');
-  }
+  void cycleFrontDisplayBrightness() => control('dim');
 
-  void toggleMenu() {
-    control('menu');
-  }
-
-  void menuUp() {
-    control('up');
-  }
-
-  void menuDown() {
-    control('down');
-  }
-
-  void menuLeft() {
-    control('left');
-  }
-
-  void menuRight() {
-    control('right');
-  }
-
-  void menuEnter() {
-    control('enter');
-  }
+  void toggleMenu() => control('menu');
+  void menuUp() => control('up');
+  void menuDown() => control('down');
+  void menuLeft() => control('left');
+  void menuRight() => control('right');
+  void menuEnter() => control('enter');
 
   /// Displays the info table on OSD.
-  void info() {
-    control('info');
-  }
+  void info() => control('info');
 
   /// Sets the source to the user configurable inputs.
-  void setSource(int input) {
-    control('source_$input');
-  }
+  void setSource(int input) => control('source_$input');
 
   /// Sets the source to the HDMI input corresponding to [input].
-  void setHdmi(int input) {
-    control('hdmi$input');
-  }
+  void setHdmi(int input) => control('hdmi$input');
 
   /// Sets the audio source to the coax input corresponding to [input].
-  void setCoax(int input) {
-    control('coax$input');
-  }
+  void setCoax(int input) => control('coax$input');
 
   /// Sets the audio source to the balanced digital input.
   void setAesEbu() {
@@ -913,26 +878,14 @@ class Device {
   }
 
   /// Sets the audio source to the optical input corresponding to [input].
-  void setOptical(int input) {
-    control('optical$input');
-  }
+  void setOptical(int input) => control('optical$input');
 
-  void setArc() {
-    control('ARC');
-  }
-
-  void setUsb() {
-    control('usb_stream');
-  }
-
-  void setTuner() {
-    control('tuner');
-  }
+  void setArc() => control('ARC');
+  void setUsb() => control('usb_stream');
+  void setTuner() => control('tuner');
 
   /// Sets the audio source to the analog input corresponding to [input].
-  void setAnalog(int input) {
-    control('analog$input');
-  }
+  void setAnalog(int input) => control('analog$input');
 
   /// Sets the audio source to the balanced analog input.
   void setBalancedInput() {
@@ -941,45 +894,17 @@ class Device {
   }
 
   /// Sets the audio source to the front analog input.
-  void setFront() {
-    control('front_in');
-  }
+  void setFront() => control('front_in');
 
-  void modeAuto() {
-    control('auto');
-  }
-
-  void modeStereo() {
-    control('stereo');
-  }
-
-  void modeDirect() {
-    control('direct');
-  }
-
-  void modeReferenceStereo() {
-    control('reference_stereo');
-  }
-
-  void modeDolby() {
-    control('dolby');
-  }
-
-  void modeDts() {
-    control('dts');
-  }
-
-  void modeAllStereo() {
-    control('all_stereo');
-  }
-
-  void speakerPreset1() {
-    control('preset1');
-  }
-
-  void speakerPreset2() {
-    control('preset2');
-  }
+  void modeAuto() => control('auto');
+  void modeStereo() => control('stereo');
+  void modeDirect() => control('direct');
+  void modeReferenceStereo() => control('reference_stereo');
+  void modeDolby() => control('dolby');
+  void modeDts() => control('dts');
+  void modeAllStereo() => control('all_stereo');
+  void speakerPreset1() => control('preset1');
+  void speakerPreset2() => control('preset2');
 
   /// Adjusts the center speaker trim.
   ///
@@ -1037,55 +962,36 @@ class Device {
     control('width_trim_set', value: trim.toString());
   }
 
-  void zone2TogglePower() {
-    control('zone2_power');
-  }
+  void zone2TogglePower() => control('zone2_power');
 
   /// Changes the zone 2 volume by [delta]dBs.
-  void zone2VolumeDelta(double delta) {
-    control('zone2_volume', value: delta.toString());
-  }
+  void zone2VolumeDelta(double delta) =>
+      control('zone2_volume', value: delta.toString());
 
   /// Sets the volume to [level]dBs.
-  void zone2VolumeSet(int level) {
-    control('zone2_set_volume', value: level.toString());
-  }
+  void zone2VolumeSet(int level) =>
+      control('zone2_set_volume', value: level.toString());
 
   // This does not appear to work.
-  void zone2ToggleMute() {
-    control('zone2_mute');
-  }
+  void zone2ToggleMute() => control('zone2_mute');
 
-  void zone2SetAnalog(int input) {
-    control('zone2_analog$input');
-  }
+  void zone2SetAnalog(int input) => control('zone2_analog$input');
 
   void zone2SetBalancedInput() {
     // analog5 bring up the balanced input on the RMC-1.
     control('zone2_analog5');
   }
 
-  void zone2SetFront() {
-    control('zone2_front_in');
-  }
+  void zone2SetFront() => control('zone2_front_in');
 
   /// Sets the zone 2 input to follow the main (i.e. zone 1) input.
-  void zone2FollowMain() {
-    control('zone2_follow_main');
-  }
+  void zone2FollowMain() => control('zone2_follow_main');
 
-  void zone2SetCoax(int input) {
-    control('zone2_coax$input');
-  }
-
-  void zone2SetOptical(int input) {
-    control('zone2_optical$input');
-  }
+  void zone2SetCoax(int input) => control('zone2_coax$input');
+  void zone2SetOptical(int input) => control('zone2_optical$input');
 
   // Not in the API docs.
-  void zone2SetUsb() {
-    control('zone2_usb_stream');
-  }
+  void zone2SetUsb() => control('zone2_usb_stream');
 
   // Not in the API docs.
   void zone2SetAesEbu() {
@@ -1094,50 +1000,23 @@ class Device {
   }
 
   // Not in the API docs.
-  void zone2SetTuner() {
-    control('zone2_tuner');
-  }
+  void zone2SetTuner() => control('zone2_tuner');
 
   void toggleTunerBand() {
     // Applies to both zones.
     control('zone1_band');
   }
 
-  void setBand(TunerBand band) {
-    if (band == TunerBand.am) {
-      control('band_am');
-    } else {
-      control('band_fm');
-    }
-  }
+  void setBand(TunerBand band) =>
+      band == TunerBand.am ? control('band_am') : control('band_fm');
 
-  void frequencyHigher() {
-    control('frequency', value: '1');
-  }
-
-  void frequencyLower() {
-    control('frequency', value: '-1');
-  }
-
-  void seekHigher() {
-    control('seek', value: '1');
-  }
-
-  void seekLower() {
-    control('seek', value: '-1');
-  }
-
-  void channelUp() {
-    control('channel', value: '1');
-  }
-
-  void channelDown() {
-    control('channel', value: '-1');
-  }
-
-  void setChannel(int channel) {
-    control('channel_$channel');
-  }
+  void frequencyHigher() => control('frequency', value: '1');
+  void frequencyLower() => control('frequency', value: '-1');
+  void seekHigher() => control('seek', value: '1');
+  void seekLower() => control('seek', value: '-1');
+  void channelUp() => control('channel', value: '1');
+  void channelDown() => control('channel', value: '-1');
+  void setChannel(int channel) => control('channel_$channel');
 }
 
 /// A fake Device class that does not create or handle any network traffic.
@@ -1764,8 +1643,7 @@ class FakeDevice extends Device {
   }
 
   void _notifyMenuSubscribers() {
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    final builder = XmlBuilder()..processing('xml', 'version="1.0"');
     builder.element('emotivaMenuNotify',
         attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final row in menuContents.rows) {
@@ -1800,8 +1678,7 @@ class FakeDevice extends Device {
   void _notifySubscribers(Set<String> updatedFields) {
     // Note that updatedFields has already been vetted by other methods before
     // this method is called.
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    final builder = XmlBuilder()..processing('xml', 'version="1.0"');
     builder.element('emotivaNotify',
         attributes: {'sequence': _sequence.toString()}, nest: () {
       for (final field in updatedFields) {
@@ -1940,8 +1817,7 @@ class FakeDevice extends Device {
   }
 
   void _parseSubscriptionRequest(Iterable<String> fields) {
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    final builder = XmlBuilder()..processing('xml', 'version="1.0"');
     builder.element('emotivaSubscription', attributes: {'protocol': '3.0'},
         nest: () {
       for (final field in fields) {
@@ -1966,8 +1842,7 @@ class FakeDevice extends Device {
 
   void _parseUnsubscribeRequest(Iterable<String> fields) {
     String status = 'nak';
-    final builder = XmlBuilder();
-    builder.processing('xml', 'version="1.0"');
+    final builder = XmlBuilder()..processing('xml', 'version="1.0"');
     builder.element('emotivaUnsubscribe', nest: () {
       for (final f in fields) {
         _subscribedFields.remove(f);
@@ -1984,7 +1859,7 @@ class FakeDevice extends Device {
     final root = document.rootElement;
     final requestType = root.name.toString();
     final fields = _elementsToFields(root.childElements);
-    _log.fine('request: $request');
+    _log.fine('request: ${root.toXmlString(pretty: true)}');
     switch (requestType) {
       case 'emotivaControl':
         _parseControlRequest(root.childElements);
