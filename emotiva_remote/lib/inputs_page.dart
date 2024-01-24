@@ -666,6 +666,14 @@ Widget _volumeRow(emotiva.Device device) {
 class InputsPage extends StatelessWidget {
   const InputsPage({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DeviceChanges>(
+        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
+      return _build(context, deviceChanges.device);
+    });
+  }
+
   Widget _build(BuildContext context, emotiva.Device device) {
     return Padding(
       padding: const EdgeInsets.all(15),
@@ -682,13 +690,5 @@ class InputsPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, child) {
-      return _build(context, deviceChanges.device);
-    });
   }
 }

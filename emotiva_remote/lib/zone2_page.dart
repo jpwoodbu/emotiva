@@ -337,7 +337,7 @@ class Zone2Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, child) {
+        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
       return _build(context, deviceChanges.device);
     });
   }
