@@ -623,7 +623,10 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                     leading: const Icon(Icons.album),
                     title: Text(e.name),
                     subtitle: Text(e.address.address),
-                    onTap: () => _connect(_discover, e),
+                    onTap: () {
+                      _discover.close();
+                      _connect(e);
+                    },
                   ),
                 ),
               ))
@@ -631,8 +634,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
     }
   }
 
-  void _connect(emotiva.MultiDeviceDiscover discover, emotiva.Device device) {
-    discover.close();
+  void _connect(emotiva.Device device) {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
