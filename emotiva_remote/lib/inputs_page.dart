@@ -394,9 +394,7 @@ void _modeBottomSheet(BuildContext context, emotiva.Device device) {
   );
 }
 
-Widget _trimControls(BuildContext context, emotiva.Device device) {
-  // If no trims are visible, don't try to render an empty table. That
-  // would throw an error.
+Widget _trimControlsWarning(BuildContext context, emotiva.Device device) {
   if (!(device.visibility['center']! ||
       device.visibility['subwoofer']! ||
       device.visibility['surround']! ||
@@ -404,12 +402,21 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
       device.visibility['height']! ||
       device.visibility['width']!)) {
     return Center(
-        child: Text(
-            'Speaker trim configuration unavailable in the current mode.',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error)));
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: Text(
+              'Speaker trim configuration unavailable in the current mode.',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.error)),
+        ));
+  } else {
+    // Return an "empty" widget if we don't need to show the above warning.
+    return const SizedBox();
   }
+}
+
+Widget _trimControls(emotiva.Device device) {
   const double arrowSize = 50.0;
   return Wrap(
     alignment: WrapAlignment.center,
@@ -540,6 +547,46 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
             ),
           ),
         ]),
+      Column(children: [
+        Text('${device.trebleTrim}dB'),
+        IconButton(
+          onPressed: () => addHaptic(device.trebleUp),
+          icon: const Icon(
+            Icons.keyboard_arrow_up,
+            size: arrowSize,
+            semanticLabel: 'treble trim up',
+          ),
+        ),
+        const Text('Treble'),
+        IconButton(
+          onPressed: () => addHaptic(device.trebleDown),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            size: arrowSize,
+            semanticLabel: 'treble trim down',
+          ),
+        ),
+      ]),
+      Column(children: [
+        Text('${device.bassTrim}dB'),
+        IconButton(
+          onPressed: () => addHaptic(device.bassUp),
+          icon: const Icon(
+            Icons.keyboard_arrow_up,
+            size: arrowSize,
+            semanticLabel: 'bass trim up',
+          ),
+        ),
+        const Text('Bass'),
+        IconButton(
+          onPressed: () => addHaptic(device.bassDown),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            size: arrowSize,
+            semanticLabel: 'bass trim down',
+          ),
+        ),
+      ]),
     ],
   );
 }
@@ -686,7 +733,8 @@ class InputsPage extends StatelessWidget {
           const SizedBox(height: 15),
           _inputs(context, device),
           const SizedBox(height: 25),
-          _trimControls(context, device),
+          _trimControlsWarning(context, device),
+          _trimControls(device),
         ],
       ),
     );

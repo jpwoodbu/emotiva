@@ -195,6 +195,8 @@ class Device {
   double surroundTrim = 0.0;
   double backTrim = 0.0;
   double heightTrim = 0.0;
+  double trebleTrim = 0.0;
+  double bassTrim = 0.0;
   String selectedMode = '';
   String selectedMovieMusic = '';
   bool menuDisplayed = false;
@@ -271,6 +273,8 @@ class Device {
     'surround',
     'back',
     'height',
+    'treble',
+    'bass',
     'selected_mode',
     'selected_movie_music',
     'input_1',
@@ -538,16 +542,19 @@ class Device {
       return 0.0;
     } else {
       visibility[speaker] = true;
-      try {
-        // There could be a space after the sign, which would break
-        // double.parse().
-        return double.parse(trim.replaceAll(r' ', ''));
-      } catch (e) {
-        _log.severe(
-            'Casting trim value to double failed for ${element.toXmlString()}: $e');
-      }
+      return _getDoubleAttribute(trim);
     }
-    return 0.0;
+  }
+
+  double _getDoubleAttribute(String value) {
+    try {
+      // Remove any whitespace that might break double.parse().
+      return double.parse(value.replaceAll(RegExp(r'\s+'), ''));
+    } catch (e) {
+      _log.severe(
+          'Casting value to double failed for: $value: $e');
+      return 0.0;
+    }
   }
 
   String _getProtocolAttribute(XmlElement element) {
@@ -726,6 +733,12 @@ class Device {
           break;
         case 'height':
           heightTrim = _getSpeakerTrim(element);
+          break;
+        case 'treble':
+          trebleTrim = _getDoubleAttribute(_valueAttribute(element.attributes));
+          break;
+        case 'bass':
+          bassTrim = _getDoubleAttribute(_valueAttribute(element.attributes));
           break;
         // "mode_*" fields indicate whether these modes are selectable on the
         // device via the "visible" atttribute.
@@ -961,6 +974,11 @@ class Device {
     trim = trim * 2;
     control('width_trim_set', value: trim.toString());
   }
+
+  void trebleUp() => control('treble_up');
+  void trebleDown() => control('treble_down');
+  void bassUp() => control('bass_up');
+  void bassDown() => control('bass_down');
 
   void zone2TogglePower() => control('zone2_power');
 
@@ -1500,6 +1518,22 @@ class FakeDevice extends Device {
           backTrim = sanitizedTrim / 2;
           updatedFields.add('back');
           break;
+        case 'treble_up':
+          trebleTrim += 0.5;
+          updatedFields.add('treble');
+          break;
+        case 'treble_down':
+          trebleTrim -= 0.5;
+          updatedFields.add('treble');
+          break;
+        case 'bass_up':
+          bassTrim += 0.5;
+          updatedFields.add('bass');
+          break;
+        case 'bass_down':
+          bassTrim -= 0.5;
+          updatedFields.add('bass');
+          break;
         case 'menu':
           menuDisplayed = menuDisplayed ? false : true;
           updatedFields.add('menu');
@@ -1743,6 +1777,10 @@ class FakeDevice extends Device {
       case 'height':
         if (!visibility[field]!) return 'None';
         return heightTrim.toString();
+      case 'treble':
+        return trebleTrim.toString();
+      case 'bass':
+        return bassTrim.toString();  
       case 'selected_mode':
         return selectedMode;
       case 'selected_movie_music':
