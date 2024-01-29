@@ -760,14 +760,6 @@ class Device {
         case 'selected_movie_music':
           selectedMovieMusic = _valueAttribute(element.attributes);
           break;
-        case 'treble':
-          // 'treble' is in the API docs, but my RMC-1L doesn't appear to have
-          // this control.
-          break;
-        case 'bass':
-          // 'bass' is in the API docs, but my RMC-1L doesn't appear to have
-          // this control.
-          break;
         case 'zone2_power':
           final value = _valueAttribute(element.attributes);
           if (value == 'On') {
