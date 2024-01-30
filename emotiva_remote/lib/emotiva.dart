@@ -175,7 +175,7 @@ class Device {
   int menuNotifyPort = 0;
   int setupXmlVersion = 0;
   int keepAlive = 0;
-  String power = '';
+  bool power = false;
   String source = '';
   String mode = '';
   double volume = 0.0;
@@ -551,8 +551,7 @@ class Device {
       // Remove any whitespace that might break double.parse().
       return double.parse(value.replaceAll(RegExp(r'\s+'), ''));
     } catch (e) {
-      _log.severe(
-          'Casting value to double failed for: $value: $e');
+      _log.severe('Casting value to double failed for: $value: $e');
       return 0.0;
     }
   }
@@ -663,7 +662,9 @@ class Device {
       }
       switch (field) {
         case 'power':
-          power = _valueAttribute(element.attributes);
+          power = _valueAttribute(element.attributes).toLowerCase() == 'on'
+              ? true
+              : false;
           break;
         case 'source':
           source = _valueAttribute(element.attributes);
@@ -847,8 +848,7 @@ class Device {
   /// Sets the volume to [level]dBs.
   void volumeSet(int level) => control('set_volume', value: level.toString());
 
-  void togglePower() =>
-      power == 'On' ? control('power_off') : control('power_on');
+  void togglePower() => power ? control('power_off') : control('power_on');
   void toggleLoudness() => control('loudness');
   void toggleMute() => control('mute');
 
@@ -1047,7 +1047,7 @@ class FakeDevice extends Device {
     notifyPort = 2;
     infoPort = 3;
     setupPortTcp = 4;
-    power = 'Off';
+    power = false;
     // With the power off, the device normally returns a 'None' value for the
     // speaker trims. We handle that internally as false visibility.
     visibility['center'] = false;
@@ -1238,7 +1238,7 @@ class FakeDevice extends Device {
       String field = element.name.toString();
       switch (field) {
         case 'power_on':
-          power = 'On';
+          power = true;
           visibility['center'] = true;
           visibility['subwoofer'] = true;
           visibility['surround'] = true;
@@ -1256,7 +1256,7 @@ class FakeDevice extends Device {
           ]);
           break;
         case 'power_off':
-          power = 'Off';
+          power = false;
           visibility['center'] = false;
           visibility['subwoofer'] = false;
           visibility['surround'] = false;
@@ -1723,7 +1723,7 @@ class FakeDevice extends Device {
   String _getValueForField(String field) {
     switch (field) {
       case 'power':
-        return power;
+        return power ? 'On' : 'False';
       case 'source':
         return source;
       case 'mode':
@@ -1772,7 +1772,7 @@ class FakeDevice extends Device {
       case 'treble':
         return trebleTrim.toString();
       case 'bass':
-        return bassTrim.toString();  
+        return bassTrim.toString();
       case 'selected_mode':
         return selectedMode;
       case 'selected_movie_music':

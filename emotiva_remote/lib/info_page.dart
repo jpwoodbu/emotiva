@@ -33,7 +33,7 @@ Widget _nameRow(emotiva.Device device) {
             },
             icon: Icon(
               Icons.power_settings_new,
-              color: device.power == 'On' ? Colors.blue : Colors.amber,
+              color: device.power ? Colors.blue : Colors.amber,
               size: 30,
               semanticLabel: 'Toggle power',
             ),
