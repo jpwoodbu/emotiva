@@ -394,205 +394,202 @@ void _modeBottomSheet(BuildContext context, emotiva.Device device) {
   );
 }
 
-Widget _trimControlsWarning(BuildContext context, emotiva.Device device) {
+Widget _trimControls(BuildContext context, emotiva.Device device) {
   if (!(device.visibility['center']! ||
       device.visibility['subwoofer']! ||
       device.visibility['surround']! ||
       device.visibility['back']! ||
       device.visibility['height']! ||
-      device.visibility['width']!)) {
+      device.visibility['width']! ||
+      device.power)) {
     return Center(
         child: Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
-      child: Text('Speaker trim configuration unavailable in the current mode.',
+      child: Text(
+          'Speaker and EQ trim configuration unavailable in the current mode.',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.error)),
     ));
   } else {
-    // Return an "empty" widget if we don't need to show the above warning.
-    return const SizedBox();
+    const double arrowSize = 50.0;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      children: [
+        if (device.visibility['center']!)
+          Column(children: [
+            Text('${device.centerTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpCenterTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'center trim up',
+              ),
+            ),
+            const Text('Center'),
+            IconButton(
+              onPressed: () => _bumpCenterTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'center trim down',
+              ),
+            ),
+          ]),
+        if (device.visibility['subwoofer']!)
+          Column(children: [
+            Text('${device.subwooferTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpSubwooferTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'subwoofer trim up',
+              ),
+            ),
+            const Text('Sub'),
+            IconButton(
+              onPressed: () => _bumpSubwooferTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'subwoofer trim down',
+              ),
+            ),
+          ]),
+        if (device.visibility['surround']!)
+          Column(children: [
+            Text('${device.surroundTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpSurroundTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'surround trim up',
+              ),
+            ),
+            const Text('Surround'),
+            IconButton(
+              onPressed: () => _bumpSurroundTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'surround trim down',
+              ),
+            ),
+          ]),
+        if (device.visibility['back']!)
+          Column(children: [
+            Text('${device.backTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpBackTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'back trim up',
+              ),
+            ),
+            const Text('Back'),
+            IconButton(
+              onPressed: () => _bumpBackTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'back trim down',
+              ),
+            ),
+          ]),
+        if (device.visibility['height']!)
+          Column(children: [
+            Text('${device.heightTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpHeightTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'height trim up',
+              ),
+            ),
+            const Text('Height'),
+            IconButton(
+              onPressed: () => _bumpHeightTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'height trim down',
+              ),
+            ),
+          ]),
+        if (device.visibility['width']!)
+          Column(children: [
+            Text('${device.widthTrim}dB'),
+            IconButton(
+              onPressed: () => _bumpWidthTrim(0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_up,
+                size: arrowSize,
+                semanticLabel: 'width trim up',
+              ),
+            ),
+            const Text('Width'),
+            IconButton(
+              onPressed: () => _bumpWidthTrim(-0.5, device),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                size: arrowSize,
+                semanticLabel: 'width trim down',
+              ),
+            ),
+          ]),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(children: [
+              Text('${device.trebleTrim}dB'),
+              IconButton(
+                onPressed: () => addHaptic(device.trebleUp),
+                icon: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: arrowSize,
+                  semanticLabel: 'treble trim up',
+                ),
+              ),
+              const Text('Treble'),
+              IconButton(
+                onPressed: () => addHaptic(device.trebleDown),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: arrowSize,
+                  semanticLabel: 'treble trim down',
+                ),
+              ),
+            ]),
+            Column(children: [
+              Text('${device.bassTrim}dB'),
+              IconButton(
+                onPressed: () => addHaptic(device.bassUp),
+                icon: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: arrowSize,
+                  semanticLabel: 'bass trim up',
+                ),
+              ),
+              const Text('Bass'),
+              IconButton(
+                onPressed: () => addHaptic(device.bassDown),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: arrowSize,
+                  semanticLabel: 'bass trim down',
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ],
+    );
   }
-}
-
-Widget _trimControls(emotiva.Device device) {
-  const double arrowSize = 50.0;
-  return Wrap(
-    alignment: WrapAlignment.center,
-    children: [
-      if (device.visibility['center']!)
-        Column(children: [
-          Text('${device.centerTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpCenterTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'center trim up',
-            ),
-          ),
-          const Text('Center'),
-          IconButton(
-            onPressed: () => _bumpCenterTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'center trim down',
-            ),
-          ),
-        ]),
-      if (device.visibility['subwoofer']!)
-        Column(children: [
-          Text('${device.subwooferTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpSubwooferTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'subwoofer trim up',
-            ),
-          ),
-          const Text('Sub'),
-          IconButton(
-            onPressed: () => _bumpSubwooferTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'subwoofer trim down',
-            ),
-          ),
-        ]),
-      if (device.visibility['surround']!)
-        Column(children: [
-          Text('${device.surroundTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpSurroundTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'surround trim up',
-            ),
-          ),
-          const Text('Surround'),
-          IconButton(
-            onPressed: () => _bumpSurroundTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'surround trim down',
-            ),
-          ),
-        ]),
-      if (device.visibility['back']!)
-        Column(children: [
-          Text('${device.backTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpBackTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'back trim up',
-            ),
-          ),
-          const Text('Back'),
-          IconButton(
-            onPressed: () => _bumpBackTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'back trim down',
-            ),
-          ),
-        ]),
-      if (device.visibility['height']!)
-        Column(children: [
-          Text('${device.heightTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpHeightTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'height trim up',
-            ),
-          ),
-          const Text('Height'),
-          IconButton(
-            onPressed: () => _bumpHeightTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'height trim down',
-            ),
-          ),
-        ]),
-      if (device.visibility['width']!)
-        Column(children: [
-          Text('${device.widthTrim}dB'),
-          IconButton(
-            onPressed: () => _bumpWidthTrim(0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_up,
-              size: arrowSize,
-              semanticLabel: 'width trim up',
-            ),
-          ),
-          const Text('Width'),
-          IconButton(
-            onPressed: () => _bumpWidthTrim(-0.5, device),
-            icon: const Icon(
-              Icons.keyboard_arrow_down,
-              size: arrowSize,
-              semanticLabel: 'width trim down',
-            ),
-          ),
-        ]),
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(children: [
-            Text('${device.trebleTrim}dB'),
-            IconButton(
-              onPressed: () => addHaptic(device.trebleUp),
-              icon: const Icon(
-                Icons.keyboard_arrow_up,
-                size: arrowSize,
-                semanticLabel: 'treble trim up',
-              ),
-            ),
-            const Text('Treble'),
-            IconButton(
-              onPressed: () => addHaptic(device.trebleDown),
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                size: arrowSize,
-                semanticLabel: 'treble trim down',
-              ),
-            ),
-          ]),
-          Column(children: [
-            Text('${device.bassTrim}dB'),
-            IconButton(
-              onPressed: () => addHaptic(device.bassUp),
-              icon: const Icon(
-                Icons.keyboard_arrow_up,
-                size: arrowSize,
-                semanticLabel: 'bass trim up',
-              ),
-            ),
-            const Text('Bass'),
-            IconButton(
-              onPressed: () => addHaptic(device.bassDown),
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                size: arrowSize,
-                semanticLabel: 'bass trim down',
-              ),
-            ),
-          ]),
-        ],
-      ),
-    ],
-  );
 }
 
 Widget _inputs(BuildContext context, emotiva.Device device) {
@@ -737,8 +734,7 @@ class InputsPage extends StatelessWidget {
           const SizedBox(height: 15),
           _inputs(context, device),
           const SizedBox(height: 25),
-          _trimControlsWarning(context, device),
-          _trimControls(device),
+          _trimControls(context, device),
         ],
       ),
     );
