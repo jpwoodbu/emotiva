@@ -96,6 +96,7 @@ Widget _volumeRow(emotiva.Device device) {
 }
 
 Widget _bandRow(emotiva.Device device) {
+  bool enabled = _tunerActiveInput(device);
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -104,17 +105,21 @@ Widget _bandRow(emotiva.Device device) {
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       SegmentedButton<emotiva.TunerBand>(
-        segments: const [
-          ButtonSegment(value: emotiva.TunerBand.am, label: Text('AM')),
-          ButtonSegment(value: emotiva.TunerBand.fm, label: Text('FM')),
+        segments: [
+          ButtonSegment(
+              value: emotiva.TunerBand.am,
+              label: const Text('AM'),
+              enabled: enabled),
+          ButtonSegment(
+              value: emotiva.TunerBand.fm,
+              label: const Text('FM'),
+              enabled: enabled),
         ],
         emptySelectionAllowed: true,
         selected: device.tunerBand == emotiva.TunerBand.unknown
             ? {}
             : {device.tunerBand},
-        onSelectionChanged: _tunerActiveInput(device)
-            ? (selection) => addHaptic(device.toggleTunerBand)
-            : null,
+        onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
       )
     ],
   );
@@ -122,10 +127,10 @@ Widget _bandRow(emotiva.Device device) {
 
 Widget _controls(BuildContext context, emotiva.Device device) {
   const double arrowSize = 50.0;
-  // opacity of 1.0 is the default. Reduce the pacity of these controls to 38%
+  // opacity of 1.0 is the default. Reduce the opacity of these controls to 38%
   // when disabled. This is based on how Material 3 describes how to change the
-  // opacity for disabled inputs. I looked for this could be done more directly,
-  // but didn't find a way.
+  // opacity for disabled inputs. I looked for how this could be done more
+  // directly, but didn't find a way.
   double opacity = 1.0;
   if (!_tunerActiveInput(device)) opacity = 0.38;
   return Table(
