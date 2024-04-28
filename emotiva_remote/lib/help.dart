@@ -38,6 +38,8 @@ class Help extends StatelessWidget {
                   return HelpItem(title: _helpHeader3, helpText: _help3);
                 case 3:
                   return HelpItem(title: _helpHeader4, helpText: _help4);
+                default:
+                  return const SizedBox();
               }
             },
             separatorBuilder: (_, __) => const Divider(),

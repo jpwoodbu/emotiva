@@ -33,6 +33,8 @@ class KnownIssues extends StatelessWidget {
                 case 3:
                   return KnownIssueItem(
                       title: 'Zone 2 and the Tuner', issueText: _issue4);
+                default:
+                  return const SizedBox();
               }
             },
             separatorBuilder: (_, __) => const Divider(),
