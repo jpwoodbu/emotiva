@@ -438,9 +438,10 @@ class _DiscoveryState extends State<Discovery> {
     } else {
       // Discovery is usually very fast... O(ms). To avoid the scanning widget
       // being displayed for such a short time that they user can't read it
-      // (which would be janky), delay discovery for a second.
-      _device = Future<emotiva.Device>.delayed(
-          const Duration(milliseconds: 750), () => emotiva.discover(3));
+      // (which would be janky), show for it at least 750ms.
+      _device = waitAtLeast<emotiva.Device>(
+          future: emotiva.discover(3),
+          duration: const Duration(milliseconds: 750));
     }
   }
 

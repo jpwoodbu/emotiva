@@ -22,3 +22,22 @@ Widget menuWarning(BuildContext context) {
     ],
   );
 }
+
+/// Returns a Future that won't complete until the given [duration] has passed.
+///
+/// This is distinct from adding a delay before executing a Future. With this
+/// function, if [future] takes the same time or more to complete as [duration],
+/// the returned Future will complete without adding any delay. If [future]
+/// completes before [duration], the return Future will complete ~exactly when
+/// [duration] has completed.
+///
+/// This is particularly useful when using FutureBuilder and waiting for an
+/// operation to complete that could be very quick or could take long enough
+/// that you're displaying a loading indicator. Using this function prevents the
+/// loading indicator from flashing on the screen very briefly, which can look
+/// like jank to a user.
+Future<T> waitAtLeast<T>(
+    {required Future<T> future, required Duration duration}) async {
+  final results = await Future.wait([future, Future.delayed(duration)]);
+  return Future<T>.value(results[0]);
+}
