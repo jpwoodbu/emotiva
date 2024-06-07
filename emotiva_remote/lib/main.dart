@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'emotiva.dart' as emotiva;
@@ -61,6 +63,21 @@ List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
   // Change the volume controls to actuate zone 2 when on the zone 2 page.
   final volumeFunction =
       currentPageIndex == 4 ? device.zone2VolumeDelta : device.volumeDelta;
+  final throttledVolumeFunction =
+      volumeFunction.throttled(const Duration(seconds: 1));
+  // TODO - Find some way to manage the lifecycle of this subscription.
+  // TODO - I think this widget and this subscription are being rebuilt everyday
+  // a new device update comes back when the volume changes. The symptom is that
+  // a single volume key press makes massive changes to the volume.
+  FlutterAndroidVolumeKeydown.stream.listen((event) async {
+    if (event == HardwareButton.volume_down) {
+      throttledVolumeFunction([-1.0]);
+    } else if (event == HardwareButton.volume_up) {
+      throttledVolumeFunction([1.0]);
+    } else {
+      _log.warning('Unrecognized hardware button: $event');
+    }
+  });
   return [
     Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

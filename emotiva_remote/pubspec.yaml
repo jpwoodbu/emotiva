@@ -31,6 +31,8 @@ dependencies:
   logging: ^1.2.0
   google_fonts: ^6.1.0
   shared_preferences: ^2.2.2
+  flutter_android_volume_keydown: ^1.0.0
+  rate_limiter: ^1.0.0
 
 dev_dependencies:
   flutter_test:

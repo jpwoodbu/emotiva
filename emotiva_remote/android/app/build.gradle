@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "one.woodbury.emotiva_remote"
+    namespace "one.woodbury.emotiva_remote"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
