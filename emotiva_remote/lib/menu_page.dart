@@ -6,18 +6,16 @@ import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
 import 'util.dart';
 
-double _iconSize(BoxConstraints boxConstraints) {
-  // At 100, the controls table will be 348w x 424h. That will be our max
-  // and default size.
-  double iconSize = 100.0;
-  if (boxConstraints.maxHeight < 424) {
-    iconSize = boxConstraints.maxHeight / 6.0;
+double _iconSize(BoxConstraints constraints) {
+  // There are 4 rows in the controls table. Divide the height evenly by the
+  // number of rows. I don't yet understand why diving by 3.0 (there are 3
+  // columns) looks bad when the screen is in landscape mode.
+  const rows = 4.0;
+  if (constraints.maxHeight > constraints.maxWidth) {
+    return constraints.maxWidth / rows;
+  } else {
+    return constraints.maxHeight / rows;
   }
-  if (boxConstraints.maxWidth < 348) {
-    final newSize = boxConstraints.maxWidth / 4.0;
-    if (iconSize > newSize) iconSize = newSize;
-  }
-  return iconSize;
 }
 
 Widget _arrowWidget(emotiva.Arrow arrowType, double size) {
@@ -130,17 +128,18 @@ TableRow _verticleArrow(emotiva.Menu menu, emotiva.Arrow arrowType) {
   return TableRow(children: children);
 }
 
-Widget _onScreenDisplay(emotiva.Device device) {
-  const Color borderColor = Colors.white;
-  const padding = 10.0;
-  if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
-    const rowHeight = 25.0;
-    return SizedBox(
-      // 152 is the height of the OSD table, at least with the current font
-      // settings.
-      height: 152,
-      child: Padding(
-        padding: const EdgeInsets.all(padding),
+class OnScreenDisplay extends StatelessWidget {
+  const OnScreenDisplay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    const Color borderColor = Colors.white;
+    const padding = 10.0;
+    if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
+      const rowHeight = 25.0;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
         child: Table(
           children: const [
             TableRow(children: [SizedBox(height: rowHeight)]),
@@ -158,133 +157,155 @@ Widget _onScreenDisplay(emotiva.Device device) {
             TableRow(children: [SizedBox(height: rowHeight)]),
           ],
         ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
+      child: Table(
+        columnWidths: const {
+          0: FixedColumnWidth(25.0),
+          1: FlexColumnWidth(),
+          2: FlexColumnWidth(),
+          3: FlexColumnWidth(),
+          4: FixedColumnWidth(25.0),
+        },
+        children: <TableRow>[
+          _verticleArrow(device.menuContents, emotiva.Arrow.up),
+          TableRow(
+            children: _row(device, 4),
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: borderColor),
+              ),
+            ),
+          ),
+          TableRow(children: _row(device, 5)),
+          TableRow(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: borderColor),
+              ),
+            ),
+            children: _row(device, 6),
+          ),
+          _verticleArrow(device.menuContents, emotiva.Arrow.down),
+        ],
       ),
     );
   }
-  return Padding(
-    padding: const EdgeInsets.all(padding),
-    child: Table(
-      columnWidths: const {
-        0: FixedColumnWidth(25.0),
-        1: FlexColumnWidth(),
-        2: FlexColumnWidth(),
-        3: FlexColumnWidth(),
-        4: FixedColumnWidth(25.0),
-      },
-      children: <TableRow>[
-        _verticleArrow(device.menuContents, emotiva.Arrow.up),
-        TableRow(
-          children: _row(device, 4),
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: borderColor),
-            ),
-          ),
-        ),
-        TableRow(children: _row(device, 5)),
-        TableRow(
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: borderColor),
-            ),
-          ),
-          children: _row(device, 6),
-        ),
-        _verticleArrow(device.menuContents, emotiva.Arrow.down),
-      ],
-    ),
-  );
 }
 
-Widget _controls(emotiva.Device device, BoxConstraints boxConstraints) {
-  final iconSize = _iconSize(boxConstraints);
-  return Table(
-    defaultColumnWidth: const IntrinsicColumnWidth(),
-    children: <TableRow>[
-      TableRow(
-        children: [
-          const SizedBox(),
-          IconButton(
-            onPressed: () => addHaptic(device.menuUp),
-            icon: Icon(
-              Icons.keyboard_arrow_up,
-              size: iconSize,
-              semanticLabel: 'up',
-            ),
+class Controls extends StatelessWidget {
+  const Controls({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.read<DeviceChanges>().device;
+    // final iconSize = _iconSize(boxConstraints);
+    return LayoutBuilder(
+      builder: (_, constraints) => Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        children: <TableRow>[
+          TableRow(
+            children: [
+              const SizedBox(),
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => addHaptic(device.menuUp),
+                icon: Icon(
+                  Icons.keyboard_arrow_up,
+                  size: _iconSize(constraints),
+                  semanticLabel: 'up',
+                ),
+              ),
+              const SizedBox(),
+            ],
           ),
-          const SizedBox(),
+          TableRow(
+            children: [
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => addHaptic(device.menuLeft),
+                icon: Icon(
+                  Icons.keyboard_arrow_left,
+                  size: _iconSize(constraints),
+                  semanticLabel: 'left',
+                ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => addHaptic(device.menuEnter),
+                icon: Icon(
+                  Icons.circle_outlined,
+                  size: _iconSize(constraints),
+                  semanticLabel: 'enter',
+                ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => addHaptic(device.menuRight),
+                icon: Icon(
+                  Icons.keyboard_arrow_right,
+                  size: _iconSize(constraints),
+                  semanticLabel: 'right',
+                ),
+              ),
+            ],
+          ),
+          TableRow(
+            children: [
+              const SizedBox(),
+              IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => addHaptic(device.menuDown),
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  size: _iconSize(constraints),
+                  semanticLabel: 'down',
+                ),
+              ),
+              const SizedBox(),
+            ],
+          ),
+          TableRow(
+            children: [
+              IconButton(
+                // There's some special padding math here because these icons
+                // are just too big without scaling them down. But making their
+                // size different reduces the row height, which causes the whole
+                // table to appear to scale before it must. The padding makes
+                // the row approximiately the size it would have been had the
+                // icon size not been reduced (see below).
+                padding: EdgeInsets.all(_iconSize(constraints) * 0.2),
+                onPressed: () => addHaptic(device.info),
+                icon: Icon(
+                  Icons.info,
+                  size: _iconSize(constraints) * 0.6,
+                  semanticLabel: 'show on screen display info table',
+                ),
+              ),
+              const SizedBox(),
+              IconButton(
+                padding: EdgeInsets.all(_iconSize(constraints) * 0.2),
+                onPressed: () => addHaptic(device.toggleMenu),
+                icon: Icon(
+                  Icons.menu,
+                  size: _iconSize(constraints) * 0.6,
+                  semanticLabel:
+                      'toggles entering and exiting the Emotiva menu',
+                ),
+              ),
+            ],
+          ),
+          const TableRow(children: [
+            SizedBox(height: 15.0),
+            SizedBox(),
+            SizedBox(),
+          ]),
         ],
       ),
-      TableRow(
-        children: [
-          IconButton(
-            onPressed: () => addHaptic(device.menuLeft),
-            icon: Icon(
-              Icons.keyboard_arrow_left,
-              size: iconSize,
-              semanticLabel: 'left',
-            ),
-          ),
-          IconButton(
-            onPressed: () => addHaptic(device.menuEnter),
-            icon: Icon(
-              Icons.circle_outlined,
-              size: iconSize,
-              semanticLabel: 'enter',
-            ),
-          ),
-          IconButton(
-            onPressed: () => addHaptic(device.menuRight),
-            icon: Icon(
-              Icons.keyboard_arrow_right,
-              size: iconSize,
-              semanticLabel: 'right',
-            ),
-          ),
-        ],
-      ),
-      TableRow(
-        children: [
-          const SizedBox(),
-          IconButton(
-            onPressed: () => addHaptic(device.menuDown),
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              size: iconSize,
-              semanticLabel: 'down',
-            ),
-          ),
-          const SizedBox(),
-        ],
-      ),
-      TableRow(
-        children: [
-          IconButton(
-            onPressed: () => addHaptic(device.info),
-            icon: Icon(
-              Icons.info,
-              size: iconSize * 0.50,
-              semanticLabel: 'show on screen display info table',
-            ),
-          ),
-          const SizedBox(),
-          IconButton(
-            onPressed: () => addHaptic(device.toggleMenu),
-            icon: Icon(
-              Icons.menu,
-              size: iconSize * 0.50,
-              semanticLabel: 'toggles entering and exiting the Emotiva menu',
-            ),
-          ),
-        ],
-      ),
-      const TableRow(children: [
-        SizedBox(height: 15.0),
-        SizedBox(),
-        SizedBox(),
-      ]),
-    ],
-  );
+    );
+  }
 }
 
 class MenuPage extends StatelessWidget {
@@ -292,29 +313,15 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
-      return _build(context, deviceChanges.device);
-    });
-  }
-
-  Widget _build(BuildContext context, emotiva.Device device) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _onScreenDisplay(device),
-          Expanded(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: LayoutBuilder(builder:
-                  (BuildContext context, BoxConstraints boxConstraints) {
-                return _controls(device, boxConstraints);
-              }),
-            ),
-          ),
-        ],
-      ),
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        OnScreenDisplay(),
+        Flexible(
+          fit: FlexFit.loose,
+          child: Controls(),
+        ),
+      ],
     );
   }
 }

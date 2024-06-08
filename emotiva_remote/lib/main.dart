@@ -3,11 +3,9 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:rate_limiter/rate_limiter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'emotiva.dart' as emotiva;
@@ -20,6 +18,7 @@ import 'menu_page.dart';
 import 'tuner_page.dart';
 import 'util.dart';
 import 'zone2_page.dart';
+import 'volume_controls.dart';
 
 final _log = Logger('main');
 const String settingMultiDevice = 'multiDeviceEnabled';
@@ -53,111 +52,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
     );
   }
-}
-
-List<Widget>? _footer(emotiva.Device device, int currentPageIndex) {
-  // Disable the footer on the menu page to make more room.
-  if (currentPageIndex == 2) {
-    return null;
-  }
-  // Change the volume controls to actuate zone 2 when on the zone 2 page.
-  final volumeFunction =
-      currentPageIndex == 4 ? device.zone2VolumeDelta : device.volumeDelta;
-  final throttledVolumeFunction =
-      volumeFunction.throttled(const Duration(seconds: 1));
-  // TODO - Find some way to manage the lifecycle of this subscription.
-  // TODO - I think this widget and this subscription are being rebuilt everyday
-  // a new device update comes back when the volume changes. The symptom is that
-  // a single volume key press makes massive changes to the volume.
-  FlutterAndroidVolumeKeydown.stream.listen((event) async {
-    if (event == HardwareButton.volume_down) {
-      throttledVolumeFunction([-1.0]);
-    } else if (event == HardwareButton.volume_up) {
-      throttledVolumeFunction([1.0]);
-    } else {
-      _log.warning('Unrecognized hardware button: $event');
-    }
-  });
-  return [
-    Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Volume', style: TextStyle(fontSize: 20.0)),
-        ),
-        Row(
-          children: [
-            ElevatedButton(
-                onPressed: () => addHaptic(() => volumeFunction(-1.0)),
-                child: const Icon(
-                  Icons.remove,
-                  size: 30.0,
-                  semanticLabel: 'Volume down',
-                )),
-            const SizedBox(width: 15.0),
-            ElevatedButton(
-                onPressed: () => addHaptic(() => volumeFunction(1.0)),
-                child: const Icon(
-                  Icons.add,
-                  size: 30.0,
-                  semanticLabel: 'Volume up',
-                )),
-          ],
-        ),
-      ],
-    )
-  ];
-}
-
-AppBar? _appBar(BuildContext context, emotiva.Device device) {
-  return AppBar(
-    title: const Center(child: Text('Emotiva Remote')),
-    leading: IconButton(
-      icon: const Icon(
-        Icons.help,
-        semanticLabel: 'show help',
-      ),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const Help()),
-      ),
-    ),
-    actions: [
-      PopupMenuButton(
-        itemBuilder: (BuildContext context) => [
-          PopupMenuItem(
-            child: const Text('Device discovery'),
-            onTap: () {
-              // The analyzer throws warnings if we await for unsubscribeAll()
-              // while then passing context in the next call. Unsubscribing is
-              // kind, but not imperitive. It's OK to do it optimistically.
-              device.unsubscribeAll();
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const DiscoverySwitch(rediscover: true),
-                  ),
-                  (Route<dynamic> route) => false);
-            },
-          ),
-          PopupMenuItem(
-            child: const Text('Known issues'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const KnownIssues()),
-            ),
-          ),
-          PopupMenuItem(
-            child: const Text('Licenses'),
-            onTap: () => showLicensePage(context: context),
-          ),
-          const PopupMenuItem(child: MultiDeviceSetting()),
-        ],
-      ),
-    ],
-  );
 }
 
 class DiscoverySwitch extends StatefulWidget {
@@ -283,17 +177,58 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceChanges>(
-      builder: (context, deviceChanges, _) {
-        return _build(context, deviceChanges.device);
-      },
-    );
-  }
-
-  Widget _build(BuildContext context, emotiva.Device device) {
     return SafeArea(
       child: Scaffold(
-        appBar: _currentPageIndex == 0 ? _appBar(context, device) : null,
+        appBar: _currentPageIndex == 0
+            ? AppBar(
+                title: const Center(child: Text('Emotiva Remote')),
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.help,
+                    semanticLabel: 'show help',
+                  ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const Help()),
+                  ),
+                ),
+                actions: [
+                  PopupMenuButton(
+                    itemBuilder: (BuildContext context) => [
+                      PopupMenuItem(
+                        child: const Text('Device discovery'),
+                        onTap: () {
+                          // The analyzer throws warnings if we await for unsubscribeAll()
+                          // while then passing context in the next call. Unsubscribing is
+                          // kind, but not imperitive. It's OK to do it optimistically.
+                          context.read<DeviceChanges>().device.unsubscribeAll();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const DiscoverySwitch(rediscover: true),
+                              ),
+                              (Route<dynamic> route) => false);
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Text('Known issues'),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const KnownIssues()),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        child: const Text('Licenses'),
+                        onTap: () => showLicensePage(context: context),
+                      ),
+                      const PopupMenuItem(child: MultiDeviceSetting()),
+                    ],
+                  ),
+                ],
+              )
+            : null,
         // Using IndexedStack is critical. It preserves the existance (I think) of
         // the widgets as the user navigates between them so that we don't try to
         // do something breaking like creating additional listeners for a stream
@@ -308,7 +243,7 @@ class _MainViewState extends State<MainView> {
             Zone2Page(),
           ],
         ),
-        persistentFooterButtons: _footer(device, _currentPageIndex),
+        persistentFooterButtons: const [VolumeControls()],
         bottomNavigationBar: NavigationBar(
           destinations: const [
             NavigationDestination(
