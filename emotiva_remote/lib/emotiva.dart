@@ -486,9 +486,9 @@ class Device {
   /// message if it received the command. An ack message does not indicate that
   /// it understood and acted on the command; only that the command message was
   /// received. This library currently ignores ack messages.
-  void control(String command, {String value = '0', bool ack = false}) async {
+  void control(String command, {String value = '0', bool ack = false}) {
     final request = _controlRequest(command, value, ack);
-    await _send(request, controlPort);
+    _send(request, controlPort);
   }
 
   String _valueAttribute(List<XmlAttribute> attributes) {
