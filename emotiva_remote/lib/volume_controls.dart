@@ -1,10 +1,10 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 
 import 'device_changes.dart';
 import 'page_index_change_notifier.dart';
@@ -63,33 +63,39 @@ class _VolumeControlsState extends State<VolumeControls> {
 
   @override
   Widget build(BuildContext context) {
+    const iconSize = 30.0;
     // Page index 4 is the zone 2 controls page.
     _controlMainVolume =
         context.watch<PageIndexChangeNotifier>().pageIndex != 4;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Volume', style: TextStyle(fontSize: 20.0)),
+        Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Text(
+            'Volume',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         Row(
           children: [
             ElevatedButton(
-                onPressed: volumeDown,
-                child: const Icon(
-                  Icons.remove,
-                  size: 30.0,
-                  semanticLabel: 'Volume down',
-                )),
+              onPressed: volumeDown,
+              child: const Icon(
+                Icons.remove,
+                size: iconSize,
+                semanticLabel: 'Volume down',
+              ),
+            ),
             const SizedBox(width: 15.0),
             ElevatedButton(
-                onPressed: volumeUp,
-                child: const Icon(
-                  Icons.add,
-                  size: 30.0,
-                  semanticLabel: 'Volume up',
-                )),
+              onPressed: volumeUp,
+              child: const Icon(
+                Icons.add,
+                size: iconSize,
+                semanticLabel: 'Volume up',
+              ),
+            ),
           ],
         ),
       ],

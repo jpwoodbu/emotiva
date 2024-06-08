@@ -201,7 +201,6 @@ class Controls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = context.read<DeviceChanges>().device;
-    // final iconSize = _iconSize(boxConstraints);
     return LayoutBuilder(
       builder: (_, constraints) => Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
