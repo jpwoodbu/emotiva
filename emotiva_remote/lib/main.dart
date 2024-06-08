@@ -15,6 +15,7 @@ import 'info_page.dart';
 import 'inputs_page.dart';
 import 'known_issues.dart';
 import 'menu_page.dart';
+import 'page_index_change_notifier.dart';
 import 'tuner_page.dart';
 import 'util.dart';
 import 'zone2_page.dart';
@@ -173,13 +174,13 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  int _currentPageIndex = 0;
+  final _pageIndexModel = PageIndexChangeNotifier();
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: _currentPageIndex == 0
+        appBar: _pageIndexModel.pageIndex == 0
             ? AppBar(
                 title: const Center(child: Text('Emotiva Remote')),
                 leading: IconButton(
@@ -234,7 +235,7 @@ class _MainViewState extends State<MainView> {
         // do something breaking like creating additional listeners for a stream
         // inside initState perhaps before the prior listeners have been GC'd.
         body: IndexedStack(
-          index: _currentPageIndex,
+          index: _pageIndexModel.pageIndex,
           children: const [
             InfoPage(),
             InputsPage(),
@@ -243,7 +244,12 @@ class _MainViewState extends State<MainView> {
             Zone2Page(),
           ],
         ),
-        persistentFooterButtons: const [VolumeControls()],
+        persistentFooterButtons: [
+          ChangeNotifierProvider.value(
+            value: _pageIndexModel,
+            child: const VolumeControls(),
+          )
+        ],
         bottomNavigationBar: NavigationBar(
           destinations: const [
             NavigationDestination(
@@ -267,10 +273,10 @@ class _MainViewState extends State<MainView> {
               label: 'Zone 2',
             ),
           ],
-          selectedIndex: _currentPageIndex,
+          selectedIndex: _pageIndexModel.pageIndex,
           onDestinationSelected: (int index) {
             setState(() {
-              _currentPageIndex = index;
+              _pageIndexModel.setPageIndex(index);
             });
           },
         ),

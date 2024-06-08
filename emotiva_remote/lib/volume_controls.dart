@@ -1,36 +1,69 @@
 import 'dart:io';
 
-import 'package:emotiva_remote/device_changes.dart';
-import 'package:emotiva_remote/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import 'device_changes.dart';
+import 'page_index_change_notifier.dart';
+import 'util.dart';
+
 final _log = Logger('VolumeControls');
 
-class VolumeControls extends StatelessWidget {
+class VolumeControls extends StatefulWidget {
   const VolumeControls({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // TODO - Plumb into this widget a signal on whether we're adjusting volume
-    // for zone 2.
-    // Change the volume controls to actuate zone 2 when on the zone 2 page.
-    // final volumeFunction =
-    //     currentPageIndex == 4 ? device.zone2VolumeDelta : device.volumeDelta;
-    final volumeFunction = context.read<DeviceChanges>().device.volumeDelta;
+  State<VolumeControls> createState() => _VolumeControlsState();
+}
+
+class _VolumeControlsState extends State<VolumeControls> {
+  late final Function _mainVolumeFunction;
+  late final Function _zone2VolumeFunction;
+  bool _controlMainVolume = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final device = context.read<DeviceChanges>().device;
+    _mainVolumeFunction = device.volumeDelta;
+    _zone2VolumeFunction = device.zone2VolumeDelta;
+
     if (Platform.isAndroid) {
       FlutterAndroidVolumeKeydown.stream.listen((event) async {
         if (event == HardwareButton.volume_down) {
-          volumeFunction(-1.0);
+          volumeDown();
         } else if (event == HardwareButton.volume_up) {
-          volumeFunction(1.0);
+          volumeUp();
         } else {
           _log.warning('Unrecognized hardware button: $event');
         }
       });
     }
+  }
+
+  void volumeDown() {
+    if (_controlMainVolume) {
+      _mainVolumeFunction(-1.0);
+    } else {
+      _zone2VolumeFunction(-1.0);
+    }
+  }
+
+  void volumeUp() {
+    if (_controlMainVolume) {
+      _mainVolumeFunction(1.0);
+    } else {
+      _zone2VolumeFunction(1.0);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Page index 4 is the zone 2 controls page.
+    _controlMainVolume =
+        context.watch<PageIndexChangeNotifier>().pageIndex != 4;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -41,7 +74,7 @@ class VolumeControls extends StatelessWidget {
         Row(
           children: [
             ElevatedButton(
-                onPressed: () => addHaptic(() => volumeFunction(-1.0)),
+                onPressed: () => addHaptic(volumeDown),
                 child: const Icon(
                   Icons.remove,
                   size: 30.0,
@@ -49,7 +82,7 @@ class VolumeControls extends StatelessWidget {
                 )),
             const SizedBox(width: 15.0),
             ElevatedButton(
-                onPressed: () => addHaptic(() => volumeFunction(1.0)),
+                onPressed: () => addHaptic(volumeUp),
                 child: const Icon(
                   Icons.add,
                   size: 30.0,
