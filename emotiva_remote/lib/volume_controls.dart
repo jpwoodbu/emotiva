@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
