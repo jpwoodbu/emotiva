@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import 'device_changes.dart';
 import 'page_index_change_notifier.dart';
+import 'util.dart';
 
 final _log = Logger('VolumeControls');
 
@@ -44,7 +45,6 @@ class _VolumeControlsState extends State<VolumeControls> {
   }
 
   void volumeDown() {
-    HapticFeedback.lightImpact();
     if (_controlMainVolume) {
       _mainVolumeFunction(-1.0);
     } else {
@@ -53,7 +53,6 @@ class _VolumeControlsState extends State<VolumeControls> {
   }
 
   void volumeUp() {
-    HapticFeedback.lightImpact();
     if (_controlMainVolume) {
       _mainVolumeFunction(1.0);
     } else {
@@ -80,7 +79,7 @@ class _VolumeControlsState extends State<VolumeControls> {
         Row(
           children: [
             ElevatedButton(
-              onPressed: volumeDown,
+              onPressed: () => addHaptic(volumeDown),
               child: const Icon(
                 Icons.remove,
                 size: iconSize,
@@ -89,7 +88,7 @@ class _VolumeControlsState extends State<VolumeControls> {
             ),
             const SizedBox(width: 15.0),
             ElevatedButton(
-              onPressed: volumeUp,
+              onPressed: () => addHaptic(volumeUp),
               child: const Icon(
                 Icons.add,
                 size: iconSize,
