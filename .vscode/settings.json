@@ -1,18 +1,16 @@
 {
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportMissingImports": "none",
-        "reportMissingModuleSource": "none"
-    },
-    "dart.analysisExcludedFolders": [
-        "bazel-emotiva"
-    ],
-    "dart.flutterSdkPath": "emotiva_remote/.fvm/flutter_sdk",
-    // Remove .fvm files from search
-    "search.exclude": {
-        "**/.fvm": true
-    },
-    // Remove from file watching
-    "files.watcherExclude": {
-        "**/.fvm": true
-    }
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportMissingModuleSource": "none"
+  },
+  "dart.analysisExcludedFolders": [
+    "bazel-emotiva"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.22.2",
+  "search.exclude": {
+    "**/.fvm": true
+  },
+  "files.watcherExclude": {
+    "**/.fvm": true
+  }
 }
