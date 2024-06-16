@@ -178,6 +178,11 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
+    const appIcon = const Image(
+      image: AssetImage('assets/hdpi_app_icon.png'),
+      height: 72.0,
+      width: 72.0,
+    );
     return SafeArea(
       child: Scaffold(
         appBar: _pageIndexModel.pageIndex == 0
@@ -222,7 +227,8 @@ class _MainViewState extends State<MainView> {
                       ),
                       PopupMenuItem(
                         child: const Text('Licenses'),
-                        onTap: () => showLicensePage(context: context),
+                        onTap: () => showLicensePage(
+                            context: context, applicationIcon: appIcon),
                       ),
                       const PopupMenuItem(child: MultiDeviceSetting()),
                     ],
