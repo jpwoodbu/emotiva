@@ -23,27 +23,30 @@ class Help extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Help'),
         ),
-        body: Padding(
-          // TODO - centralize this padding value. It was pulled from the info
-          // page.
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: ListView.separated(
-            itemBuilder: (_, index) {
-              switch (index) {
-                case 0:
-                  return HelpItem(title: _helpHeader1, helpText: _help1);
-                case 1:
-                  return HelpItem(title: _helpHeader2, helpText: _help2);
-                case 2:
-                  return HelpItem(title: _helpHeader3, helpText: _help3);
-                case 3:
-                  return HelpItem(title: _helpHeader4, helpText: _help4);
-                default:
-                  return const SizedBox();
-              }
-            },
-            separatorBuilder: (_, __) => const Divider(),
-            itemCount: 4,
+        body: Semantics(
+          label: 'help page',
+          child: Padding(
+            // TODO - centralize this padding value. It was pulled from the info
+            // page.
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: ListView.separated(
+              itemBuilder: (_, index) {
+                switch (index) {
+                  case 0:
+                    return HelpItem(title: _helpHeader1, helpText: _help1);
+                  case 1:
+                    return HelpItem(title: _helpHeader2, helpText: _help2);
+                  case 2:
+                    return HelpItem(title: _helpHeader3, helpText: _help3);
+                  case 3:
+                    return HelpItem(title: _helpHeader4, helpText: _help4);
+                  default:
+                    return const SizedBox();
+                }
+              },
+              separatorBuilder: (_, __) => const Divider(),
+              itemCount: 4,
+            ),
           ),
         ),
       ),
