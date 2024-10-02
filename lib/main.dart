@@ -178,7 +178,7 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    const appIcon = const Image(
+    const appIcon = Image(
       image: AssetImage('assets/hdpi_app_icon.png'),
       height: 72.0,
       width: 72.0,
