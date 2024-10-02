@@ -6,7 +6,7 @@
   "dart.analysisExcludedFolders": [
     "bazel-emotiva"
   ],
-  "dart.flutterSdkPath": ".fvm/versions/3.24.1",
+  "dart.flutterSdkPath": ".fvm/versions/3.24.3",
   "search.exclude": {
     "**/.fvm": true
   },
