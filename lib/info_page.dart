@@ -178,7 +178,7 @@ class InfoPage extends StatelessWidget {
   Widget _build(BuildContext context, emotiva.Device device) {
     return RefreshIndicator(
       semanticsLabel: 'Info page',
-      onRefresh: device.updateAll,
+      onRefresh: () => addHaptic(device.updateAll),
       child: Padding(
         padding: const EdgeInsets.all(15),
         child: ListView(
