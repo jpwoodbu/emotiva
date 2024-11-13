@@ -894,7 +894,7 @@ class Device {
 
   /// Sets the audio source to the balanced analog input.
   void setBalancedInput() {
-    // analog5 bring up the balanced input on the RMC-1.
+    // analog5 brings up the balanced input on the RMC-1.
     control('analog5');
   }
 
