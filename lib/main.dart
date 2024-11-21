@@ -401,8 +401,8 @@ class _DiscoveryState extends State<Discovery> {
       _device = _futureProvidedDevice();
     } else {
       // Discovery is usually very fast... O(ms). To avoid the scanning widget
-      // being displayed for such a short time that they user can't read it
-      // (which would be janky), show for it at least 750ms.
+      // being displayed for such a short time that the user can't read it
+      // (which would be janky), show it for at least 750ms.
       _device = waitAtLeast<emotiva.Device>(
           future: emotiva.discover(3),
           duration: const Duration(milliseconds: 750));
@@ -538,17 +538,17 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       return const [Text('No devices found so far...')];
     } else {
       return devices
-          .map((e) => Card(
+          .map((device) => Card(
                 child: SizedBox(
                   width: 300,
                   height: 75,
                   child: ListTile(
                     leading: const Icon(Icons.album),
-                    title: Text(e.name),
-                    subtitle: Text(e.address.address),
+                    title: Text(device.name),
+                    subtitle: Text(device.address.address),
                     onTap: () {
                       _discover.close();
-                      _connect(e);
+                      _connect(device);
                     },
                   ),
                 ),
