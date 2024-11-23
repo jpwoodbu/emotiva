@@ -10,16 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'emotiva.dart' as emotiva;
 import 'device_changes.dart';
-import 'help.dart';
-import 'info_page.dart';
-import 'inputs_page.dart';
-import 'known_issues.dart';
-import 'menu_page.dart';
 import 'page_index_change_notifier.dart';
-import 'tuner_page.dart';
 import 'util.dart';
-import 'zone2_page.dart';
-import 'volume_controls.dart';
+import 'widgets/help.dart';
+import 'widgets/info_page.dart';
+import 'widgets/inputs_page.dart';
+import 'widgets/known_issues.dart';
+import 'widgets/menu_page.dart';
+import 'widgets/tuner_page.dart';
+import 'widgets/zone2_page.dart';
+import 'widgets/volume_controls.dart';
 
 final _log = Logger('main');
 const String settingMultiDevice = 'multiDeviceEnabled';

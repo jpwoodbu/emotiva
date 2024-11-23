@@ -1,9 +1,9 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-import 'emotiva.dart' as emotiva;
-import 'device_changes.dart';
-import 'util.dart';
+import '../emotiva.dart' as emotiva;
+import '../device_changes.dart';
+import '../util.dart';
 
 const double _sheetPadding = 15.0;
 

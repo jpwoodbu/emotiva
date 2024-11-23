@@ -5,9 +5,9 @@ import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.da
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-import 'device_changes.dart';
-import 'page_index_change_notifier.dart';
-import 'util.dart';
+import '../device_changes.dart';
+import '../page_index_change_notifier.dart';
+import '../util.dart';
 
 final _log = Logger('VolumeControls');
 

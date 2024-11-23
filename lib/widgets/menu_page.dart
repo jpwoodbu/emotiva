@@ -2,9 +2,9 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
-import 'emotiva.dart' as emotiva;
-import 'device_changes.dart';
-import 'util.dart';
+import '../emotiva.dart' as emotiva;
+import '../device_changes.dart';
+import '../util.dart';
 
 double _iconSize(BoxConstraints constraints) {
   // There are 4 rows in the controls table. Divide the height evenly by the
