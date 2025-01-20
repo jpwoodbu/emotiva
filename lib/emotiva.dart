@@ -39,13 +39,13 @@ Future<Device> discover(int timeoutSec) async {
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
-        _log.fine('sent: $ping');
+        _log.info('sent: $ping');
         break;
       case RawSocketEvent.read:
         final datagram = socket.receive();
         socket.close();
         final data = String.fromCharCodes(datagram!.data);
-        _log.fine('received: $data');
+        _log.info('received: $data');
         final device = _parseTransponder(data, datagram.address);
         return device;
       case RawSocketEvent.closed:
@@ -88,7 +88,7 @@ class MultiDeviceDiscover {
     if (bytesSent == 0) {
       _log.severe('Unable to send broadcast ping.');
     } else {
-      _log.fine('sent: $ping');
+      _log.info('sent: $ping');
     }
   }
 
@@ -105,7 +105,7 @@ class MultiDeviceDiscover {
         case RawSocketEvent.read:
           final datagram = _socket!.receive();
           final data = String.fromCharCodes(datagram!.data);
-          _log.fine('received: $data');
+          _log.info('received: $data');
           final device = _parseTransponder(data, datagram.address);
           yield device;
         case RawSocketEvent.closed:
@@ -349,7 +349,7 @@ class Device {
             break;
           }
           final packet = String.fromCharCodes(datagram.data);
-          _log.fine('received: $packet');
+          _log.info('received: $packet');
           yield packet;
         case RawSocketEvent.closed:
           break;
@@ -386,7 +386,7 @@ class Device {
 
   Future<void> _send(String request, int destinationPort) async {
     _sendSocket ??= await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-    _log.fine('sending: $request');
+    _log.info('sending: $request');
     final bytesSent =
         _sendSocket!.send(request.codeUnits, address, destinationPort);
     if (bytesSent == 0) {
@@ -588,13 +588,13 @@ class Device {
     final packetType = root.name.toString();
     if (packetType == 'emotivaAck') {
       // We don't currently do anything with acks.
-      _log.fine('Received an ack message: ${root.toXmlString()}');
+      _log.info('Received an ack message: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaUnsubscribe') {
       // If we get a response from an unsubscribe request before we tear down
       // the socket, catch it and do nothing.
-      _log.fine('Recieved an unsubscribe request: ${root.toXmlString()}');
+      _log.info('Recieved an unsubscribe request: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaNotify' || packetType == 'emotivaMenuNotify') {
@@ -1147,7 +1147,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log.fine('response: $response');
+    _log.info('response: $response');
     _controlStream.add(response);
   }
 
@@ -1715,7 +1715,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log.fine('response: $response');
+    _log.info('response: $response');
     _sequence++;
     _notifyStream.add(response);
   }
@@ -1866,7 +1866,7 @@ class FakeDevice extends Device {
       }
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
-    _log.fine('response: $response');
+    _log.info('response: $response');
     _controlStream.add(response);
   }
 
@@ -1889,7 +1889,7 @@ class FakeDevice extends Device {
     final root = document.rootElement;
     final requestType = root.name.toString();
     final fields = _elementsToFields(root.childElements);
-    _log.fine('request: ${root.toXmlString(pretty: true)}');
+    _log.info('request: ${root.toXmlString(pretty: true)}');
     switch (requestType) {
       case 'emotivaControl':
         _parseControlRequest(root.childElements);

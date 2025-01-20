@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
+import 'package:logging_flutter/logging_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,11 +31,29 @@ void main() async {
     // ignore: avoid_print
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
+
+  // Set up in-app log viewing.
+  Flogger.init(
+    config: const FloggerConfig(
+      printClassName: true,
+      printMethodName: true,
+      showDateTime: true,
+      showDebugLogs: true,
+    ),
+  );
+  Flogger.registerListener(
+    (record) => LogConsole.add(
+      OutputEvent(record.level, [record.printable()]),
+      bufferSize: 1000,
+    ),
+  );
+
   GoogleFonts.config.allowRuntimeFetching = false;
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/LICENSE.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
+
   runApp(const MyApp());
 }
 
@@ -229,6 +248,10 @@ class _MainViewState extends State<MainView> {
                         child: const Text('Licenses'),
                         onTap: () => showLicensePage(
                             context: context, applicationIcon: appIcon),
+                      ),
+                      PopupMenuItem(
+                        child: const Text('Debug logs'),
+                        onTap: () => LogConsole.open(context),
                       ),
                       const PopupMenuItem(child: MultiDeviceSetting()),
                     ],
