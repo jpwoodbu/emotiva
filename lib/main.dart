@@ -79,10 +79,10 @@ class DiscoverySwitch extends StatefulWidget {
   const DiscoverySwitch({super.key, this.rediscover = false});
 
   @override
-  State<DiscoverySwitch> createState() => _RediscoverState();
+  State<DiscoverySwitch> createState() => _DiscoverySwitchState();
 }
 
-class _RediscoverState extends State<DiscoverySwitch> {
+class _DiscoverySwitchState extends State<DiscoverySwitch> {
   late Future<SharedPreferences> _preferences;
 
   @override
