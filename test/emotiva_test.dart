@@ -27,4 +27,9 @@ void main() {
       expect(device == device, true);
     });
   });
+
+// TODO: Write some tests for packet parsing. How will I feed in the XML in a
+// way that's obviously correct?
+  group('Packet parsing', () {
+  });
 }
