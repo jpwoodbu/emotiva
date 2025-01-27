@@ -61,5 +61,41 @@ void main() {
       device.parsePacket(createUpdateXml('source', 'HDMI 2'));
       expect(device.source, 'HDMI 2');
     });
+
+    test('mode', () {
+      device.mode = 'All stereo';
+      device.parsePacket(createUpdateXml('mode', 'Dolby ATMOS'));
+      expect(device.mode, 'Dolby ATMOS');
+    });
+
+    test('volume is set', () {
+      device.volume = -30.0;
+      device.parsePacket(createUpdateXml('volume', '-20.0'));
+      expect(device.volume, -20.0);
+    });
+
+    test('mute', () {
+      device.muted = false;
+      device.parsePacket(createUpdateXml('volume', 'Mute'));
+      expect(device.muted, true);
+    });
+
+    test('volume value has extra whitespace', () {
+      device.volume = -30.0;
+      device.parsePacket(createUpdateXml('volume', '- 9.0'));
+      expect(device.volume, -9.0);
+    });
+   
+    test('loudness', () {
+      device.loudness = 'Off';
+      device.parsePacket(createUpdateXml('loudness', 'On'));
+      expect(device.loudness, 'On');
+    });
+
+    test('audio input', () {
+      device.audioInput = 'Optical 1';
+      device.parsePacket(createUpdateXml('audio_input', 'Optical 2'));
+      expect(device.audioInput, 'Optical 2');
+    });
   });
 }

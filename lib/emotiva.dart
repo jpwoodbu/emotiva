@@ -180,6 +180,7 @@ class Device {
   String mode = '';
   double volume = 0.0;
   bool muted = false;
+  // TODO: Make this a bool. The UI only checks if its value is 'On'.
   String loudness = '';
   String audioInput = '';
   String audioBitstream = '';
