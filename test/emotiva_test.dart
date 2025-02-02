@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:emotiva_remote/emotiva.dart';
 import 'package:test/test.dart';
 
-String createUpdateXml(String name, String value) {
+String createUpdateXml(String name, String value, {bool visible = true}) {
   return '''<?xml version="1.0" encoding="utf-8"?>
     <emotivaUpdate protocol="3.0">
-      <property name="$name" value="$value" visible="true" status="ack"/>
+      <property name="$name" value="$value"
+        visible="${visible.toString().toLowerCase()}" status="ack"/>
     </emotivaUpdate>''';
 }
 
@@ -187,6 +188,102 @@ void main() {
         device.bassTrim = 0.0;
         device.parsePacket(createUpdateXml('bass', '-1.0'));
         expect(device.bassTrim, -1.0);
+      });
+
+      test('mode_ref_stereo', () {
+        device.visibility['mode_ref_stereo'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_ref_stereo', 'unused', visible: true));
+        expect(device.visibility['mode_ref_stereo'], true);
+      });
+
+      test('mode_stereo', () {
+        device.visibility['mode_stereo'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_stereo', 'unused', visible: true));
+        expect(device.visibility['mode_stereo'], true);
+      });
+
+      test('mode_music', () {
+        device.visibility['mode_music'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_music', 'unused', visible: true));
+        expect(device.visibility['mode_music'], true);
+      });
+
+      test('mode_music', () {
+        device.visibility['mode_music'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_music', 'unused', visible: true));
+        expect(device.visibility['mode_music'], true);
+      });
+
+      test('mode_movie', () {
+        device.visibility['mode_movie'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_movie', 'unused', visible: true));
+        expect(device.visibility['mode_movie'], true);
+      });
+
+      test('mode_direct', () {
+        device.visibility['mode_direct'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_direct', 'unused', visible: true));
+        expect(device.visibility['mode_direct'], true);
+      });
+
+      test('mode_dolby', () {
+        device.visibility['mode_dolby'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_dolby', 'unused', visible: true));
+        expect(device.visibility['mode_dolby'], true);
+      });
+
+      test('mode_all_stereo', () {
+        device.visibility['mode_all_stereo'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_all_stereo', 'unused', visible: true));
+        expect(device.visibility['mode_all_stereo'], true);
+      });
+
+      test('mode_auto', () {
+        device.visibility['mode_auto'] = false;
+        device.parsePacket(
+            createUpdateXml('mode_auto', 'unused', visible: true));
+        expect(device.visibility['mode_auto'], true);
+      });
+
+      test('mode_surround', () {
+        device.visibility['mode_surround'] = false;
+
+        device.parsePacket(
+            createUpdateXml('mode_surround', 'unused', visible: true));
+
+        expect(device.visibility['mode_surround'], true);
+      });
+
+      test('selected_mode', () {
+        device.selectedMode = 'Dolby Surround';
+        device.parsePacket(createUpdateXml('selected_mode', 'Auto'));
+        expect(device.selectedMode, 'Auto');
+      });
+
+      test('selected_movie_music', () {
+        device.selectedMovieMusic = 'Movie';
+        device.parsePacket(createUpdateXml('selected_movie_music', 'Music'));
+        expect(device.selectedMovieMusic, 'Music');
+      });
+
+      test('zone2_power on', () {
+        device.zone2Power = false;
+        device.parsePacket(createUpdateXml('zone2_power', 'On'));
+        expect(device.zone2Power, true);
+      });
+
+      test('zone2_power off', () {
+        device.zone2Power = true;
+        device.parsePacket(createUpdateXml('zone2_power', 'Off'));
+        expect(device.zone2Power, false);
       });
     });
   });
