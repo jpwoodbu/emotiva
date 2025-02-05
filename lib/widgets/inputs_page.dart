@@ -139,6 +139,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
 void _sourceBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -155,6 +156,7 @@ void _sourceBottomSheet(BuildContext context, emotiva.Device device) {
 void _hdmiBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -203,6 +205,7 @@ void _hdmiBottomSheet(BuildContext context, emotiva.Device device) {
 void _coaxBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -235,6 +238,7 @@ void _coaxBottomSheet(BuildContext context, emotiva.Device device) {
 void _opticalBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -267,6 +271,7 @@ void _opticalBottomSheet(BuildContext context, emotiva.Device device) {
 void _xlrBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -291,6 +296,7 @@ void _xlrBottomSheet(BuildContext context, emotiva.Device device) {
 void _analogBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -319,6 +325,7 @@ void _analogBottomSheet(BuildContext context, emotiva.Device device) {
 void _otherBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
@@ -352,6 +359,7 @@ void _otherBottomSheet(BuildContext context, emotiva.Device device) {
 void _modeBottomSheet(BuildContext context, emotiva.Device device) {
   showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(_sheetPadding),
