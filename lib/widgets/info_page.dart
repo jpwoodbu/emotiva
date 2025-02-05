@@ -123,7 +123,7 @@ Widget _loudnessRow(emotiva.Device device) {
         'Loudness',
         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
       ),
-      Switch(
+      Switch.adaptive(
         value: device.loudness == 'On' ? true : false,
         onChanged: (bool _) => addHaptic(device.toggleLoudness),
       ),
@@ -137,7 +137,7 @@ Widget _muteRow(emotiva.Device device) {
     children: [
       const Text('Mute',
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      Switch(
+      Switch.adaptive(
         value: device.muted ? true : false,
         onChanged: (bool _) => addHaptic(device.toggleMute),
       ),

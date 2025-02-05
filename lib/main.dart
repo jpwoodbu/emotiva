@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,6 +68,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
+        // This is necessary so that Cupertino widgets use our theme.
+        cupertinoOverrideTheme: CupertinoThemeData(
+          applyThemeToAll: true,
+        ),
       ),
       home: const DiscoverySwitch(),
       debugShowCheckedModeBanner: false,
