@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -124,282 +127,389 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
       name = 'Source $i';
     }
     if (visible) {
-      widgets.add(
-        ElevatedButton.icon(
-          onPressed: () => _setSource(context, device, i),
-          icon: const Icon(Icons.person),
-          label: Text(name),
-        ),
-      );
+      void onPressed() => _setSource(context, device, i);
+      if (Platform.isIOS) {
+        widgets.add(
+          CupertinoActionSheetAction(
+            onPressed: onPressed,
+            child: Text(name),
+          ),
+        );
+      } else {
+        widgets.add(
+          ElevatedButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.person),
+            label: Text(name),
+          ),
+        );
+      }
     }
   }
   return widgets;
 }
 
-void _sourceBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildSourceList(context, device),
-        ),
-      );
-    },
-  );
+void _sourceSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: _buildSourceList(context, device),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _buildSourceList(context, device),
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _hdmiBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 1),
+void _hdmiSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: List<Widget>.generate(8, (index) {
+          final number = index + 1;
+          return CupertinoActionSheetAction(
+            onPressed: () => _setHdmi(context, device, number),
+            child: Text('HDMI $number'),
+          );
+        }),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List<Widget>.generate(8, (index) {
+              final number = index + 1;
+              return ElevatedButton.icon(
+                onPressed: () => _setHdmi(context, device, number),
                 icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 1')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 2),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 2')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 3),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 3')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 4),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 4')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 5),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 5')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 6),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 6')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 7),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 7')),
-            ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, 8),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('HDMI 8')),
-          ],
-        ),
-      );
-    },
-  );
+                label: Text('HDMI $number'),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _coaxBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setCoax(context, device, 1),
-                icon: const Icon(Icons.settings_input_composite),
-                label: const Text('Coax 1')),
-            ElevatedButton.icon(
-                onPressed: () => _setCoax(context, device, 2),
-                icon: const Icon(Icons.settings_input_composite),
-                label: const Text('Coax 2')),
-            ElevatedButton.icon(
-                onPressed: () => _setCoax(context, device, 3),
-                icon: const Icon(Icons.settings_input_composite),
-                label: const Text('Coax 3')),
-            ElevatedButton.icon(
-                onPressed: () => _setCoax(context, device, 4),
-                icon: const Icon(Icons.settings_input_composite),
-                label: const Text('Coax 4')),
-          ],
-        ),
-      );
-    },
-  );
+void _coaxSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: List<Widget>.generate(4, (index) {
+          final number = index + 1;
+          return CupertinoActionSheetAction(
+            onPressed: () => _setCoax(context, device, number),
+            child: Text('Coax $number'),
+          );
+        }),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List<Widget>.generate(4, (index) {
+              final number = index + 1;
+              return ElevatedButton.icon(
+                  onPressed: () => _setCoax(context, device, number),
+                  icon: const Icon(Icons.settings_input_composite),
+                  label: Text('Coax $number'));
+            }),
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _opticalBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setOptical(context, device, 1),
-                icon: const Icon(Icons.lightbulb),
-                label: const Text('Optical 1')),
-            ElevatedButton.icon(
-                onPressed: () => _setOptical(context, device, 2),
-                icon: const Icon(Icons.lightbulb),
-                label: const Text('Optical 2')),
-            ElevatedButton.icon(
-                onPressed: () => _setOptical(context, device, 3),
-                icon: const Icon(Icons.lightbulb),
-                label: const Text('Optical 3')),
-            ElevatedButton.icon(
-                onPressed: () => _setOptical(context, device, 4),
-                icon: const Icon(Icons.lightbulb),
-                label: const Text('Optical 4')),
-          ],
-        ),
-      );
-    },
-  );
+void _opticalSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: List<Widget>.generate(4, (index) {
+          final number = index + 1;
+          return CupertinoActionSheetAction(
+            onPressed: () => _setOptical(context, device, number),
+            child: Text('Optical $number'),
+          );
+        }),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List<Widget>.generate(4, (index) {
+              final number = index + 1;
+              return ElevatedButton.icon(
+                  onPressed: () => _setOptical(context, device, number),
+                  icon: const Icon(Icons.lightbulb),
+                  label: Text('Optical $number'));
+            }),
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _xlrBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setAesEbu(context, device),
-                icon: const Icon(Icons.developer_board),
-                label: const Text('AES/EBU')),
-            ElevatedButton.icon(
-                onPressed: () => _setBalancedInput(context, device),
-                icon: const Icon(Icons.album),
-                label: const Text('Balanced Input')),
-          ],
-        ),
-      );
-    },
-  );
+void _xlrSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            onPressed: () => _setAesEbu(context, device),
+            child: Text('AES/EBU'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setBalancedInput(context, device),
+            child: Text('Balanced Input'),
+          ),
+        ],
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton.icon(
+                  onPressed: () => _setAesEbu(context, device),
+                  icon: const Icon(Icons.developer_board),
+                  label: const Text('AES/EBU')),
+              ElevatedButton.icon(
+                  onPressed: () => _setBalancedInput(context, device),
+                  icon: const Icon(Icons.album),
+                  label: const Text('Balanced Input')),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _analogBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setAnalog(context, device, 1),
+void _analogSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: List<Widget>.generate(3, (index) {
+          final number = index + 1;
+          return CupertinoActionSheetAction(
+            onPressed: () => _setAnalog(context, device, number),
+            child: Text('Analog $number'),
+          );
+        }),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List<Widget>.generate(3, (index) {
+              final number = index + 1;
+              return ElevatedButton.icon(
+                onPressed: () => _setAnalog(context, device, number),
                 icon: const Icon(Icons.settings_input_component),
-                label: const Text('Analog 1')),
-            ElevatedButton.icon(
-                onPressed: () => _setAnalog(context, device, 2),
-                icon: const Icon(Icons.settings_input_component),
-                label: const Text('Analog 2')),
-            ElevatedButton.icon(
-                onPressed: () => _setAnalog(context, device, 3),
-                icon: const Icon(Icons.settings_input_component),
-                label: const Text('Analog 3')),
-          ],
-        ),
-      );
-    },
-  );
+                label: Text('Analog $number'),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _otherBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setArc(context, device),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: const Text('ARC')),
-            ElevatedButton.icon(
-                onPressed: () => _setUsb(context, device),
-                icon: const Icon(Icons.usb),
-                label: const Text('USB')),
-            ElevatedButton.icon(
-                onPressed: () => _setTuner(context, device),
-                icon: const Icon(Icons.radio),
-                label: const Text('Tuner')),
-            ElevatedButton.icon(
-                onPressed: () => _setFront(context, device),
-                icon: const Icon(Icons.smartphone),
-                label: const Text('Front')),
-          ],
-        ),
-      );
-    },
-  );
+void _otherInputsSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            onPressed: () => _setArc(context, device),
+            child: Text('ARC'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setUsb(context, device),
+            child: Text('USB'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setTuner(context, device),
+            child: Text('Tuner'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setFront(context, device),
+            child: Text('Front'),
+          ),
+        ],
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ElevatedButton.icon(
+                  onPressed: () => _setArc(context, device),
+                  icon: const Icon(Icons.settings_input_hdmi),
+                  label: const Text('ARC')),
+              ElevatedButton.icon(
+                  onPressed: () => _setUsb(context, device),
+                  icon: const Icon(Icons.usb),
+                  label: const Text('USB')),
+              ElevatedButton.icon(
+                  onPressed: () => _setTuner(context, device),
+                  icon: const Icon(Icons.radio),
+                  label: const Text('Tuner')),
+              ElevatedButton.icon(
+                  onPressed: () => _setFront(context, device),
+                  icon: const Icon(Icons.smartphone),
+                  label: const Text('Front')),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-void _modeBottomSheet(BuildContext context, emotiva.Device device) {
-  showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 1.0,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(_sheetPadding),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            ElevatedButton.icon(
-                onPressed: () => _setModeAuto(context, device),
-                icon: const Icon(Icons.surround_sound),
-                label: const Text('Auto')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeStereo(context, device),
-                icon: const Icon(Icons.speaker_group),
-                label: const Text('Stereo')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeDirect(context, device),
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Direct')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeReferenceStereo(context, device),
-                icon: const Icon(Icons.hearing),
-                label: const Text('Reference Stereo')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeDolby(context, device),
-                icon: const Icon(Icons.surround_sound),
-                label: const Text('Dolby')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeDts(context, device),
-                icon: const Icon(Icons.surround_sound),
-                label: const Text('DTS')),
-            ElevatedButton.icon(
-                onPressed: () => _setModeAllStereo(context, device),
-                icon: const Icon(Icons.hub),
-                label: const Text('All Stereo')),
-          ],
-        ),
-      );
-    },
-  );
+void _modeSelector(BuildContext context, emotiva.Device device) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeAuto(context, device),
+            child: Text('Auto'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeStereo(context, device),
+            child: Text('Stereo'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeDirect(context, device),
+            child: Text('Direct'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeReferenceStereo(context, device),
+            child: Text('Reference Stereo'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeDolby(context, device),
+            child: Text('Dolby'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeDts(context, device),
+            child: Text('DTS'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => _setModeAllStereo(context, device),
+            child: Text('All Stereo'),
+          ),
+        ],
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 1.0,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(_sheetPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ElevatedButton.icon(
+                  onPressed: () => _setModeAuto(context, device),
+                  icon: const Icon(Icons.surround_sound),
+                  label: const Text('Auto')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeStereo(context, device),
+                  icon: const Icon(Icons.speaker_group),
+                  label: const Text('Stereo')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeDirect(context, device),
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Direct')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeReferenceStereo(context, device),
+                  icon: const Icon(Icons.hearing),
+                  label: const Text('Reference Stereo')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeDolby(context, device),
+                  icon: const Icon(Icons.surround_sound),
+                  label: const Text('Dolby')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeDts(context, device),
+                  icon: const Icon(Icons.surround_sound),
+                  label: const Text('DTS')),
+              ElevatedButton.icon(
+                  onPressed: () => _setModeAllStereo(context, device),
+                  icon: const Icon(Icons.hub),
+                  label: const Text('All Stereo')),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 Widget _trimControls(BuildContext context, emotiva.Device device) {
@@ -607,7 +717,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _sourceBottomSheet(context, device),
+            onPressed: () => _sourceSelector(context, device),
             icon: const Icon(Icons.person),
             label: const Text('Source'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -616,7 +726,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _hdmiBottomSheet(context, device),
+            onPressed: () => _hdmiSelector(context, device),
             icon: const Icon(Icons.settings_input_hdmi),
             label: const Text('HDMI'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -627,7 +737,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _opticalBottomSheet(context, device),
+            onPressed: () => _opticalSelector(context, device),
             icon: const Icon(Icons.lightbulb),
             label: const Text('Optical'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -636,7 +746,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _coaxBottomSheet(context, device),
+            onPressed: () => _coaxSelector(context, device),
             icon: const Icon(Icons.settings_input_composite),
             label: const Text('Coax'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -647,7 +757,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _analogBottomSheet(context, device),
+            onPressed: () => _analogSelector(context, device),
             icon: const Icon(Icons.settings_input_component),
             label: const Text('Analog'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -656,7 +766,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _xlrBottomSheet(context, device),
+            onPressed: () => _xlrSelector(context, device),
             icon: const Icon(Icons.donut_large),
             label: const Text('XLR'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -667,7 +777,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _otherBottomSheet(context, device),
+            onPressed: () => _otherInputsSelector(context, device),
             icon: const Icon(Icons.more),
             label: const Text('Other'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -676,7 +786,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _modeBottomSheet(context, device),
+            onPressed: () => _modeSelector(context, device),
             icon: const Icon(Icons.surround_sound),
             label: const Text('Mode'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
