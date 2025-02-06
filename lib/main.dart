@@ -105,7 +105,7 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return const CircularProgressIndicator();
+            return const CircularProgressIndicator.adaptive();
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.hasError) {
@@ -150,7 +150,7 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return const CircularProgressIndicator();
+            return const CircularProgressIndicator.adaptive();
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.hasError) {
@@ -374,7 +374,7 @@ class ScanningPage extends StatelessWidget {
             children: [
               Text('Searching for an Emotiva device...'),
               SizedBox(height: 25.0),
-              CircularProgressIndicator(),
+              CircularProgressIndicator.adaptive(),
             ],
           ),
         ),
