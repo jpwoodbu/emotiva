@@ -8,8 +8,13 @@ import '../emotiva.dart' as emotiva;
 import '../device_changes.dart';
 import '../util.dart';
 
-const double _sheetPadding = 15.0;
 const double _tableCellPadding = 8.0;
+
+// This is a workaround for not getting notify messages when changing inputs for
+// zone 2.
+void _delayedUpdateAll(emotiva.Device device) {
+  Future.delayed(const Duration(seconds: 2), device.updateAll);
+}
 
 void _addHapticAndPop(BuildContext context, Function function) {
   addHaptic(function);
@@ -28,20 +33,45 @@ void _setCoax(BuildContext context, emotiva.Device device, int input) {
   _addHapticAndPop(context, () => device.setCoax(input));
 }
 
+void _setCoaxZone2(BuildContext context, emotiva.Device device, int input) {
+  _addHapticAndPop(context, () => device.zone2SetCoax(input));
+  _delayedUpdateAll(device);
+}
+
 void _setAesEbu(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setAesEbu());
+}
+
+void _setAesEbuZone2(BuildContext context, emotiva.Device device) {
+  _addHapticAndPop(context, () => device.zone2SetAesEbu());
+  _delayedUpdateAll(device);
 }
 
 void _setOptical(BuildContext context, emotiva.Device device, int input) {
   _addHapticAndPop(context, () => device.setOptical(input));
 }
 
+void _setOpticalZone2(BuildContext context, emotiva.Device device, int input) {
+  _addHapticAndPop(context, () => device.zone2SetOptical(input));
+  _delayedUpdateAll(device);
+}
+
 void _setAnalog(BuildContext context, emotiva.Device device, int input) {
   _addHapticAndPop(context, () => device.setAnalog(input));
 }
 
+void _setAnalogZone2(BuildContext context, emotiva.Device device, int input) {
+  _addHapticAndPop(context, () => device.zone2SetAnalog(input));
+  _delayedUpdateAll(device);
+}
+
 void _setBalancedInput(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setBalancedInput());
+}
+
+void _setBalancedInputZone2(BuildContext context, emotiva.Device device) {
+  _addHapticAndPop(context, () => device.zone2SetBalancedInput());
+  _delayedUpdateAll(device);
 }
 
 void _setArc(BuildContext context, emotiva.Device device) {
@@ -52,12 +82,29 @@ void _setUsb(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setUsb());
 }
 
+void setUsbZone2(BuildContext context, emotiva.Device device) {
+  _addHapticAndPop(context, () => device.zone2SetUsb());
+  _delayedUpdateAll(device);
+}
+
 void _setTuner(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setTuner());
 }
 
 void _setFront(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setFront());
+}
+
+void setFrontZone2(BuildContext context, emotiva.Device device) {
+  _addHapticAndPop(context, () => device.zone2SetFront());
+  _delayedUpdateAll(device);
+}
+
+// This is only used for zone 2 controls, but it makes use of functions in this
+// library.
+void setFollowMain(emotiva.Device device) {
+  addHaptic(device.zone2FollowMain);
+  _delayedUpdateAll(device);
 }
 
 void _setModeAuto(BuildContext context, emotiva.Device device) {
@@ -163,7 +210,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +242,7 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(8, (index) {
@@ -213,7 +260,8 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-void _coaxSelector(BuildContext context, emotiva.Device device) {
+void coaxSelector(BuildContext context, emotiva.Device device,
+    {bool zone2 = false}) {
   if (Platform.isIOS) {
     showCupertinoModalPopup(
       context: context,
@@ -221,7 +269,9 @@ void _coaxSelector(BuildContext context, emotiva.Device device) {
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: () => _setCoax(context, device, number),
+            onPressed: zone2
+                ? () => _setCoaxZone2(context, device, number)
+                : () => _setCoax(context, device, number),
             child: Text('Coax $number'),
           );
         }),
@@ -233,13 +283,15 @@ void _coaxSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(4, (index) {
               final number = index + 1;
               return ElevatedButton.icon(
-                  onPressed: () => _setCoax(context, device, number),
+                  onPressed: zone2
+                      ? () => _setCoaxZone2(context, device, number)
+                      : () => _setCoax(context, device, number),
                   icon: const Icon(Icons.settings_input_composite),
                   label: Text('Coax $number'));
             }),
@@ -250,7 +302,8 @@ void _coaxSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-void _opticalSelector(BuildContext context, emotiva.Device device) {
+void opticalSelector(BuildContext context, emotiva.Device device,
+    {bool zone2 = false}) {
   if (Platform.isIOS) {
     showCupertinoModalPopup(
       context: context,
@@ -258,7 +311,9 @@ void _opticalSelector(BuildContext context, emotiva.Device device) {
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: () => _setOptical(context, device, number),
+            onPressed: zone2
+                ? () => _setOpticalZone2(context, device, number)
+                : () => _setOptical(context, device, number),
             child: Text('Optical $number'),
           );
         }),
@@ -270,13 +325,15 @@ void _opticalSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(4, (index) {
               final number = index + 1;
               return ElevatedButton.icon(
-                  onPressed: () => _setOptical(context, device, number),
+                  onPressed: zone2
+                      ? () => _setOpticalZone2(context, device, number)
+                      : () => _setOptical(context, device, number),
                   icon: const Icon(Icons.lightbulb),
                   label: Text('Optical $number'));
             }),
@@ -287,18 +344,23 @@ void _opticalSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-void _xlrSelector(BuildContext context, emotiva.Device device) {
+void xlrSelector(BuildContext context, emotiva.Device device,
+    {bool zone2 = false}) {
   if (Platform.isIOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <Widget>[
           CupertinoActionSheetAction(
-            onPressed: () => _setAesEbu(context, device),
+            onPressed: zone2
+                ? () => _setAesEbuZone2(context, device)
+                : () => _setAesEbu(context, device),
             child: Text('AES/EBU'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setBalancedInput(context, device),
+            onPressed: zone2
+                ? () => _setBalancedInputZone2(context, device)
+                : () => _setBalancedInput(context, device),
             child: Text('Balanced Input'),
           ),
         ],
@@ -310,16 +372,20 @@ void _xlrSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ElevatedButton.icon(
-                  onPressed: () => _setAesEbu(context, device),
+                  onPressed: zone2
+                      ? () => _setAesEbuZone2(context, device)
+                      : () => _setAesEbu(context, device),
                   icon: const Icon(Icons.developer_board),
                   label: const Text('AES/EBU')),
               ElevatedButton.icon(
-                  onPressed: () => _setBalancedInput(context, device),
+                  onPressed: zone2
+                      ? () => _setBalancedInputZone2(context, device)
+                      : () => _setBalancedInput(context, device),
                   icon: const Icon(Icons.album),
                   label: const Text('Balanced Input')),
             ],
@@ -330,7 +396,8 @@ void _xlrSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-void _analogSelector(BuildContext context, emotiva.Device device) {
+void analogSelector(BuildContext context, emotiva.Device device,
+    {bool zone2 = false}) {
   if (Platform.isIOS) {
     showCupertinoModalPopup(
       context: context,
@@ -338,7 +405,9 @@ void _analogSelector(BuildContext context, emotiva.Device device) {
         actions: List<Widget>.generate(3, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: () => _setAnalog(context, device, number),
+            onPressed: zone2
+                ? () => _setAnalogZone2(context, device, number)
+                : () => _setAnalog(context, device, number),
             child: Text('Analog $number'),
           );
         }),
@@ -350,13 +419,15 @@ void _analogSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(3, (index) {
               final number = index + 1;
               return ElevatedButton.icon(
-                onPressed: () => _setAnalog(context, device, number),
+                onPressed: zone2
+                    ? () => _setAnalogZone2(context, device, number)
+                    : () => _setAnalog(context, device, number),
                 icon: const Icon(Icons.settings_input_component),
                 label: Text('Analog $number'),
               );
@@ -399,7 +470,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +542,7 @@ void _modeSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(_sheetPadding),
+          padding: const EdgeInsets.all(sheetPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -737,7 +808,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _opticalSelector(context, device),
+            onPressed: () => opticalSelector(context, device),
             icon: const Icon(Icons.lightbulb),
             label: const Text('Optical'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -746,7 +817,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _coaxSelector(context, device),
+            onPressed: () => coaxSelector(context, device),
             icon: const Icon(Icons.settings_input_composite),
             label: const Text('Coax'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -757,7 +828,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _analogSelector(context, device),
+            onPressed: () => analogSelector(context, device),
             icon: const Icon(Icons.settings_input_component),
             label: const Text('Analog'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),
@@ -766,7 +837,7 @@ Widget _inputs(BuildContext context, emotiva.Device device) {
         Padding(
           padding: const EdgeInsets.all(_tableCellPadding),
           child: ElevatedButton.icon(
-            onPressed: () => _xlrSelector(context, device),
+            onPressed: () => xlrSelector(context, device),
             icon: const Icon(Icons.donut_large),
             label: const Text('XLR'),
             style: const ButtonStyle(alignment: Alignment.centerLeft),

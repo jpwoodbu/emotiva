@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+const double sheetPadding = 15.0;
+
 dynamic addHaptic(Function function) {
   HapticFeedback.lightImpact();
   return function();
