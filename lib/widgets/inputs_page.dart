@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -175,7 +173,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
     }
     if (visible) {
       void onPressed() => _setSource(context, device, i);
-      if (Platform.isIOS) {
+      if (Theme.of(context).platform == TargetPlatform.iOS) {
         widgets.add(
           CupertinoActionSheetAction(
             onPressed: onPressed,
@@ -197,7 +195,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
 }
 
 void _sourceSelector(BuildContext context, emotiva.Device device) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -223,7 +221,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) {
 }
 
 void _hdmiSelector(BuildContext context, emotiva.Device device) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -262,7 +260,7 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
 
 void coaxSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -304,7 +302,7 @@ void coaxSelector(BuildContext context, emotiva.Device device,
 
 void opticalSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -346,7 +344,7 @@ void opticalSelector(BuildContext context, emotiva.Device device,
 
 void xlrSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -398,7 +396,7 @@ void xlrSelector(BuildContext context, emotiva.Device device,
 
 void analogSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -440,7 +438,7 @@ void analogSelector(BuildContext context, emotiva.Device device,
 }
 
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -500,7 +498,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
 }
 
 void _modeSelector(BuildContext context, emotiva.Device device) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(

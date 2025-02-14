@@ -1,6 +1,3 @@
-
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +9,7 @@ import '../device_changes.dart';
 import '../util.dart';
 
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
-  if (Platform.isIOS) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
