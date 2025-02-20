@@ -90,24 +90,30 @@ Widget _speakerPresetRow(emotiva.Device device) {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
-      PopupMenuButton(
-        child: Row(
-          children: [
-            Text(device.speakerPreset,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 5),
-            const Icon(Icons.more_vert),
-          ],
-        ),
-        itemBuilder: (BuildContext context) => [
-          PopupMenuItem(
+      MenuAnchor(
+        builder: (BuildContext context, MenuController controller, _) {
+          return TextButton(
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            child: Text(
+              device.speakerPreset,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+          );
+        },
+        menuChildren: [
+          MenuItemButton(
             child: const Text('Preset 1'),
-            onTap: () => addHaptic(device.speakerPreset1),
+            onPressed: () => addHaptic(device.speakerPreset1),
           ),
-          PopupMenuItem(
+          MenuItemButton(
             child: const Text('Preset 2'),
-            onTap: () => addHaptic(device.speakerPreset2),
+            onPressed: () => addHaptic(device.speakerPreset2),
           ),
         ],
       ),

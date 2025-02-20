@@ -24,7 +24,7 @@ import 'widgets/zone2_page.dart';
 import 'widgets/volume_controls.dart';
 
 final _log = Logger('main');
-const String settingMultiDevice = 'multiDeviceEnabled';
+const String kSettingMultiDevice = 'multiDeviceEnabled';
 
 void main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
@@ -114,7 +114,7 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
               return const Text('Error fetching settings.');
             } else {
               final p = snapshot.data!;
-              final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
+              final multiDeviceEnable = p.getBool(kSettingMultiDevice) ?? false;
               return multiDeviceEnable
                   ? const MultiDeviceDiscovery()
                   : Discovery(rediscover: widget.rediscover);
@@ -150,7 +150,7 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return const CircularProgressIndicator.adaptive();
+            return const LinearProgressIndicator();
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.hasError) {
@@ -159,33 +159,22 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
               return const Text('Error fetching settings.');
             } else {
               final p = snapshot.data!;
-              final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
-              return multiDeviceEnable ? _disable(p) : _enable(p);
+              final currentSetting = p.getBool(kSettingMultiDevice) ?? false;
+              return TextButton.icon(
+                icon: currentSetting
+                    ? Icon(Icons.check_box)
+                    : Icon(Icons.check_box_outline_blank),
+                onPressed: () async {
+                  await p.setBool(kSettingMultiDevice, !currentSetting);
+                  _log.fine(
+                      'multi-device mode -> ${p.getBool(kSettingMultiDevice)}');
+                  setState(() {});
+                },
+                label: const Text('Multi-device mode'),
+              );
             }
         }
       },
-    );
-  }
-
-  void setSetting(SharedPreferences p, bool value) async {
-    await p.setBool(settingMultiDevice, value);
-    _log.fine('multi-device mode -> ${p.getBool(settingMultiDevice)}');
-    setState(() {});
-  }
-
-  Widget _disable(SharedPreferences p) {
-    return TextButton.icon(
-      onPressed: () => setSetting(p, false),
-      icon: const Icon(Icons.check_box),
-      label: const Text('Multi-device mode'),
-    );
-  }
-
-  Widget _enable(SharedPreferences p) {
-    return TextButton.icon(
-      onPressed: () => setSetting(p, true),
-      icon: const Icon(Icons.check_box_outline_blank),
-      label: const Text('Multi-device mode'),
     );
   }
 }
@@ -223,11 +212,26 @@ class _MainViewState extends State<MainView> {
                   ),
                 ),
                 actions: [
-                  PopupMenuButton(
-                    itemBuilder: (BuildContext context) => [
-                      PopupMenuItem(
+                  // https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+                  // suggest migrating to MenuAnchor.
+                  MenuAnchor(
+                    builder:
+                        (BuildContext context, MenuController controller, _) {
+                      return IconButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        icon: Icon(Icons.more_vert),
+                      );
+                    },
+                    menuChildren: [
+                      MenuItemButton(
                         child: const Text('Device discovery'),
-                        onTap: () {
+                        onPressed: () {
                           // The analyzer throws warnings if we await for unsubscribeAll()
                           // while then passing context in the next call. Unsubscribing is
                           // kind, but not imperitive. It's OK to do it optimistically.
@@ -241,17 +245,17 @@ class _MainViewState extends State<MainView> {
                               (Route<dynamic> route) => false);
                         },
                       ),
-                      PopupMenuItem(
+                      MenuItemButton(
                         child: const Text('Known issues'),
-                        onTap: () => Navigator.push(
+                        onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => const KnownIssues()),
                         ),
                       ),
-                      PopupMenuItem(
+                      MenuItemButton(
                         child: const Text('Licenses'),
-                        onTap: () => showLicensePage(
+                        onPressed: () => showLicensePage(
                           context: context,
                           applicationIcon:
                               Theme.of(context).platform == TargetPlatform.iOS
@@ -262,11 +266,14 @@ class _MainViewState extends State<MainView> {
                                   : appIcon,
                         ),
                       ),
-                      PopupMenuItem(
+                      MenuItemButton(
                         child: const Text('Debug logs'),
-                        onTap: () => LogConsole.open(context),
+                        onPressed: () => LogConsole.open(context),
                       ),
-                      const PopupMenuItem(child: MultiDeviceSetting()),
+                      MenuItemButton(
+                        child: MultiDeviceSetting(),
+                        onPressed: () {},
+                      ),
                     ],
                   ),
                 ],
