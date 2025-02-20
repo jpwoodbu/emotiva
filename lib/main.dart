@@ -252,7 +252,15 @@ class _MainViewState extends State<MainView> {
                       PopupMenuItem(
                         child: const Text('Licenses'),
                         onTap: () => showLicensePage(
-                            context: context, applicationIcon: appIcon),
+                          context: context,
+                          applicationIcon:
+                              Theme.of(context).platform == TargetPlatform.iOS
+                                  // The iOS icon was required by Apple to be
+                                  // different and I don't have an appropriate
+                                  // version of the iOS icon to use here.
+                                  ? null
+                                  : appIcon,
+                        ),
                       ),
                       PopupMenuItem(
                         child: const Text('Debug logs'),
