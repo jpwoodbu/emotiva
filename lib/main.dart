@@ -272,6 +272,9 @@ class _MainViewState extends State<MainView> {
                       ),
                       MenuItemButton(
                         child: MultiDeviceSetting(),
+                        // MuiltiDeviceSettings has its own gesture behavior.
+                        // But onPressed needs to be non-null here to get the
+                        // desired hover effect.
                         onPressed: () {},
                       ),
                     ],
