@@ -262,15 +262,13 @@ class _MainViewState extends State<MainView> {
                         child: const Text('Licenses'),
                         onPressed: () => showLicensePage(
                           context: context,
+                          applicationName: 'Unofficial Emotiva Remote',
                           applicationIcon: isApple(context)
                               // The iOS icon was required by Apple to be
                               // different and I don't have an appropriate
                               // version of the iOS icon to use here.
                               ? null
                               : appIcon,
-                          applicationName: isApple(context)
-                              ? 'Unofficial Emotiva Remote'
-                              : null,
                         ),
                       ),
                       MenuItemButton(
