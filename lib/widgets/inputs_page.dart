@@ -173,7 +173,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
     }
     if (visible) {
       void onPressed() => _setSource(context, device, i);
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
+      if (isApple(context)) {
         widgets.add(
           CupertinoActionSheetAction(
             onPressed: onPressed,
@@ -195,7 +195,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
 }
 
 void _sourceSelector(BuildContext context, emotiva.Device device) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -221,7 +221,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) {
 }
 
 void _hdmiSelector(BuildContext context, emotiva.Device device) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -260,7 +260,7 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
 
 void coaxSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -302,7 +302,7 @@ void coaxSelector(BuildContext context, emotiva.Device device,
 
 void opticalSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -344,7 +344,7 @@ void opticalSelector(BuildContext context, emotiva.Device device,
 
 void xlrSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -396,7 +396,7 @@ void xlrSelector(BuildContext context, emotiva.Device device,
 
 void analogSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -438,7 +438,7 @@ void analogSelector(BuildContext context, emotiva.Device device,
 }
 
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -498,7 +498,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
 }
 
 void _modeSelector(BuildContext context, emotiva.Device device) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(

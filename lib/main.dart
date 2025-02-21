@@ -64,7 +64,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Emotiva Remote',
+      // Apple doesn't like me using "Emotiva" in the app.
+      title: isApple(context) ? 'Remote Control' : 'Emotiva Remote',
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -200,7 +201,11 @@ class _MainViewState extends State<MainView> {
       child: Scaffold(
         appBar: _pageIndexModel.pageIndex == 0
             ? AppBar(
-                title: const Center(child: Text('Emotiva Remote')),
+                title: Center(
+                  child: isApple(context)
+                      ? Text('Remote Control')
+                      : Text('Emotiva Remote'),
+                ),
                 leading: IconButton(
                   icon: const Icon(
                     Icons.help,
@@ -257,13 +262,15 @@ class _MainViewState extends State<MainView> {
                         child: const Text('Licenses'),
                         onPressed: () => showLicensePage(
                           context: context,
-                          applicationIcon:
-                              Theme.of(context).platform == TargetPlatform.iOS
-                                  // The iOS icon was required by Apple to be
-                                  // different and I don't have an appropriate
-                                  // version of the iOS icon to use here.
-                                  ? null
-                                  : appIcon,
+                          applicationIcon: isApple(context)
+                              // The iOS icon was required by Apple to be
+                              // different and I don't have an appropriate
+                              // version of the iOS icon to use here.
+                              ? null
+                              : appIcon,
+                          applicationName: isApple(context)
+                              ? 'Unofficial Emotiva Remote'
+                              : null,
                         ),
                       ),
                       MenuItemButton(
@@ -348,7 +355,9 @@ class NoDevicesFoundPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('No Emotiva device was found.'),
+              isApple(context)
+                  ? Text('No device was found.')
+                  : Text('No Emotiva device was found.'),
               const SizedBox(height: 25.0),
               ElevatedButton(
                 onPressed: () {
@@ -384,13 +393,15 @@ class ScanningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Searching for an Emotiva device...'),
+              isApple(context)
+                  ? Text('Searching for a device...')
+                  : Text('Searching for an Emotiva device...'),
               SizedBox(height: 25.0),
               CircularProgressIndicator.adaptive(),
             ],

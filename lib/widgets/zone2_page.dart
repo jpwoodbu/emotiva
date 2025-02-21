@@ -9,7 +9,7 @@ import '../device_changes.dart';
 import '../util.dart';
 
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
-  if (Theme.of(context).platform == TargetPlatform.iOS) {
+  if (isApple(context)) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(

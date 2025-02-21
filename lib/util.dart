@@ -43,3 +43,12 @@ Future<T> waitAtLeast<T>(
   final results = await Future.wait([future, Future.delayed(duration)]);
   return Future<T>.value(results[0]);
 }
+
+bool isApple(BuildContext context) {
+  switch (Theme.of(context).platform) {
+    case TargetPlatform.iOS || TargetPlatform.macOS:
+      return true;
+    default:
+      return false;
+  }
+}
