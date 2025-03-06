@@ -353,13 +353,13 @@ void xlrSelector(BuildContext context, emotiva.Device device,
             onPressed: zone2
                 ? () => _setAesEbuZone2(context, device)
                 : () => _setAesEbu(context, device),
-            child: Text('AES/EBU'),
+            child: const Text('AES/EBU'),
           ),
           CupertinoActionSheetAction(
             onPressed: zone2
                 ? () => _setBalancedInputZone2(context, device)
                 : () => _setBalancedInput(context, device),
-            child: Text('Balanced Input'),
+            child: const Text('Balanced Input'),
           ),
         ],
       ),
@@ -445,19 +445,19 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
         actions: <Widget>[
           CupertinoActionSheetAction(
             onPressed: () => _setArc(context, device),
-            child: Text('ARC'),
+            child: const Text('ARC'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setUsb(context, device),
-            child: Text('USB'),
+            child: const Text('USB'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setTuner(context, device),
-            child: Text('Tuner'),
+            child: const Text('Tuner'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setFront(context, device),
-            child: Text('Front'),
+            child: const Text('Front'),
           ),
         ],
       ),
@@ -505,31 +505,31 @@ void _modeSelector(BuildContext context, emotiva.Device device) {
         actions: <Widget>[
           CupertinoActionSheetAction(
             onPressed: () => _setModeAuto(context, device),
-            child: Text('Auto'),
+            child: const Text('Auto'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeStereo(context, device),
-            child: Text('Stereo'),
+            child: const Text('Stereo'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeDirect(context, device),
-            child: Text('Direct'),
+            child: const Text('Direct'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeReferenceStereo(context, device),
-            child: Text('Reference Stereo'),
+            child: const Text('Reference Stereo'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeDolby(context, device),
-            child: Text('Dolby'),
+            child: const Text('Dolby'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeDts(context, device),
-            child: Text('DTS'),
+            child: const Text('DTS'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => _setModeAllStereo(context, device),
-            child: Text('All Stereo'),
+            child: const Text('All Stereo'),
           ),
         ],
       ),

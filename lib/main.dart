@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
         // This is necessary so that Cupertino widgets use our theme.
-        cupertinoOverrideTheme: CupertinoThemeData(
+        cupertinoOverrideTheme: const CupertinoThemeData(
           applyThemeToAll: true,
         ),
       ),
@@ -163,8 +163,8 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
               final currentSetting = p.getBool(kSettingMultiDevice) ?? false;
               return TextButton.icon(
                 icon: currentSetting
-                    ? Icon(Icons.check_box)
-                    : Icon(Icons.check_box_outline_blank),
+                    ? const Icon(Icons.check_box)
+                    : const Icon(Icons.check_box_outline_blank),
                 onPressed: () async {
                   await p.setBool(kSettingMultiDevice, !currentSetting);
                   _log.fine(
@@ -203,8 +203,8 @@ class _MainViewState extends State<MainView> {
             ? AppBar(
                 title: Center(
                   child: isApple(context)
-                      ? Text('Remote Control')
-                      : Text('Emotiva Remote'),
+                      ? const Text('Remote Control')
+                      : const Text('Emotiva Remote'),
                 ),
                 leading: IconButton(
                   icon: const Icon(
@@ -230,7 +230,7 @@ class _MainViewState extends State<MainView> {
                             controller.open();
                           }
                         },
-                        icon: Icon(Icons.more_vert),
+                        icon: const Icon(Icons.more_vert),
                       );
                     },
                     menuChildren: [
@@ -269,7 +269,7 @@ class _MainViewState extends State<MainView> {
                         onPressed: () => LogConsole.open(context),
                       ),
                       MenuItemButton(
-                        child: MultiDeviceSetting(),
+                        child: const MultiDeviceSetting(),
                         // MuiltiDeviceSettings has its own gesture behavior.
                         // But onPressed needs to be non-null here to get the
                         // desired hover effect.
@@ -361,8 +361,8 @@ class NoDevicesFoundPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               isApple(context)
-                  ? Text('No device was found.')
-                  : Text('No Emotiva device was found.'),
+                  ? const Text('No device was found.')
+                  : const Text('No Emotiva device was found.'),
               const SizedBox(height: 25.0),
               ElevatedButton(
                 onPressed: () {
@@ -405,10 +405,10 @@ class ScanningPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               isApple(context)
-                  ? Text('Searching for a device...')
-                  : Text('Searching for an Emotiva device...'),
-              SizedBox(height: 25.0),
-              CircularProgressIndicator.adaptive(),
+                  ? const Text('Searching for a device...')
+                  : const Text('Searching for an Emotiva device...'),
+              const SizedBox(height: 25.0),
+              const CircularProgressIndicator.adaptive(),
             ],
           ),
         ),

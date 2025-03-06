@@ -16,11 +16,11 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
         actions: <Widget>[
           CupertinoActionSheetAction(
             onPressed: () => setUsbZone2(context, device),
-            child: Text('USB'),
+            child: const Text('USB'),
           ),
           CupertinoActionSheetAction(
             onPressed: () => setFrontZone2(context, device),
-            child: Text('Front'),
+            child: const Text('Front'),
           ),
         ],
       ),
