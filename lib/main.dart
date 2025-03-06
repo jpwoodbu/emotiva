@@ -236,18 +236,11 @@ class _MainViewState extends State<MainView> {
                     menuChildren: [
                       MenuItemButton(
                         child: const Text('Device discovery'),
-                        onPressed: () {
-                          // The analyzer throws warnings if we await for unsubscribeAll()
-                          // while then passing context in the next call. Unsubscribing is
-                          // kind, but not imperitive. It's OK to do it optimistically.
-                          context.read<DeviceChanges>().device.unsubscribeAll();
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const DiscoverySwitch(rediscover: true),
-                              ),
-                              (Route<dynamic> route) => false);
+                        onPressed: () async {
+                          final device = context.read<DeviceChanges>().device;
+                          await device.unsubscribeAll();
+                          await device.closeSockets();
+                          navigateToDiscovery();
                         },
                       ),
                       MenuItemButton(
@@ -340,6 +333,20 @@ class _MainViewState extends State<MainView> {
       ),
     );
   }
+
+  // This was extracted into its own method to avoid
+  // https://dart.dev/tools/diagnostic-messages?utm_source=dartdev&utm_medium=redir&utm_id=diagcode&utm_content=use_build_context_synchronously#use_build_context_synchronously.
+  /// TL;DR: Don't pass [context] inside an async callback. I believe the
+  /// references to [context] inside this function will use a different getter
+  /// than the async callback would use.
+  void navigateToDiscovery() {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DiscoverySwitch(rediscover: true),
+        ),
+        (Route<dynamic> route) => false);
+  }
 }
 
 class NoDevicesFoundPage extends StatelessWidget {
@@ -413,7 +420,7 @@ class ScanningPage extends StatelessWidget {
 class Discovery extends StatefulWidget {
   final bool useFake;
   final bool rediscover;
-  // provideDevice allows an external discovery process to provide an already
+  // providedDevice allows an external discovery process to provide an already
   // discovered device. E.g. the multi-device discovery feature.
   final emotiva.Device? providedDevice;
   const Discovery(
