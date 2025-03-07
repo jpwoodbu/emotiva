@@ -180,8 +180,7 @@ class Device {
   String mode = '';
   double volume = 0.0;
   bool muted = false;
-  // TODO: Make this a bool. The UI only checks if its value is 'On'.
-  String loudness = '';
+  bool loudness = false;
   String audioInput = '';
   String audioBitstream = '';
   String audioBits = '';
@@ -692,7 +691,9 @@ class Device {
           }
           break;
         case 'loudness':
-          loudness = _valueAttribute(element.attributes);
+          loudness = _valueAttribute(element.attributes).toLowerCase() == 'on'
+              ? true
+              : false;
           break;
         case 'audio_input':
           audioInput = _valueAttribute(element.attributes);
@@ -1066,7 +1067,7 @@ class FakeDevice extends Device {
     volume = -35.0;
     audioBits = '48kHz 20bits';
     videoSpace = '10bits';
-    loudness = 'Off';
+    loudness = false;
     dim = 0;
     speakerPreset = 'Preset 1';
     names['input_1'] = 'Blu-Ray analog';
@@ -1153,19 +1154,7 @@ class FakeDevice extends Device {
   }
 
   void _toggleLoudness() {
-    switch (loudness) {
-      case 'On':
-        loudness = 'Off';
-        break;
-      case 'Off':
-        loudness = 'On';
-        break;
-      default:
-        // If loudness wasn't set, set it to off since the device probably would
-        // have it off by default.
-        loudness = 'Off';
-        break;
-    }
+    loudness = !loudness;
   }
 
   String _getValue(XmlElement element) {
@@ -1735,7 +1724,7 @@ class FakeDevice extends Device {
         }
         return volume.toString();
       case 'loudness':
-        return loudness;
+        return loudness ? 'On' : 'Off';
       case 'audio_input':
         return audioInput;
       case 'audio_bitstream':

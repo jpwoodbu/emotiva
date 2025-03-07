@@ -88,9 +88,9 @@ void main() {
     });
 
     test('loudness', () {
-      device.loudness = 'Off';
+      device.loudness = false;
       device.parsePacket(createUpdateXml('loudness', 'On'));
-      expect(device.loudness, 'On');
+      expect(device.loudness, true);
     });
 
     test('audio input', () {
