@@ -220,10 +220,6 @@ class Device {
     'input_7': '',
     'input_8': '',
   };
-  // TODO - Maybe turn this into a data class. Having to do null checks on
-  // element access is annoying, as well as using element selector syntax. Then
-  // again, using a string to access a value is nice. I've not found a getattr()
-  // type function in Dart.
   Map<String, bool> visibility = {
     'input_1': true,
     'input_2': true,
