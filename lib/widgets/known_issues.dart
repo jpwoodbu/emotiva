@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../util.dart';
+
 class KnownIssues extends StatelessWidget {
   const KnownIssues({super.key});
 
@@ -18,7 +20,7 @@ class KnownIssues extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(title: const Text('Known issues')),
         body: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.all(kPadding),
           child: ListView.separated(
             itemBuilder: (_, index) {
               switch (index) {

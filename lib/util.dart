@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const double sheetPadding = 15.0;
+// Padding used for text containers like bottom sheets and screens with mostly
+// text like the help page.
+const double kPadding = 15.0;
 
 dynamic addHaptic(Function function) {
   HapticFeedback.lightImpact();

@@ -31,7 +31,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

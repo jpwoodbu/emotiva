@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../util.dart';
+
 class Help extends StatelessWidget {
   const Help({super.key});
 
@@ -26,9 +28,7 @@ class Help extends StatelessWidget {
         body: Semantics(
           label: 'help page',
           child: Padding(
-            // TODO - centralize this padding value. It was pulled from the info
-            // page.
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            padding: const EdgeInsets.symmetric(horizontal: kPadding),
             child: ListView.separated(
               itemBuilder: (_, index) {
                 switch (index) {

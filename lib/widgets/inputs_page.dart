@@ -208,7 +208,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +240,7 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(8, (index) {
@@ -281,7 +281,7 @@ void coaxSelector(BuildContext context, emotiva.Device device,
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(4, (index) {
@@ -323,7 +323,7 @@ void opticalSelector(BuildContext context, emotiva.Device device,
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(4, (index) {
@@ -370,7 +370,7 @@ void xlrSelector(BuildContext context, emotiva.Device device,
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -417,7 +417,7 @@ void analogSelector(BuildContext context, emotiva.Device device,
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(3, (index) {
@@ -468,7 +468,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +540,7 @@ void _modeSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(sheetPadding),
+          padding: const EdgeInsets.all(kPadding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
