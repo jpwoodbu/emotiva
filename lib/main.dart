@@ -81,8 +81,7 @@ class MyApp extends StatelessWidget {
 }
 
 class DiscoverySwitch extends StatefulWidget {
-  final bool rediscover;
-  const DiscoverySwitch({super.key, this.rediscover = false});
+  const DiscoverySwitch({super.key});
 
   @override
   State<DiscoverySwitch> createState() => _DiscoverySwitchState();
@@ -118,7 +117,7 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
               final multiDeviceEnable = p.getBool(kSettingMultiDevice) ?? false;
               return multiDeviceEnable
                   ? const MultiDeviceDiscovery()
-                  : Discovery(rediscover: widget.rediscover);
+                  : const Discovery();
             }
         }
       },
@@ -343,7 +342,7 @@ class _MainViewState extends State<MainView> {
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const DiscoverySwitch(rediscover: true),
+          builder: (context) => const DiscoverySwitch(),
         ),
         (Route<dynamic> route) => false);
   }
@@ -419,14 +418,12 @@ class ScanningPage extends StatelessWidget {
 
 class Discovery extends StatefulWidget {
   final bool useFake;
-  final bool rediscover;
   // providedDevice allows an external discovery process to provide an already
   // discovered device. E.g. the multi-device discovery feature.
   final emotiva.Device? providedDevice;
   const Discovery(
       {super.key,
       this.useFake = false,
-      this.rediscover = false,
       this.providedDevice});
 
   @override
@@ -480,12 +477,7 @@ class _DiscoveryState extends State<Discovery> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
-      // TODO - Figure out a better way to protect against a new Device object
-      // doing work before the old Device object has been disposed.  E.g. The
-      // old Device might unsubscribe the new Device from notification.
-      future: widget.rediscover
-          ? Future.delayed(const Duration(seconds: 1), () => _device)
-          : _device,
+      future: _device,
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
