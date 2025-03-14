@@ -190,6 +190,16 @@ class _MainViewState extends State<MainView> {
   final _pageIndexModel = PageIndexChangeNotifier();
 
   @override
+  void initState() {
+    super.initState();
+    _subscribeAll();
+  }
+
+  void _subscribeAll() async {
+    await context.read<DeviceChanges>().device.subscribeAll();
+  }
+
+  @override
   Widget build(BuildContext context) {
     const appIcon = Image(
       image: AssetImage('assets/hdpi_app_icon.png'),
@@ -238,7 +248,7 @@ class _MainViewState extends State<MainView> {
                         onPressed: () async {
                           final device = context.read<DeviceChanges>().device;
                           await device.unsubscribeAll();
-                          await device.closeSockets();
+                          device.closeSockets();
                           navigateToDiscovery();
                         },
                       ),
@@ -448,7 +458,7 @@ class _DiscoveryState extends State<Discovery> {
           _log.info('Unsubscribing from all fields.');
           await device?.unsubscribeAll();
           _log.info('Closing sockets for device.');
-          await device?.closeSockets();
+          device?.closeSockets();
         }
         return AppExitResponse.exit;
       },
@@ -486,13 +496,12 @@ class _DiscoveryState extends State<Discovery> {
           return ChangeNotifierProvider(
             create: (_) {
               _log.info('Found Emotiva device.');
-              device = snapshot.data;
-              // Initializing DeviceChanges to set up the UDP port listeners
-              // before calling subscribeAll(), which should result in
-              // populating the attributes of device.
-              final deviceChanges = DeviceChanges(device!);
-              device?.subscribeAll();
-              return deviceChanges;
+              // TODO(jpwoodbu) There could be a race condition here. The
+              // listening sockets are set up asynchronously but nothing it
+              // waiting for them to finish. Perhaps initState in MainView
+              // should do so. This might require moving some setup out of the
+              // constructor for DeviceChanges.
+              return DeviceChanges(snapshot.data!);
             },
             child: const MainView(),
           );

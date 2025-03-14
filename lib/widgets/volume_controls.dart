@@ -31,7 +31,7 @@ class _VolumeControlsState extends State<VolumeControls> {
     _zone2VolumeFunction = device.zone2VolumeDelta;
 
     if (Platform.isAndroid) {
-      FlutterAndroidVolumeKeydown.stream.listen((event) async {
+      FlutterAndroidVolumeKeydown.stream.listen((event) {
         if (event == HardwareButton.volume_down) {
           volumeDown();
         } else if (event == HardwareButton.volume_up) {
