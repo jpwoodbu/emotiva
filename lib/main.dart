@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -431,10 +432,8 @@ class Discovery extends StatefulWidget {
   // providedDevice allows an external discovery process to provide an already
   // discovered device. E.g. the multi-device discovery feature.
   final emotiva.Device? providedDevice;
-  const Discovery(
-      {super.key,
-      this.useFake = false,
-      this.providedDevice});
+
+  const Discovery({super.key, this.useFake = false, this.providedDevice});
 
   @override
   State<Discovery> createState() => _DiscoveryState();
@@ -467,21 +466,27 @@ class _DiscoveryState extends State<Discovery> {
       _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
     } else if (widget.providedDevice != null) {
-      _device = _futureProvidedDevice();
+      _device = _futureProvidedDevice().then(_setupDevice);
     } else {
       // Discovery is usually very fast... O(ms). To avoid the scanning widget
       // being displayed for such a short time that the user can't read it
       // (which would be janky), show it for at least 750ms.
       _device = waitAtLeast<emotiva.Device>(
-          future: emotiva.discover(3),
+          future: emotiva.discover(3).then(_setupDevice),
           duration: const Duration(milliseconds: 750));
     }
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     super.dispose();
     _listener.dispose();
+  }
+
+  Future<emotiva.Device> _setupDevice(emotiva.Device device) async {
+    _log.info('Found Emotiva device.');
+    await device.bindListeningSockets();
+    return device;
   }
 
   @override
@@ -491,18 +496,14 @@ class _DiscoveryState extends State<Discovery> {
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
+            _log.severe('Error on device discovery: ${snapshot.error}');
+            // TODO(jpwoodbu) Display more meaningful error using
+            // snapshot.error. It could have just been we could not bind our
+            // sockets.
             return const NoDevicesFoundPage();
           }
           return ChangeNotifierProvider(
-            create: (_) {
-              _log.info('Found Emotiva device.');
-              // TODO(jpwoodbu) There could be a race condition here. The
-              // listening sockets are set up asynchronously but nothing it
-              // waiting for them to finish. Perhaps initState in MainView
-              // should do so. This might require moving some setup out of the
-              // constructor for DeviceChanges.
-              return DeviceChanges(snapshot.data!);
-            },
+            create: (BuildContext _) => DeviceChanges(snapshot.data!),
             child: const MainView(),
           );
         } else {

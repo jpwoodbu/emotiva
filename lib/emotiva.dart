@@ -302,8 +302,14 @@ class Device {
     'tuner_program',
     'tuner_RDS',
   };
-  final List<RawDatagramSocket> _sockets = [];
-  RawDatagramSocket? _sendSocket;
+  late RawDatagramSocket _controlSocket;
+  late RawDatagramSocket _notifySocket;
+  late RawDatagramSocket _menuNotifySocket;
+  late RawDatagramSocket _sendSocket;
+  // Used in a lot of places to safety check whether it's OK to work with the
+  // socket objects.
+  /// Set to true in [bindListeningSockets].
+  bool socketsBound = false;
   final Set<String> _subscribedFields = {};
   // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
   // not yet gotten a real sequence number.
@@ -331,14 +337,14 @@ class Device {
     return '2.0';
   }
 
-  Stream<String> _socketStream(int port, InternetAddress address) async* {
-    final stream = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
-    stream.writeEventsEnabled = false;
-    _sockets.add(stream);
-    await for (final event in stream) {
+  Stream<String> _socketStream(RawDatagramSocket socket) async* {
+    if (!socketsBound) {
+      throw 'Sockets must be bound before listening streams can be set up.';
+    }
+    await for (final event in socket) {
       switch (event) {
         case RawSocketEvent.read:
-          final datagram = stream.receive();
+          final datagram = socket.receive();
           // Drop packets not from the address of the discovered Emotiva device.
           if (datagram!.address != address) {
             _log.warning('Ignoring packet from ${datagram.address}');
@@ -357,34 +363,51 @@ class Device {
     }
   }
 
-  /// Stream of messages arriving on the control port.
-  Stream<String> controlPortStream(InternetAddress address) {
-    return _socketStream(controlPort, address);
-  }
-
-  /// Stream of messages arriving on the notify port.
-  Stream<String> notifyPortStream(InternetAddress address) {
-    return _socketStream(notifyPort, address);
-  }
-
-  /// Stream of messages arriving on the menu notify port.
-  Stream<String> menuNotifyPortStream(InternetAddress address) {
-    return _socketStream(menuNotifyPort, address);
+  Future<void> bindListeningSockets() async {
+    _controlSocket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
+    _controlSocket.writeEventsEnabled = false;
+    _log.info('Control socket bound.');
+    _notifySocket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, notifyPort);
+    _notifySocket.writeEventsEnabled = false;
+    _log.info('Notify socket bound.');
+    _menuNotifySocket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, menuNotifyPort);
+    _menuNotifySocket.writeEventsEnabled = false;
+    _log.info('Menu Notify socket bound.');
+    _sendSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+    _log.info('Send socket bound.');
+    socketsBound = true;
   }
 
   /// Close any sockets opened so far by this object.
   void closeSockets() {
-    for (RawDatagramSocket s in _sockets) {
-      s.close();
-    }
-    _sendSocket?.close();
+    if (!socketsBound) return;
+    _controlSocket.close();
+    _notifySocket.close();
+    _menuNotifySocket.close();
+    _sendSocket.close();
+    socketsBound = false;
+    _log.info('Sockets closed.');
   }
 
+  /// Stream of messages arriving on the control socket.
+  Stream<String> controlPortStream() => _socketStream(_controlSocket);
+
+  /// Stream of messages arriving on the notify socket.
+  Stream<String> notifyPortStream() => _socketStream(_notifySocket);
+
+  /// Stream of messages arriving on the menu notify socket.
+  Stream<String> menuNotifyPortStream() => _socketStream(_menuNotifySocket);
+
   Future<void> _send(String request, int destinationPort) async {
-    _sendSocket ??= await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+    if (!socketsBound) {
+      throw 'Send socket must be bound before sending data on it.';
+    }
     _log.info('sending: $request');
     final bytesSent =
-        _sendSocket!.send(request.codeUnits, address, destinationPort);
+        _sendSocket.send(request.codeUnits, address, destinationPort);
     if (bytesSent == 0) {
       throw 'No bytes were sent';
     }
@@ -841,12 +864,15 @@ class Device {
   }
 
   /// Changes the volume by [delta]dBs.
-  Future<void> volumeDelta(double delta) => control('volume', value: delta.toString());
+  Future<void> volumeDelta(double delta) =>
+      control('volume', value: delta.toString());
 
   /// Sets the volume to [level]dBs.
-  Future<void> volumeSet(int level) => control('set_volume', value: level.toString());
+  Future<void> volumeSet(int level) =>
+      control('set_volume', value: level.toString());
 
-  Future<void> togglePower() => power ? control('power_off') : control('power_on');
+  Future<void> togglePower() =>
+      power ? control('power_off') : control('power_on');
   Future<void> toggleLoudness() => control('loudness');
   Future<void> toggleMute() => control('mute');
 
@@ -1038,6 +1064,7 @@ class FakeDevice extends Device {
   int _sequence = 0;
 
   FakeDevice(super.address) {
+    socketsBound = true;
     model = 'Fake Emotiva';
     name = 'Fake name';
     controlVersion = '3.0';
@@ -1901,21 +1928,34 @@ class FakeDevice extends Device {
   }
 
   @override
-  Stream<String> controlPortStream(InternetAddress address) async* {
+  Future<void> bindListeningSockets() async {
+    socketsBound = true;
+  }
+  
+  @override
+  void closeSockets() {
+    _controlStream.close();
+    _notifyStream.close();
+    _menuNotifyStream.close();
+    socketsBound = false;
+  }
+
+  @override
+  Stream<String> controlPortStream() async* {
     await for (final data in _controlStream.stream) {
       yield data;
     }
   }
 
   @override
-  Stream<String> notifyPortStream(InternetAddress address) async* {
+  Stream<String> notifyPortStream() async* {
     await for (final data in _notifyStream.stream) {
       yield data;
     }
   }
 
   @override
-  Stream<String> menuNotifyPortStream(InternetAddress address) async* {
+  Stream<String> menuNotifyPortStream() async* {
     await for (final data in _menuNotifyStream.stream) {
       yield data;
     }
