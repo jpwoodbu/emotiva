@@ -193,11 +193,7 @@ class _MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    _subscribeAll();
-  }
-
-  void _subscribeAll() async {
-    await context.read<DeviceChanges>().device.subscribeAll();
+    context.read<DeviceChanges>().device.subscribeAll();
   }
 
   @override
@@ -246,9 +242,9 @@ class _MainViewState extends State<MainView> {
                     menuChildren: [
                       MenuItemButton(
                         child: const Text('Device discovery'),
-                        onPressed: () async {
+                        onPressed: () {
                           final device = context.read<DeviceChanges>().device;
-                          await device.unsubscribeAll();
+                          device.unsubscribeAll();
                           device.closeSockets();
                           navigateToDiscovery();
                         },
@@ -455,7 +451,7 @@ class _DiscoveryState extends State<Discovery> {
       onExitRequested: () async {
         if (device != null) {
           _log.info('Unsubscribing from all fields.');
-          await device?.unsubscribeAll();
+          device?.unsubscribeAll();
           _log.info('Closing sockets for device.');
           device?.closeSockets();
         }

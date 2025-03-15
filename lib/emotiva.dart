@@ -401,11 +401,13 @@ class Device {
   /// Stream of messages arriving on the menu notify socket.
   Stream<String> menuNotifyPortStream() => _socketStream(_menuNotifySocket);
 
-  Future<void> _send(String request, int destinationPort) async {
+  void _send(String request, int destinationPort) {
     if (!socketsBound) {
       throw 'Send socket must be bound before sending data on it.';
     }
     _log.info('sending: $request');
+    // OMG, send() does not return a Future. Since UDP is fire-and-forget, I
+    // don't suppose it was necessary for it to.
     final bytesSent =
         _sendSocket.send(request.codeUnits, address, destinationPort);
     if (bytesSent == 0) {
@@ -429,7 +431,7 @@ class Device {
   }
 
   /// Sends a request to get the current values for [fields].
-  Future<void> update(Iterable<String> fields) {
+  void update(Iterable<String> fields) {
     return _send(_updateRequest(fields), controlPort);
   }
 
@@ -437,18 +439,18 @@ class Device {
   ///
   /// Supported fields are a hardcoded list of fields understood by this
   /// library.
-  Future<void> updateAll() => update(_fields);
+  void updateAll() => update(_fields);
 
   String _subscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaSubscription', fields);
   }
 
   /// Sends a request to get notified when any of [fields] change in value.
-  Future<void> subscribe(Iterable<String> fields) async {
+  void subscribe(Iterable<String> fields) {
     // Since we're going to be looping over this, we should make a local copy to
     // avoid getting a ConcurrentModificationError.
     final localFields = Set<String>.from(fields);
-    await _send(_subscribeRequest(localFields), controlPort);
+    _send(_subscribeRequest(localFields), controlPort);
     for (final f in localFields) {
       _subscribedFields.add(f);
     }
@@ -458,7 +460,7 @@ class Device {
   ///
   /// Supported fields are a hardcoded list of fields understood by this
   /// library.
-  Future<void> subscribeAll() => subscribe(_fields);
+  void subscribeAll() => subscribe(_fields);
 
   String _unsubscribeRequest(Iterable<String> fields) {
     return _requestWithFields('emotivaUnsubscribe', fields);
@@ -468,18 +470,18 @@ class Device {
   ///
   /// Supported fields are a hardcoded list of fields understood by this
   /// library.
-  Future<void> unsubscribe(Iterable<String> fields) async {
+  void unsubscribe(Iterable<String> fields) {
     // Since we're going to be looping over this, we should make a local copy to
     // avoid getting a ConcurrentModificationError.
     final localFields = Set<String>.from(fields);
-    await _send(_unsubscribeRequest(localFields), controlPort);
+    _send(_unsubscribeRequest(localFields), controlPort);
     for (final f in localFields) {
       _subscribedFields.remove(f);
     }
   }
 
   /// Sends a request to stop being notified when supported fields change.
-  Future<void> unsubscribeAll() => unsubscribe(_subscribedFields);
+  void unsubscribeAll() => unsubscribe(_subscribedFields);
 
   String _controlRequest(String command, String value, bool ack) {
     final builder = XmlBuilder();
@@ -505,7 +507,7 @@ class Device {
   /// message if it received the command. An ack message does not indicate that
   /// it understood and acted on the command; only that the command message was
   /// received. This library currently ignores ack messages.
-  Future<void> control(String command, {String value = '0', bool ack = false}) {
+  void control(String command, {String value = '0', bool ack = false}) {
     final request = _controlRequest(command, value, ack);
     return _send(request, controlPort);
   }
@@ -864,82 +866,79 @@ class Device {
   }
 
   /// Changes the volume by [delta]dBs.
-  Future<void> volumeDelta(double delta) =>
-      control('volume', value: delta.toString());
+  void volumeDelta(double delta) => control('volume', value: delta.toString());
 
   /// Sets the volume to [level]dBs.
-  Future<void> volumeSet(int level) =>
-      control('set_volume', value: level.toString());
+  void volumeSet(int level) => control('set_volume', value: level.toString());
 
-  Future<void> togglePower() =>
-      power ? control('power_off') : control('power_on');
-  Future<void> toggleLoudness() => control('loudness');
-  Future<void> toggleMute() => control('mute');
+  void togglePower() => power ? control('power_off') : control('power_on');
+  void toggleLoudness() => control('loudness');
+  void toggleMute() => control('mute');
 
   /// Cycles the front display brightness.
   ///
   /// Brightness values cycle through 0%, 20%, 40%, 60%, 80%, and 100%.
-  Future<void> cycleFrontDisplayBrightness() => control('dim');
+  void cycleFrontDisplayBrightness() => control('dim');
 
-  Future<void> toggleMenu() => control('menu');
-  Future<void> menuUp() => control('up');
-  Future<void> menuDown() => control('down');
-  Future<void> menuLeft() => control('left');
-  Future<void> menuRight() => control('right');
-  Future<void> menuEnter() => control('enter');
+  void toggleMenu() => control('menu');
+  void menuUp() => control('up');
+  void menuDown() => control('down');
+  void menuLeft() => control('left');
+  void menuRight() => control('right');
+  void menuEnter() => control('enter');
 
   /// Displays the info table on OSD.
-  Future<void> info() => control('info');
+  void info() => control('info');
 
   /// Sets the source to the user configurable inputs.
-  Future<void> setSource(int input) => control('source_$input');
+  void setSource(int input) => control('source_$input');
 
   /// Sets the source to the HDMI input corresponding to [input].
-  Future<void> setHdmi(int input) => control('hdmi$input');
+  void setHdmi(int input) => control('hdmi$input');
 
   /// Sets the audio source to the coax input corresponding to [input].
-  Future<void> setCoax(int input) => control('coax$input');
+  void setCoax(int input) => control('coax$input');
 
   /// Sets the audio source to the balanced digital input.
-  Future<void> setAesEbu() {
+  void setAesEbu() {
     // coax5 pulls up the AES/EBU input on the RMC-1.
     return control('coax5');
   }
 
   /// Sets the audio source to the optical input corresponding to [input].
-  Future<void> setOptical(int input) => control('optical$input');
+  void setOptical(int input) => control('optical$input');
 
-  Future<void> setArc() => control('ARC');
-  Future<void> setUsb() => control('usb_stream');
-  Future<void> setTuner() => control('tuner');
+  void setArc() => control('ARC');
+  void setUsb() => control('usb_stream');
+  void setTuner() => control('tuner');
 
   /// Sets the audio source to the analog input corresponding to [input].
-  Future<void> setAnalog(int input) => control('analog$input');
+  void setAnalog(int input) => control('analog$input');
 
   /// Sets the audio source to the balanced analog input.
-  Future<void> setBalancedInput() {
+  void setBalancedInput() {
     // analog5 brings up the balanced input on the RMC-1.
     return control('analog5');
   }
 
   /// Sets the audio source to the front analog input.
-  Future<void> setFront() => control('front_in');
+  void setFront() => control('front_in');
 
-  Future<void> modeAuto() => control('auto');
-  Future<void> modeStereo() => control('stereo');
-  Future<void> modeDirect() => control('direct');
-  Future<void> modeReferenceStereo() => control('reference_stereo');
-  Future<void> modeDolby() => control('dolby');
-  Future<void> modeDts() => control('dts');
-  Future<void> modeAllStereo() => control('all_stereo');
-  Future<void> speakerPreset1() => control('preset1');
-  Future<void> speakerPreset2() => control('preset2');
+  void modeAuto() => control('auto');
+  void modeStereo() => control('stereo');
+  void modeDirect() => control('direct');
+  void modeReferenceStereo() => control('reference_stereo');
+  void modeDolby() => control('dolby');
+  void modeDts() => control('dts');
+  void modeAllStereo() => control('all_stereo');
+  void speakerPreset1() => control('preset1');
+  void speakerPreset2() => control('preset2');
 
   /// Adjusts the center speaker trim.
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimCenter(double trim) {
+  void trimCenter(double trim) {
     trim = trim * 2;
     return control('center_trim_set', value: trim.toString());
   }
@@ -948,7 +947,7 @@ class Device {
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimSubwoofer(double trim) {
+  void trimSubwoofer(double trim) {
     trim = trim * 2;
     return control('subwoofer_trim_set', value: trim.toString());
   }
@@ -957,7 +956,7 @@ class Device {
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimSurround(double trim) {
+  void trimSurround(double trim) {
     trim = trim * 2;
     return control('surround_trim_set', value: trim.toString());
   }
@@ -966,7 +965,7 @@ class Device {
   ///
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimBack(double trim) {
+  void trimBack(double trim) {
     trim = trim * 2;
     return control('back_trim_set', value: trim.toString());
   }
@@ -976,7 +975,7 @@ class Device {
   /// Only available in protocol version >= 3.0.
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimHeight(double trim) {
+  void trimHeight(double trim) {
     trim = trim * 2;
     return control('height_trim_set', value: trim.toString());
   }
@@ -986,71 +985,71 @@ class Device {
   /// Only available in protocol version >= 3.0.
   /// [trim] is a value between -24 and 24 representing 0.5dB steps between
   /// -12dB and +12dB.
-  Future<void> trimWidth(double trim) {
+  void trimWidth(double trim) {
     trim = trim * 2;
     return control('width_trim_set', value: trim.toString());
   }
 
-  Future<void> trebleUp() => control('treble_up');
-  Future<void> trebleDown() => control('treble_down');
-  Future<void> bassUp() => control('bass_up');
-  Future<void> bassDown() => control('bass_down');
+  void trebleUp() => control('treble_up');
+  void trebleDown() => control('treble_down');
+  void bassUp() => control('bass_up');
+  void bassDown() => control('bass_down');
 
-  Future<void> zone2TogglePower() => control('zone2_power');
+  void zone2TogglePower() => control('zone2_power');
 
   /// Changes the zone 2 volume by [delta]dBs.
-  Future<void> zone2VolumeDelta(double delta) =>
+  void zone2VolumeDelta(double delta) =>
       control('zone2_volume', value: delta.toString());
 
   /// Sets the volume to [level]dBs.
-  Future<void> zone2VolumeSet(int level) =>
+  void zone2VolumeSet(int level) =>
       control('zone2_set_volume', value: level.toString());
 
   // This does not appear to work.
-  Future<void> zone2ToggleMute() => control('zone2_mute');
+  void zone2ToggleMute() => control('zone2_mute');
 
-  Future<void> zone2SetAnalog(int input) => control('zone2_analog$input');
+  void zone2SetAnalog(int input) => control('zone2_analog$input');
 
-  Future<void> zone2SetBalancedInput() {
+  void zone2SetBalancedInput() {
     // analog5 bring up the balanced input on the RMC-1.
     return control('zone2_analog5');
   }
 
-  Future<void> zone2SetFront() => control('zone2_front_in');
+  void zone2SetFront() => control('zone2_front_in');
 
   /// Sets the zone 2 input to follow the main (i.e. zone 1) input.
-  Future<void> zone2FollowMain() => control('zone2_follow_main');
+  void zone2FollowMain() => control('zone2_follow_main');
 
-  Future<void> zone2SetCoax(int input) => control('zone2_coax$input');
-  Future<void> zone2SetOptical(int input) => control('zone2_optical$input');
-
-  // Not in the API docs.
-  Future<void> zone2SetUsb() => control('zone2_usb_stream');
+  void zone2SetCoax(int input) => control('zone2_coax$input');
+  void zone2SetOptical(int input) => control('zone2_optical$input');
 
   // Not in the API docs.
-  Future<void> zone2SetAesEbu() {
+  void zone2SetUsb() => control('zone2_usb_stream');
+
+  // Not in the API docs.
+  void zone2SetAesEbu() {
     // coax5 pulls up the AES/EBU input on the RMC-1.
     return control('zone2_coax5');
   }
 
   // Not in the API docs.
-  Future<void> zone2SetTuner() => control('zone2_tuner');
+  void zone2SetTuner() => control('zone2_tuner');
 
-  Future<void> toggleTunerBand() {
+  void toggleTunerBand() {
     // Applies to both zones.
     return control('zone1_band');
   }
 
-  Future<void> setBand(TunerBand band) =>
+  void setBand(TunerBand band) =>
       band == TunerBand.am ? control('band_am') : control('band_fm');
 
-  Future<void> frequencyHigher() => control('frequency', value: '1');
-  Future<void> frequencyLower() => control('frequency', value: '-1');
-  Future<void> seekHigher() => control('seek', value: '1');
-  Future<void> seekLower() => control('seek', value: '-1');
-  Future<void> channelUp() => control('channel', value: '1');
-  Future<void> channelDown() => control('channel', value: '-1');
-  Future<void> setChannel(int channel) => control('channel_$channel');
+  void frequencyHigher() => control('frequency', value: '1');
+  void frequencyLower() => control('frequency', value: '-1');
+  void seekHigher() => control('seek', value: '1');
+  void seekLower() => control('seek', value: '-1');
+  void channelUp() => control('channel', value: '1');
+  void channelDown() => control('channel', value: '-1');
+  void setChannel(int channel) => control('channel_$channel');
 }
 
 /// A fake Device class that does not create or handle any network traffic.
@@ -1922,7 +1921,7 @@ class FakeDevice extends Device {
   }
 
   @override
-  Future<void> _send(String request, int destinationPort) async {
+  void _send(String request, int destinationPort) async {
     // destinationPort seems to always be controlPort.
     _parseRequest(request);
   }
@@ -1931,7 +1930,7 @@ class FakeDevice extends Device {
   Future<void> bindListeningSockets() async {
     socketsBound = true;
   }
-  
+
   @override
   void closeSockets() {
     _controlStream.close();
