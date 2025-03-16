@@ -1921,7 +1921,7 @@ class FakeDevice extends Device {
   }
 
   @override
-  void _send(String request, int destinationPort) async {
+  void _send(String request, int destinationPort) {
     // destinationPort seems to always be controlPort.
     _parseRequest(request);
   }
@@ -1961,10 +1961,9 @@ class FakeDevice extends Device {
   }
 }
 
-/// This function is meant to be mostly a stand-in replacement for [discovery].
-Future<FakeDevice> futureFakeDevice() async {
-  return FakeDevice(InternetAddress('192.168.42.1'));
-}
+/// This function is meant to be mostly a stand-in replacement for [discover].
+Future<FakeDevice> futureFakeDevice() async =>
+    FakeDevice(InternetAddress('192.168.42.1'));
 
 // These enums represet the UI elements of the on-screen display menu.
 enum Arrow {
