@@ -440,9 +440,8 @@ class _DiscoveryState extends State<Discovery> {
   late final AppLifecycleListener _listener;
   emotiva.Device? device;
 
-  Future<emotiva.Device> _futureProvidedDevice() async {
-    return widget.providedDevice!;
-  }
+  Future<emotiva.Device> _futureProvidedDevice() async =>
+      widget.providedDevice!;
 
   @override
   initState() {
@@ -547,47 +546,37 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => MultiDeviceDiscoveryChanges(_discover),
-      child: _consumer(),
-    );
-  }
-
-  Widget _consumer() {
-    return Consumer<MultiDeviceDiscoveryChanges>(
-      builder: (context, changes, _) => _page(changes.devices),
-    );
-  }
-
-  Widget _page(Set<emotiva.Device> devices) {
-    return SafeArea(
-      child: Scaffold(
-        body: ListView(
-          padding: const EdgeInsets.all(25.0),
-          children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Device selection',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    ElevatedButton(
-                      onPressed: () {
-                        _discover.close();
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const Discovery(useFake: true)),
-                            (Route<dynamic> route) => false);
-                      },
-                      child: const Text('Demo mode'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15.0),
-                const LinearProgressIndicator(),
-                const SizedBox(height: 15.0),
-              ] +
-              _devices(devices),
+      create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
+      builder: (context, _) => SafeArea(
+        child: Scaffold(
+          body: ListView(
+            padding: const EdgeInsets.all(25.0),
+            children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Device selection',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      ElevatedButton(
+                        onPressed: () {
+                          _discover.close();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const Discovery(useFake: true)),
+                              (Route<dynamic> route) => false);
+                        },
+                        child: const Text('Demo mode'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15.0),
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: 15.0),
+                ] +
+                _devices(context.watch<MultiDeviceDiscoveryChanges>().devices),
+          ),
         ),
       ),
     );
