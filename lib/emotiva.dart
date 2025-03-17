@@ -46,7 +46,7 @@ Future<Device> discover(int timeoutSec) async {
         socket.close();
         final data = String.fromCharCodes(datagram!.data);
         _log.info('received: $data');
-        final device = _parseTransponder(data, datagram.address);
+        final device = parseTransponder(data, datagram.address);
         return device;
       case RawSocketEvent.closed:
         break;
@@ -106,7 +106,7 @@ class MultiDeviceDiscover {
           final datagram = _socket!.receive();
           final data = String.fromCharCodes(datagram!.data);
           _log.info('received: $data');
-          final device = _parseTransponder(data, datagram.address);
+          final device = parseTransponder(data, datagram.address);
           yield device;
         case RawSocketEvent.closed:
           break;
@@ -138,7 +138,8 @@ int _intFromElement(XmlNode node, String xpath) {
   }
 }
 
-Device _parseTransponder(String data, InternetAddress address) {
+// Made public only for testing.
+Device parseTransponder(String data, InternetAddress address) {
   final document = XmlDocument.parse(data);
   final root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
@@ -148,14 +149,29 @@ Device _parseTransponder(String data, InternetAddress address) {
   final device = Device(address);
   device.model = _textFromElement(root, 'model');
   device.name = _textFromElement(root, 'name');
-  device.dataRevision = _textFromElement(root, 'dataRevision');
+  // Some fields aren't used by this library. And some fields have absent on
+  // some devices in the fields. E.g. an XMC-1, perhaps running an older
+  // firmware. For those fields, log warnings instead of hard failing.
+  try {
+    device.dataRevision = _textFromElement(root, 'dataRevision');
+  } catch (e) {
+    _log.warning('Missing dataRevision element in transponder: $e');
+  }
   device.controlVersion = _textFromElement(root, './control/version');
   device.controlPort = _intFromElement(root, './control/controlPort');
   device.notifyPort = _intFromElement(root, './control/notifyPort');
   device.infoPort = _intFromElement(root, './control/infoPort');
-  device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
+  try {
+    device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
+  } catch (e) {
+    _log.warning('Missing setupPortTCP element in transponder: $e');
+  }
   device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
-  device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
+  try {
+    device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
+  } catch (e) {
+    _log.warning('Missing setupXMLVersion element in transponder: $e');
+  }
   return device;
 }
 
