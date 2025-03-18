@@ -113,13 +113,12 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
               _log.severe(
                   'Error fetching multi-device setting: ${snapshot.error}');
               return const Text('Error fetching settings.');
-            } else {
-              final p = snapshot.data!;
-              final multiDeviceEnable = p.getBool(kSettingMultiDevice) ?? false;
-              return multiDeviceEnable
-                  ? const MultiDeviceDiscovery()
-                  : const Discovery();
             }
+            final p = snapshot.data!;
+            final multiDeviceEnable = p.getBool(kSettingMultiDevice) ?? false;
+            return multiDeviceEnable
+                ? const MultiDeviceDiscovery()
+                : const Discovery();
         }
       },
     );
