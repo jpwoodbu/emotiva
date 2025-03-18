@@ -354,43 +354,51 @@ class _MainViewState extends State<MainView> {
   }
 }
 
-class NoDevicesFoundPage extends StatelessWidget {
-  const NoDevicesFoundPage({super.key});
+class DiscoveryError extends StatelessWidget {
+  final Object error;
+  const DiscoveryError({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
+    // This is the default message when error is not a String. It was likely a
+    // TimeoutException.
+    String message = isApple(context)
+        ? 'No device was found.'
+        : 'No Emotiva device was found.';
+    if (error is String) message = error.toString();
     return SafeArea(
       child: Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              isApple(context)
-                  ? const Text('No device was found.')
-                  : const Text('No Emotiva device was found.'),
-              const SizedBox(height: 25.0),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Discovery()),
-                      (Route<dynamic> route) => false);
-                },
-                child: const Text('Try again'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Discovery(useFake: true)),
-                      (Route<dynamic> route) => false);
-                },
-                child: const Text('Demo mode'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(kPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(message),
+                const SizedBox(height: 25.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Discovery()),
+                        (Route<dynamic> route) => false);
+                  },
+                  child: const Text('Try again'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Discovery(useFake: true)),
+                        (Route<dynamic> route) => false);
+                  },
+                  child: const Text('Demo mode'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -491,10 +499,7 @@ class _DiscoveryState extends State<Discovery> {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
             _log.severe('Error on device discovery: ${snapshot.error}');
-            // TODO(jpwoodbu) Display more meaningful error using
-            // snapshot.error. It could have just been we could not bind our
-            // sockets.
-            return const NoDevicesFoundPage();
+            return DiscoveryError(error: snapshot.error!);
           }
           return ChangeNotifierProvider(
             create: (BuildContext _) => DeviceChanges(snapshot.data!),

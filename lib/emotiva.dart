@@ -147,30 +147,29 @@ Device parseTransponder(String data, InternetAddress address) {
         'Received improperly formatted emotivaTransponder response.');
   }
   final device = Device(address);
-  device.model = _textFromElement(root, 'model');
-  device.name = _textFromElement(root, 'name');
-  // Some fields aren't used by this library. And some fields have absent on
-  // some devices in the fields. E.g. an XMC-1, perhaps running an older
-  // firmware. For those fields, log warnings instead of hard failing.
+  try {
+    device.model = _textFromElement(root, 'model');
+    device.name = _textFromElement(root, 'name');
+    device.controlVersion = _textFromElement(root, './control/version');
+    device.controlPort = _intFromElement(root, './control/controlPort');
+    device.notifyPort = _intFromElement(root, './control/notifyPort');
+    device.infoPort = _intFromElement(root, './control/infoPort');
+    device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
+  } catch (e) {
+    _log.severe(e);
+    throw ('The response from your Emotiva processor is missing some required '
+        'fields. Your Emotiva processor may require a firmware update to work '
+        'with this app.');
+  }
+  // Some fields aren't used by this library. And some fields are absent on some
+  // devices in the fields. E.g. an XMC-1, perhaps running an older firmware.
+  // For those fields, log warnings instead of hard failing.
   try {
     device.dataRevision = _textFromElement(root, 'dataRevision');
-  } catch (e) {
-    _log.warning('Missing dataRevision element in transponder: $e');
-  }
-  device.controlVersion = _textFromElement(root, './control/version');
-  device.controlPort = _intFromElement(root, './control/controlPort');
-  device.notifyPort = _intFromElement(root, './control/notifyPort');
-  device.infoPort = _intFromElement(root, './control/infoPort');
-  try {
     device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
-  } catch (e) {
-    _log.warning('Missing setupPortTCP element in transponder: $e');
-  }
-  device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
-  try {
     device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
   } catch (e) {
-    _log.warning('Missing setupXMLVersion element in transponder: $e');
+    _log.warning('Missing optional element in transponder packet: $e');
   }
   return device;
 }
