@@ -176,6 +176,8 @@ Device parseTransponder(String data, InternetAddress address) {
 
 enum TunerBand { unknown, am, fm }
 
+enum _SocketId { control, notify, menuNotify, send }
+
 /// A model of an Emotiva device.
 class Device {
   InternetAddress address;
@@ -321,10 +323,14 @@ class Device {
   late RawDatagramSocket _notifySocket;
   late RawDatagramSocket _menuNotifySocket;
   late RawDatagramSocket _sendSocket;
+  final _controlStreamController = StreamController();
+  final _notifyStreamController = StreamController();
+  final _menuNotifyStreamController = StreamController();
   // Used in a lot of places to safety check whether it's OK to work with the
   // socket objects.
-  /// Set to true in [bindListeningSockets].
+  /// Set to true in [bindSockets].
   bool socketsBound = false;
+  bool _suppressSocketCloseEventHandler = false;
   final Set<String> _subscribedFields = {};
   // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
   // not yet gotten a real sequence number.
@@ -352,7 +358,8 @@ class Device {
     return '2.0';
   }
 
-  Stream<String> _socketStream(RawDatagramSocket socket) async* {
+  Stream<String> _socketStream(
+      RawDatagramSocket socket, _SocketId socketId) async* {
     if (!socketsBound) {
       throw 'Sockets must be bound before listening streams can be set up.';
     }
@@ -369,7 +376,7 @@ class Device {
           _log.info('received: $packet');
           yield packet;
         case RawSocketEvent.closed:
-          break;
+          await _rebindSocket(socketId);
         case RawSocketEvent.readClosed:
           break;
         default:
@@ -378,43 +385,77 @@ class Device {
     }
   }
 
-  Future<void> bindListeningSockets() async {
+  Future<void> bindSockets() async {
+    await _bindControlSocket();
+    await _bindNotifySocket();
+    await _bindMenuNotifySocket();
+    await _bindSendSocket();
+    socketsBound = true;
+  }
+
+  Future<void> _rebindSocket(_SocketId socketId) async {
+    if (_suppressSocketCloseEventHandler) return;
+    switch (socketId) {
+      case _SocketId.control:
+        await _bindControlSocket();
+      case _SocketId.notify:
+      case _SocketId.menuNotify:
+      case _SocketId.send:
+    }
+    _sendSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+    _log.info('Send socket bound.');
+  }
+
+  Future<void> _bindControlSocket() async {
     _controlSocket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
     _controlSocket.writeEventsEnabled = false;
     _log.info('Control socket bound.');
+  }
+
+  Future<void> _bindNotifySocket() async {
     _notifySocket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, notifyPort);
     _notifySocket.writeEventsEnabled = false;
     _log.info('Notify socket bound.');
+  }
+
+  Future<void> _bindMenuNotifySocket() async {
     _menuNotifySocket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, menuNotifyPort);
     _menuNotifySocket.writeEventsEnabled = false;
     _log.info('Menu Notify socket bound.');
+  }
+
+  Future<void> _bindSendSocket() async {
     _sendSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     _log.info('Send socket bound.');
-    socketsBound = true;
   }
 
   /// Close any sockets opened so far by this object.
   void closeSockets() {
     if (!socketsBound) return;
+    _suppressSocketCloseEventHandler = true;
     _controlSocket.close();
     _notifySocket.close();
     _menuNotifySocket.close();
     _sendSocket.close();
     socketsBound = false;
+    _suppressSocketCloseEventHandler = false;
     _log.info('Sockets closed.');
   }
 
   /// Stream of messages arriving on the control socket.
-  Stream<String> controlPortStream() => _socketStream(_controlSocket);
+  Stream<String> controlPortStream() =>
+      _socketStream(_controlSocket, _SocketId.control);
 
   /// Stream of messages arriving on the notify socket.
-  Stream<String> notifyPortStream() => _socketStream(_notifySocket);
+  Stream<String> notifyPortStream() =>
+      _socketStream(_notifySocket, _SocketId.notify);
 
   /// Stream of messages arriving on the menu notify socket.
-  Stream<String> menuNotifyPortStream() => _socketStream(_menuNotifySocket);
+  Stream<String> menuNotifyPortStream() =>
+      _socketStream(_menuNotifySocket, _SocketId.menuNotify);
 
   void _send(String request, int destinationPort) {
     if (!socketsBound) {
@@ -1942,7 +1983,7 @@ class FakeDevice extends Device {
   }
 
   @override
-  Future<void> bindListeningSockets() async {
+  Future<void> bindSockets() async {
     socketsBound = true;
   }
 

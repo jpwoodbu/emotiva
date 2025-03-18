@@ -487,7 +487,7 @@ class _DiscoveryState extends State<Discovery> {
 
   Future<emotiva.Device> _setupDevice(emotiva.Device device) async {
     _log.info('Found Emotiva device.');
-    await device.bindListeningSockets();
+    await device.bindSockets();
     return device;
   }
 
