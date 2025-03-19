@@ -43,7 +43,6 @@ Future<Device> discover(int timeoutSec) async {
           throw 'Unable to send broadcast ping.';
         }
         _log.info('sent: $ping');
-        break;
       case RawSocketEvent.read:
         final datagram = socket.receive();
         socket.close();
@@ -52,11 +51,8 @@ Future<Device> discover(int timeoutSec) async {
         final device = parseTransponder(data, datagram.address);
         return device;
       case RawSocketEvent.closed:
-        break;
       case RawSocketEvent.readClosed:
         break;
-      default:
-        throw 'Unexpected event $event';
     }
   }
   throw 'Socket closed before receiving a transponder response from a device.';
