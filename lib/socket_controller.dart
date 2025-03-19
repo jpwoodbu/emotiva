@@ -5,11 +5,25 @@ import 'package:logging/logging.dart';
 
 final _log = Logger('SocketController');
 
+/// An intermediate for socket consumers to manage the socket lifecycle.
+/// 
+/// When the socket is closed by the OS, which can easily happen on a mobile OS
+/// when the app is backgrounded, the socket is automatically recreated.
+/// The [stream] used by consumers of this class is not disrupted when the
+/// socket needs to be recreated.
+/// 
+/// This class is meant for sockets which only receieve data. If you want to be
+/// able to send data, use [SendSocketController].
 class SocketController {
+  /// The port on which to listen for inbound [Datagram]s.
   int port;
+  /// The address of the Emotiva device. [Datagram]s received from other addresses
+  /// will be discard.
   InternetAddress address;
+  /// Consumers should listen to this stream to read the received [Datagram]s.
   late Stream<Datagram> stream;
-  // Making this public as it's useful for fakes.
+  /// The [StreamController] managing [stream]. It should be considered private,
+  /// but it has been made public ful for testing.
   final controller = StreamController<Datagram>();
   RawDatagramSocket? _socket;
   StreamSubscription? _subscription;
@@ -18,6 +32,7 @@ class SocketController {
     stream = controller.stream;
   }
 
+  /// Bind the socket and set up [stream] to emit its [Datagram]s.
   Future<void> bind() async {
     _socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     _log.info('Bound to port $port');
@@ -25,6 +40,7 @@ class SocketController {
     await _setUpStream();
   }
 
+  /// Close the underlying socket.
   Future<void> close() async {
     // Stop the socket event listener, which includes a handler to rebind the
     // socket when it closes, which we don't want running after an explicit call
@@ -65,10 +81,19 @@ class SocketController {
   }
 }
 
+/// An intermediate for socket users to manage the socket lifecycle.
+/// 
+/// When the socket is closed by the OS, which can easily happen on a mobile OS
+/// when the app is backgrounded, the socket is automatically recreated.
+/// 
+/// This class is meant for sockets which only send data. If you want to receive
+/// data, use [SocketController].
 class SendSocketController {
+  /// The underlying socket. Users should use it directly to send data.
   RawDatagramSocket? socket;
   StreamSubscription? _subscription;
 
+  /// Bind [socket].
   Future<void> bind() async {
     socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     _subscription = socket!.listen((event) async {
@@ -80,6 +105,7 @@ class SendSocketController {
     });
   }
 
+  /// Close [socket].
   Future<void> close() async {
     // Stop the socket event listener, which includes a handler to rebind the
     // socket when it closes, which we don't want running after an explicit call
