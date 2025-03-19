@@ -11,25 +11,27 @@ String createUpdateXml(String name, String value, {bool visible = true}) {
     </emotivaUpdate>''';
 }
 
+Device fakeDevice() => Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+
 void main() {
   group('operator ==', () {
     test('Devices with the same IP address are considered the same device', () {
-      final device1 = Device(InternetAddress('1.1.1.1'));
-      final device2 = Device(InternetAddress('1.1.1.1'));
+      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+      final device2 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
 
       expect(device1 == device2, true);
     });
 
     test('Devices with a different IP address are considered different devices',
         () {
-      final device1 = Device(InternetAddress('1.1.1.1'));
-      final device2 = Device(InternetAddress('1.1.1.2'));
+      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+      final device2 = Device(InternetAddress('1.1.1.2'), 1, 2, 3);
 
       expect(device1 == device2, false);
     });
 
     test('The same device object is considered the same device', () {
-      final device = Device(InternetAddress('1.1.1.1'));
+      final device = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
 
       expect(device == device, true);
     });
@@ -42,7 +44,7 @@ void main() {
 
     late Device device;
     setUp(() {
-      device = Device(InternetAddress('1.1.1.1'));
+      device = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
     });
 
     test('power on', () {

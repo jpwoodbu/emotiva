@@ -241,10 +241,10 @@ class _MainViewState extends State<MainView> {
                     menuChildren: [
                       MenuItemButton(
                         child: const Text('Device discovery'),
-                        onPressed: () {
+                        onPressed: () async {
                           final device = context.read<DeviceChanges>().device;
                           device.unsubscribeAll();
-                          device.closeSockets();
+                          await device.closeSockets();
                           navigateToDiscovery();
                         },
                       ),
@@ -459,7 +459,7 @@ class _DiscoveryState extends State<Discovery> {
           _log.info('Unsubscribing from all fields.');
           device?.unsubscribeAll();
           _log.info('Closing sockets for device.');
-          device?.closeSockets();
+          await device?.closeSockets();
         }
         return AppExitResponse.exit;
       },

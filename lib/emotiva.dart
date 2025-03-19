@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
+
+import 'package:emotiva_remote/socket_controller.dart';
 
 final _log = Logger('Emotiva');
 const int _pingPort = 7000;
@@ -146,28 +149,38 @@ Device parseTransponder(String data, InternetAddress address) {
     throw Exception(
         'Received improperly formatted emotivaTransponder response.');
   }
-  final device = Device(address);
+  String model;
+  String name;
+  String controlVersion;
+  int controlPort;
+  int notifyPort;
+  int menuNotifyPort;
   try {
-    device.model = _textFromElement(root, 'model');
-    device.name = _textFromElement(root, 'name');
-    device.controlVersion = _textFromElement(root, './control/version');
-    device.controlPort = _intFromElement(root, './control/controlPort');
-    device.notifyPort = _intFromElement(root, './control/notifyPort');
-    device.infoPort = _intFromElement(root, './control/infoPort');
-    device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
+    model = _textFromElement(root, 'model');
+    name = _textFromElement(root, 'name');
+    controlVersion = _textFromElement(root, './control/version');
+    controlPort = _intFromElement(root, './control/controlPort');
+    notifyPort = _intFromElement(root, './control/notifyPort');
+    menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
   } catch (e) {
     _log.severe(e);
     throw ('The response from your Emotiva processor is missing some required '
         'fields. Your Emotiva processor may require a firmware update to work '
         'with this app.');
   }
+  final device = Device(address, controlPort, notifyPort, menuNotifyPort);
+  device.model = model;
+  device.name = name;
+  device.controlVersion = controlVersion;
   // Some fields aren't used by this library. And some fields are absent on some
   // devices in the fields. E.g. an XMC-1, perhaps running an older firmware.
   // For those fields, log warnings instead of hard failing.
   try {
+    device.infoPort = _intFromElement(root, './control/infoPort');
     device.dataRevision = _textFromElement(root, 'dataRevision');
     device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
     device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
+    device.keepAlive = _intFromElement(root, './control/keepAlive');
   } catch (e) {
     _log.warning('Missing optional element in transponder packet: $e');
   }
@@ -176,8 +189,6 @@ Device parseTransponder(String data, InternetAddress address) {
 
 enum TunerBand { unknown, am, fm }
 
-enum _SocketId { control, notify, menuNotify, send }
-
 /// A model of an Emotiva device.
 class Device {
   InternetAddress address;
@@ -185,11 +196,11 @@ class Device {
   String dataRevision = '';
   String name = '';
   String controlVersion = '';
-  int controlPort = 0;
-  int notifyPort = 0;
+  int controlPort;
+  int notifyPort;
+  int menuNotifyPort;
   int infoPort = 0;
   int setupPortTcp = 0;
-  int menuNotifyPort = 0;
   int setupXmlVersion = 0;
   int keepAlive = 0;
   bool power = false;
@@ -319,24 +330,23 @@ class Device {
     'tuner_program',
     'tuner_RDS',
   };
-  late RawDatagramSocket _controlSocket;
-  late RawDatagramSocket _notifySocket;
-  late RawDatagramSocket _menuNotifySocket;
-  late RawDatagramSocket _sendSocket;
-  final _controlStreamController = StreamController();
-  final _notifyStreamController = StreamController();
-  final _menuNotifyStreamController = StreamController();
-  // Used in a lot of places to safety check whether it's OK to work with the
-  // socket objects.
-  /// Set to true in [bindSockets].
-  bool socketsBound = false;
-  bool _suppressSocketCloseEventHandler = false;
   final Set<String> _subscribedFields = {};
   // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
   // not yet gotten a real sequence number.
   int _sequenceNumber = -1;
+  // TODO(jpwoodbu) Do we really need to listen on this port? The docs say we
+  // do, but from what I've seen in logging, we do not. I think this is only the
+  // port number we need to use to send control commands to the processor.
+  late SocketController _control;
+  late SocketController _notify;
+  late SocketController _menuNotify;
+  final _sender = SendSocketController();
 
-  Device(this.address);
+  Device(this.address, this.controlPort, this.notifyPort, this.menuNotifyPort) {
+    _control = SocketController(address, controlPort);
+    _notify = SocketController(address, notifyPort);
+    _menuNotify = SocketController(address, menuNotifyPort);
+  }
 
   // The hashCode and == operator override allow Device to be placed into a Set.
   // This is useful when discoverying multiple Emotiva devices on a network.
@@ -358,114 +368,46 @@ class Device {
     return '2.0';
   }
 
-  Stream<String> _socketStream(
-      RawDatagramSocket socket, _SocketId socketId) async* {
-    if (!socketsBound) {
-      throw 'Sockets must be bound before listening streams can be set up.';
-    }
-    await for (final event in socket) {
-      switch (event) {
-        case RawSocketEvent.read:
-          final datagram = socket.receive();
-          // Drop packets not from the address of the discovered Emotiva device.
-          if (datagram!.address != address) {
-            _log.warning('Ignoring packet from ${datagram.address}');
-            break;
-          }
-          final packet = String.fromCharCodes(datagram.data);
-          _log.info('received: $packet');
-          yield packet;
-        case RawSocketEvent.closed:
-          await _rebindSocket(socketId);
-        case RawSocketEvent.readClosed:
-          break;
-        default:
-          throw 'Unexpected event $event';
-      }
-    }
-  }
-
   Future<void> bindSockets() async {
-    await _bindControlSocket();
-    await _bindNotifySocket();
-    await _bindMenuNotifySocket();
-    await _bindSendSocket();
-    socketsBound = true;
+    _log.info('Binding all sockets.');
+    await _control.bind();
+    await _notify.bind();
+    await _menuNotify.bind();
+    await _sender.bind();
   }
 
-  Future<void> _rebindSocket(_SocketId socketId) async {
-    if (_suppressSocketCloseEventHandler) return;
-    switch (socketId) {
-      case _SocketId.control:
-        await _bindControlSocket();
-      case _SocketId.notify:
-      case _SocketId.menuNotify:
-      case _SocketId.send:
+  Future<void> closeSockets() async {
+    _log.info('Closing all sockets.');
+    await _control.close();
+    await _notify.close();
+    await _menuNotify.close();
+    await _sender.close();
+  }
+
+  Stream<String> _decode(Stream<Datagram> stream) async* {
+    await for (final datagram in stream) {
+      final packet = String.fromCharCodes(datagram.data);
+      _log.info('received: $packet');
+      yield packet;
     }
-    _sendSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-    _log.info('Send socket bound.');
   }
 
-  Future<void> _bindControlSocket() async {
-    _controlSocket =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, controlPort);
-    _controlSocket.writeEventsEnabled = false;
-    _log.info('Control socket bound.');
-  }
+  /// Stream of messages arriving on the control stream.
+  Stream<String> controlStream() => _decode(_control.stream);
 
-  Future<void> _bindNotifySocket() async {
-    _notifySocket =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, notifyPort);
-    _notifySocket.writeEventsEnabled = false;
-    _log.info('Notify socket bound.');
-  }
+  /// Stream of messages arriving on the notify stream.
+  Stream<String> notifyStream() => _decode(_notify.stream);
 
-  Future<void> _bindMenuNotifySocket() async {
-    _menuNotifySocket =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, menuNotifyPort);
-    _menuNotifySocket.writeEventsEnabled = false;
-    _log.info('Menu Notify socket bound.');
-  }
+  /// Stream of messages arriving on the menu notify stream.
+  Stream<String> menuNotifyStream() => _decode(_menuNotify.stream);
 
-  Future<void> _bindSendSocket() async {
-    _sendSocket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-    _log.info('Send socket bound.');
-  }
-
-  /// Close any sockets opened so far by this object.
-  void closeSockets() {
-    if (!socketsBound) return;
-    _suppressSocketCloseEventHandler = true;
-    _controlSocket.close();
-    _notifySocket.close();
-    _menuNotifySocket.close();
-    _sendSocket.close();
-    socketsBound = false;
-    _suppressSocketCloseEventHandler = false;
-    _log.info('Sockets closed.');
-  }
-
-  /// Stream of messages arriving on the control socket.
-  Stream<String> controlPortStream() =>
-      _socketStream(_controlSocket, _SocketId.control);
-
-  /// Stream of messages arriving on the notify socket.
-  Stream<String> notifyPortStream() =>
-      _socketStream(_notifySocket, _SocketId.notify);
-
-  /// Stream of messages arriving on the menu notify socket.
-  Stream<String> menuNotifyPortStream() =>
-      _socketStream(_menuNotifySocket, _SocketId.menuNotify);
-
-  void _send(String request, int destinationPort) {
-    if (!socketsBound) {
-      throw 'Send socket must be bound before sending data on it.';
-    }
+  void _send(String request, int destinationPort) async {
     _log.info('sending: $request');
     // OMG, send() does not return a Future. Since UDP is fire-and-forget, I
     // don't suppose it was necessary for it to.
     final bytesSent =
-        _sendSocket.send(request.codeUnits, address, destinationPort);
+        _sender.socket!.send(request.codeUnits, address, destinationPort);
+    _log.fine('bytes sent: $bytesSent; ${address.address}:$destinationPort');
     if (bytesSent == 0) {
       throw 'No bytes were sent';
     }
@@ -657,8 +599,8 @@ class Device {
   /// stream yielding a message and the message being parsed (which might update
   /// data in this object). E.g. updating a UI when data in this object changes.
   ///
-  /// [data] should be a message yielded by [controlPortStream] or
-  /// [notifyPortStream].
+  /// [data] should be a message yielded by [controlStream] or
+  /// [notifyStream].
   void parsePacket(String data) {
     final document = XmlDocument.parse(data);
     final root = document.rootElement;
@@ -1113,20 +1055,17 @@ class Device {
 /// This class is meant to be use for testing and demonstration.
 /// This class only supports Emotiva protocol 3.0.
 class FakeDevice extends Device {
-  final _controlStream = StreamController<String>();
-  final _notifyStream = StreamController<String>();
-  final _menuNotifyStream = StreamController<String>();
   int _sequence = 0;
 
-  FakeDevice(super.address) {
-    socketsBound = true;
+  FakeDevice(
+    super.address,
+    super.controlPort,
+    super.notifyPort,
+    super.menuNotifyPort,
+  ) {
     model = 'Fake Emotiva';
     name = 'Fake name';
     controlVersion = '3.0';
-    controlPort = 1;
-    notifyPort = 2;
-    infoPort = 3;
-    setupPortTcp = 4;
     power = false;
     // With the power off, the device normally returns a 'None' value for the
     // speaker trims. We handle that internally as false visibility.
@@ -1158,6 +1097,13 @@ class FakeDevice extends Device {
     tunerProgram = 'Classical';
     tunerRds = 'WCPE: Mahler 5';
     tunerChannel = 'FM 89.7';
+  }
+
+  Datagram _encode(String request) {
+    return Datagram(
+        // In the fake, the address and port don't matter, but are required by
+        // DataGram.
+        Uint8List.fromList(request.codeUnits), address, notifyPort);
   }
 
   Menu _initMenuContent() {
@@ -1228,7 +1174,7 @@ class FakeDevice extends Device {
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
-    _controlStream.add(response);
+    _control.controller.add(_encode(response));
   }
 
   void _toggleLoudness() {
@@ -1766,7 +1712,7 @@ class FakeDevice extends Device {
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _sequence++;
-    _menuNotifyStream.add(response);
+    _menuNotify.controller.add(_encode(response));
   }
 
   void _notifySubscribers(Set<String> updatedFields) {
@@ -1785,7 +1731,7 @@ class FakeDevice extends Device {
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _sequence++;
-    _notifyStream.add(response);
+    _notify.controller.add(_encode(response));
   }
 
   String _getValueForField(String field) {
@@ -1935,7 +1881,7 @@ class FakeDevice extends Device {
     });
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
-    _controlStream.add(response);
+    _control.controller.add(_encode(response));
   }
 
   void _parseUnsubscribeRequest(Iterable<String> fields) {
@@ -1983,43 +1929,15 @@ class FakeDevice extends Device {
   }
 
   @override
-  Future<void> bindSockets() async {
-    socketsBound = true;
-  }
+  Future<void> bindSockets() async {}
 
   @override
-  void closeSockets() {
-    _controlStream.close();
-    _notifyStream.close();
-    _menuNotifyStream.close();
-    socketsBound = false;
-  }
-
-  @override
-  Stream<String> controlPortStream() async* {
-    await for (final data in _controlStream.stream) {
-      yield data;
-    }
-  }
-
-  @override
-  Stream<String> notifyPortStream() async* {
-    await for (final data in _notifyStream.stream) {
-      yield data;
-    }
-  }
-
-  @override
-  Stream<String> menuNotifyPortStream() async* {
-    await for (final data in _menuNotifyStream.stream) {
-      yield data;
-    }
-  }
+  Future<void> closeSockets() async {}
 }
 
 /// This function is meant to be mostly a stand-in replacement for [discover].
 Future<FakeDevice> futureFakeDevice() async =>
-    FakeDevice(InternetAddress('192.168.42.1'));
+    FakeDevice(InternetAddress('192.168.42.1'), 1, 2, 3);
 
 // These enums represet the UI elements of the on-screen display menu.
 enum Arrow {

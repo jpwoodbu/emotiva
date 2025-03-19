@@ -9,10 +9,6 @@ class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
 
   DeviceChanges(this.device) {
-    if (!device.socketsBound) {
-      throw 'Cannot set up ChangeNotifier until sockets have been bound on the '
-          'device.';
-    }
     _handleControlPackets();
     _log.info('handling control packets');
     _handleNotifyPackets();
@@ -22,21 +18,24 @@ class DeviceChanges with ChangeNotifier {
   }
 
   Future<void> _handleControlPackets() async {
-    await for (final packet in device.controlPortStream()) {
+    await for (final packet in device.controlStream()) {
+      _log.fine('packet arrived on control port');
       device.parsePacket(packet);
       notifyListeners();
     }
   }
 
   Future<void> _handleNotifyPackets() async {
-    await for (final packet in device.notifyPortStream()) {
+    await for (final packet in device.notifyStream()) {
+      _log.fine('packet arrived on notify port');
       device.parsePacket(packet);
       notifyListeners();
     }
   }
 
   Future<void> _handleMenuNotifyPackets() async {
-    await for (final packet in device.menuNotifyPortStream()) {
+    await for (final packet in device.menuNotifyStream()) {
+      _log.fine('packet arrived on menu notify port');
       device.parsePacket(packet);
       notifyListeners();
     }
