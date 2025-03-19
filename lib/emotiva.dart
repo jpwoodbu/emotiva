@@ -64,11 +64,11 @@ Future<Device> discover(int timeoutSec) async {
 
 /// Continuously discovers Emotiva devices on the network.
 ///
-/// [listen] yields [Device] objects as they are discovered. A ping request is
-/// broadcast on the network every 5s once [listen] is called and until [close]
+/// [stream] yields [Device] objects as they are discovered. A ping request is
+/// broadcast on the network every 5s once [stream] is called and until [close]
 /// is called. [close] also tears down the listening socket.
 ///
-/// It is up to the caller of [listen] to deduplicate yielded devices. The
+/// It is up to the caller of [stream] to deduplicate yielded devices. The
 /// [Device] objects can be added to a [Set] to acheve this.
 class MultiDeviceDiscover {
   RawDatagramSocket? _socket;
@@ -95,7 +95,7 @@ class MultiDeviceDiscover {
     }
   }
 
-  Stream<Device> listen() async* {
+  Stream<Device> stream() async* {
     _socket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
     _socket!.broadcastEnabled = true;

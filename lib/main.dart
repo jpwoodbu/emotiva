@@ -346,16 +346,18 @@ class _MainViewState extends State<MainView> {
   /// than the async callback would use.
   void navigateToDiscovery() {
     Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DiscoverySwitch(),
-        ),
-        (Route<dynamic> route) => false);
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DiscoverySwitch(),
+      ),
+      (Route<dynamic> route) => false,
+    );
   }
 }
 
 class DiscoveryError extends StatelessWidget {
   final Object error;
+
   const DiscoveryError({super.key, required this.error});
 
   @override
@@ -379,10 +381,11 @@ class DiscoveryError extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const Discovery()),
-                        (Route<dynamic> route) => false);
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Discovery()),
+                      (Route<dynamic> route) => false,
+                    );
                   },
                   child: const Text('Try again'),
                 ),
@@ -390,10 +393,11 @@ class DiscoveryError extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const Discovery(useFake: true)),
-                        (Route<dynamic> route) => false);
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Discovery(useFake: true)),
+                      (Route<dynamic> route) => false,
+                    );
                   },
                   child: const Text('Demo mode'),
                 ),
@@ -447,9 +451,6 @@ class _DiscoveryState extends State<Discovery> {
   late final AppLifecycleListener _listener;
   emotiva.Device? device;
 
-  Future<emotiva.Device> _futureProvidedDevice() async =>
-      widget.providedDevice!;
-
   @override
   initState() {
     super.initState();
@@ -464,6 +465,7 @@ class _DiscoveryState extends State<Discovery> {
         return AppExitResponse.exit;
       },
     );
+
     if (widget.useFake) {
       _log.info('Using fake device.');
       _device = emotiva.futureFakeDevice();
@@ -491,6 +493,9 @@ class _DiscoveryState extends State<Discovery> {
     return device;
   }
 
+  Future<emotiva.Device> _futureProvidedDevice() async =>
+      widget.providedDevice!;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
@@ -501,7 +506,7 @@ class _DiscoveryState extends State<Discovery> {
             _log.severe('Error on device discovery: ${snapshot.error}');
             return DiscoveryError(error: snapshot.error!);
           }
-          return ChangeNotifierProvider(
+          return ChangeNotifierProvider<DeviceChanges>(
             create: (BuildContext _) => DeviceChanges(snapshot.data!),
             child: const MainView(),
           );
@@ -515,19 +520,13 @@ class _DiscoveryState extends State<Discovery> {
 
 class MultiDeviceDiscoveryChanges with ChangeNotifier {
   final emotiva.MultiDeviceDiscover _discover;
-  late Stream<emotiva.Device> _stream;
   final Set<emotiva.Device> devices = {};
 
   MultiDeviceDiscoveryChanges(this._discover) {
-    _stream = _discover.listen();
-    _handleDevices();
-  }
-
-  Future<void> _handleDevices() async {
-    await for (final device in _stream) {
-      devices.add(device);
+    _discover.stream().listen((emotiva.Device d) {
+      devices.add(d);
       notifyListeners();
-    }
+    });
   }
 }
 
@@ -565,11 +564,12 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                         onPressed: () {
                           _discover.close();
                           Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const Discovery(useFake: true)),
-                              (Route<dynamic> route) => false);
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const Discovery(useFake: true)),
+                            (Route<dynamic> route) => false,
+                          );
                         },
                         child: const Text('Demo mode'),
                       ),
