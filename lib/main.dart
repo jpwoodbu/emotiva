@@ -188,11 +188,28 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
   final _pageIndexModel = PageIndexChangeNotifier();
+  late final AppLifecycleListener _appLifecycleListener;
 
   @override
   void initState() {
     super.initState();
-    context.read<DeviceChanges>().device.subscribeAll();
+    final device = context.read<DeviceChanges>().device;
+    _appLifecycleListener = AppLifecycleListener(
+      onExitRequested: () async {
+        _log.info('Unsubscribing from all fields.');
+        device.unsubscribeAll();
+        _log.info('Closing sockets for device.');
+        await device.closeSockets();
+        return AppExitResponse.exit;
+      },
+    );
+    device.subscribeAll();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _appLifecycleListener.dispose();
   }
 
   @override
@@ -447,44 +464,24 @@ class Discovery extends StatefulWidget {
 }
 
 class _DiscoveryState extends State<Discovery> {
-  late Future<emotiva.Device> _device;
-  late final AppLifecycleListener _listener;
-  emotiva.Device? device;
+  late Future<emotiva.Device> _futureDevice;
 
   @override
   initState() {
     super.initState();
-    _listener = AppLifecycleListener(
-      onExitRequested: () async {
-        if (device != null) {
-          _log.info('Unsubscribing from all fields.');
-          device?.unsubscribeAll();
-          _log.info('Closing sockets for device.');
-          await device?.closeSockets();
-        }
-        return AppExitResponse.exit;
-      },
-    );
-
     if (widget.useFake) {
       _log.info('Using fake device.');
-      _device = emotiva.futureFakeDevice();
+      _futureDevice = emotiva.futureFakeDevice();
     } else if (widget.providedDevice != null) {
-      _device = _futureProvidedDevice().then(_setupDevice);
+      _futureDevice = _futureProvidedDevice().then(_setupDevice);
     } else {
       // Discovery is usually very fast... O(ms). To avoid the scanning widget
       // being displayed for such a short time that the user can't read it
       // (which would be janky), show it for at least 750ms.
-      _device = waitAtLeast<emotiva.Device>(
+      _futureDevice = waitAtLeast<emotiva.Device>(
           future: emotiva.discover(3).then(_setupDevice),
           duration: const Duration(milliseconds: 750));
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _listener.dispose();
   }
 
   Future<emotiva.Device> _setupDevice(emotiva.Device device) async {
@@ -499,7 +496,7 @@ class _DiscoveryState extends State<Discovery> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<emotiva.Device>(
-      future: _device,
+      future: _futureDevice,
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
