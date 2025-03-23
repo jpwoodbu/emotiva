@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../emotiva.dart' as emotiva;
-import '../device_changes.dart';
-import '../util.dart';
+import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'package:emotiva_remote/device_changes.dart';
+import 'package:emotiva_remote/util.dart';
 
 const double _tableCellPadding = 8.0;
 
-// This is a workaround for not getting notify messages when changing inputs for
-// zone 2.
+/// This is a workaround for not getting notify messages when changing inputs
+/// for zone 2.
 void _delayedUpdateAll(emotiva.Device device) {
   Future.delayed(const Duration(seconds: 2), device.updateAll);
 }
@@ -80,6 +80,8 @@ void _setUsb(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setUsb());
 }
 
+/// This is only used for zone 2 controls, but it makes use of functions in this
+/// library.
 void setUsbZone2(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.zone2SetUsb());
   _delayedUpdateAll(device);
@@ -93,13 +95,15 @@ void _setFront(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.setFront());
 }
 
+/// This is only used for zone 2 controls, but it makes use of functions in this
+/// library.
 void setFrontZone2(BuildContext context, emotiva.Device device) {
   _addHapticAndPop(context, () => device.zone2SetFront());
   _delayedUpdateAll(device);
 }
 
-// This is only used for zone 2 controls, but it makes use of functions in this
-// library.
+/// This is only used for zone 2 controls, but it makes use of functions in this
+/// library.
 void setFollowMain(emotiva.Device device) {
   addHaptic(device.zone2FollowMain);
   _delayedUpdateAll(device);
@@ -194,6 +198,7 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
   return widgets;
 }
 
+/// Displays an adaptive modal to select a source.
 void _sourceSelector(BuildContext context, emotiva.Device device) {
   if (isApple(context)) {
     showCupertinoModalPopup(
@@ -220,6 +225,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
+/// Displays an adaptive modal to select an HDMI input.
 void _hdmiSelector(BuildContext context, emotiva.Device device) {
   if (isApple(context)) {
     showCupertinoModalPopup(
@@ -258,6 +264,7 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
+/// Displays an adaptive modal to select a coax input. Also used for Zone 2.
 void coaxSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
   if (isApple(context)) {
@@ -300,6 +307,7 @@ void coaxSelector(BuildContext context, emotiva.Device device,
   }
 }
 
+/// Displays an adaptive modal to select an optical input. Also used for Zone 2.
 void opticalSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
   if (isApple(context)) {
@@ -342,6 +350,7 @@ void opticalSelector(BuildContext context, emotiva.Device device,
   }
 }
 
+/// Displays an adaptive modal to select an XLR input. Also used for Zone 2.
 void xlrSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
   if (isApple(context)) {
@@ -394,6 +403,7 @@ void xlrSelector(BuildContext context, emotiva.Device device,
   }
 }
 
+/// Displays an adaptive modal to select an analog input. Also used for Zone 2.
 void analogSelector(BuildContext context, emotiva.Device device,
     {bool zone2 = false}) {
   if (isApple(context)) {
@@ -437,6 +447,8 @@ void analogSelector(BuildContext context, emotiva.Device device,
   }
 }
 
+/// Displays an adaptive modal to select an input which doesn't fall into any
+/// other category.
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
   if (isApple(context)) {
     showCupertinoModalPopup(
@@ -497,6 +509,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
+/// Displays an adaptive modal to select a playback mode.
 void _modeSelector(BuildContext context, emotiva.Device device) {
   if (isApple(context)) {
     showCupertinoModalPopup(
@@ -581,24 +594,30 @@ void _modeSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-Widget _trimControls(BuildContext context, emotiva.Device device) {
-  if (!(device.visibility['center']! ||
-      device.visibility['subwoofer']! ||
-      device.visibility['surround']! ||
-      device.visibility['back']! ||
-      device.visibility['height']! ||
-      device.visibility['width']! ||
-      device.power)) {
-    return Center(
+class _TrimControls extends StatelessWidget {
+  const _TrimControls();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    if (!(device.visibility['center']! ||
+        device.visibility['subwoofer']! ||
+        device.visibility['surround']! ||
+        device.visibility['back']! ||
+        device.visibility['height']! ||
+        device.visibility['width']! ||
+        device.power)) {
+      return Center(
         child: Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Text(
-          'Speaker and EQ trim configuration unavailable in the current mode.',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.error)),
-    ));
-  } else {
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: Text(
+              'Speaker and EQ trim configuration unavailable in the current mode.',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.error)),
+        ),
+      );
+    }
     const double arrowSize = 50.0;
     return Wrap(
       alignment: WrapAlignment.center,
@@ -779,123 +798,142 @@ Widget _trimControls(BuildContext context, emotiva.Device device) {
   }
 }
 
-Widget _inputs(BuildContext context, emotiva.Device device) {
-  return Table(
-    children: [
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => _sourceSelector(context, device),
-            icon: const Icon(Icons.person),
-            label: const Text('Source'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+class _Inputs extends StatelessWidget {
+  const _Inputs();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Table(
+      children: [
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => _sourceSelector(context, device),
+              icon: const Icon(Icons.person),
+              label: const Text('Source'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => _hdmiSelector(context, device),
-            icon: const Icon(Icons.settings_input_hdmi),
-            label: const Text('HDMI'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => _hdmiSelector(context, device),
+              icon: const Icon(Icons.settings_input_hdmi),
+              label: const Text('HDMI'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => opticalSelector(context, device),
-            icon: const Icon(Icons.lightbulb),
-            label: const Text('Optical'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => opticalSelector(context, device),
+              icon: const Icon(Icons.lightbulb),
+              label: const Text('Optical'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => coaxSelector(context, device),
-            icon: const Icon(Icons.settings_input_composite),
-            label: const Text('Coax'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => coaxSelector(context, device),
+              icon: const Icon(Icons.settings_input_composite),
+              label: const Text('Coax'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => analogSelector(context, device),
-            icon: const Icon(Icons.settings_input_component),
-            label: const Text('Analog'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => analogSelector(context, device),
+              icon: const Icon(Icons.settings_input_component),
+              label: const Text('Analog'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => xlrSelector(context, device),
-            icon: const Icon(Icons.donut_large),
-            label: const Text('XLR'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => xlrSelector(context, device),
+              icon: const Icon(Icons.donut_large),
+              label: const Text('XLR'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => _otherInputsSelector(context, device),
-            icon: const Icon(Icons.more),
-            label: const Text('Other'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => _otherInputsSelector(context, device),
+              icon: const Icon(Icons.more),
+              label: const Text('Other'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(_tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => _modeSelector(context, device),
-            icon: const Icon(Icons.surround_sound),
-            label: const Text('Mode'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(_tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => _modeSelector(context, device),
+              icon: const Icon(Icons.surround_sound),
+              label: const Text('Mode'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-    ],
-  );
+        ]),
+      ],
+    );
+  }
 }
 
-Widget _status(emotiva.Device device) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Flexible(
-        child: Text(
-          device.source,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+class _Status extends StatelessWidget {
+  const _Status();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            device.source,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
         ),
-      ),
-      Flexible(
-        child: Text(device.mode,
+        Flexible(
+          child: Text(device.mode,
+              style:
+                  const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        ),
+      ],
+    );
+  }
+}
+
+class _VolumeRow extends StatelessWidget {
+  const _VolumeRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Volume',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        Text('${device.volume.toString()}dB',
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ),
-    ],
-  );
-}
-
-Widget _volumeRow(emotiva.Device device) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        'Volume',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      ),
-      Text('${device.volume.toString()}dB',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class InputsPage extends StatelessWidget {
@@ -903,25 +941,19 @@ class InputsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
-      return _build(context, deviceChanges.device);
-    });
-  }
-
-  Widget _build(BuildContext context, emotiva.Device device) {
+    final device = context.watch<DeviceChanges>().device;
     return Padding(
       padding: const EdgeInsets.all(15),
       child: ListView(
         children: [
           if (device.menuDisplayed) menuWarning(context),
-          _status(device),
+          const _Status(),
           const SizedBox(height: 15),
-          _volumeRow(device),
+          const _VolumeRow(),
           const SizedBox(height: 15),
-          _inputs(context, device),
+          const _Inputs(),
           const SizedBox(height: 25),
-          _trimControls(context, device),
+          const _TrimControls(),
         ],
       ),
     );
