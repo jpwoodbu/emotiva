@@ -302,10 +302,13 @@ class _MainViewState extends State<MainView> {
                 ],
               )
             : null,
-        // Using IndexedStack is critical. It preserves the existance (I think) of
-        // the widgets as the user navigates between them so that we don't try to
-        // do something breaking like creating additional listeners for a stream
-        // inside initState perhaps before the prior listeners have been GC'd.
+        // Using IndexedStack is critical. It preserves the existance (I think)
+        // of the widgets as the user navigates between them so that we don't
+        // try to do something breaking like creating additional listeners for a
+        // stream inside initState perhaps before the prior listeners have been
+        // GC'd.
+        // It's tempting to wrap the body in a Padding widget, but MenuPage uses
+        // different padding than the other pages.
         body: IndexedStack(
           index: _pageIndexModel.pageIndex,
           children: const [

@@ -2,9 +2,9 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
-import '../emotiva.dart' as emotiva;
-import '../device_changes.dart';
-import '../util.dart';
+import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'package:emotiva_remote/device_changes.dart';
+import 'package:emotiva_remote/util.dart';
 
 double _iconSize(BoxConstraints constraints) {
   // There are 4 rows in the controls table. Divide the height evenly by the
@@ -18,41 +18,46 @@ double _iconSize(BoxConstraints constraints) {
   }
 }
 
-Widget _arrowWidget(emotiva.Arrow arrowType, double size) {
-  IconData icon;
-  var alignment = Alignment.centerLeft;
-  switch (arrowType) {
-    case emotiva.Arrow.up:
-      icon = Icons.keyboard_arrow_up;
-      break;
-    case emotiva.Arrow.down:
-      icon = Icons.keyboard_arrow_down;
-      break;
-    case emotiva.Arrow.left:
-      icon = Icons.keyboard_arrow_left;
-      break;
-    case emotiva.Arrow.right:
-      icon = Icons.keyboard_arrow_right;
-      alignment = Alignment.centerRight;
-      break;
-    default:
-      icon = Icons.error;
-      break;
+class _ArrowIcon extends StatelessWidget {
+  const _ArrowIcon({required emotiva.Arrow arrow, required double size})
+      : _arrow = arrow,
+        _size = size;
+
+  final emotiva.Arrow _arrow;
+  final double _size;
+
+  @override
+  Widget build(BuildContext context) {
+    IconData icon;
+    var alignment = Alignment.centerLeft;
+    switch (_arrow) {
+      case emotiva.Arrow.up:
+        icon = Icons.keyboard_arrow_up;
+      case emotiva.Arrow.down:
+        icon = Icons.keyboard_arrow_down;
+      case emotiva.Arrow.left:
+        icon = Icons.keyboard_arrow_left;
+      case emotiva.Arrow.right:
+        icon = Icons.keyboard_arrow_right;
+        alignment = Alignment.centerRight;
+      default:
+        icon = Icons.error;
+    }
+    return Container(alignment: alignment, child: Icon(icon, size: _size));
   }
-  return Container(alignment: alignment, child: Icon(icon, size: size));
 }
 
 List<Widget> _row(emotiva.Device device, int rowIndex) {
   const inset = 2.0;
-  const arrowSize = 25.0;
+  const size = 25.0;
   final leftArrowPosition =
       emotiva.arrowPosition(device.menuContents, emotiva.Arrow.left);
   final rightArrowPosition =
       emotiva.arrowPosition(device.menuContents, emotiva.Arrow.right);
   // Leave space for a potential arrow.
-  List<Widget> columns = [const SizedBox(width: arrowSize)];
+  List<Widget> columns = [const SizedBox(width: size)];
   if (rowIndex == leftArrowPosition) {
-    columns[0] = _arrowWidget(emotiva.Arrow.left, arrowSize);
+    columns[0] = const _ArrowIcon(arrow: emotiva.Arrow.left, size: size);
   }
   for (final column in device.menuContents.rows[rowIndex].columns) {
     Color? color;
@@ -105,20 +110,20 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
     }
   }
   if (rowIndex == rightArrowPosition) {
-    columns.add(_arrowWidget(emotiva.Arrow.right, arrowSize));
+    columns.add(const _ArrowIcon(arrow: emotiva.Arrow.right, size: size));
   } else {
-    columns.add(const SizedBox(width: arrowSize));
+    columns.add(const SizedBox(width: size));
   }
   return columns;
 }
 
-TableRow _verticleArrow(emotiva.Menu menu, emotiva.Arrow arrowType) {
+TableRow _verticalArrow(emotiva.Menu menu, emotiva.Arrow arrow) {
   const height = 25.0;
-  final arrowPosition = emotiva.arrowPosition(menu, arrowType);
+  final arrowPosition = emotiva.arrowPosition(menu, arrow);
   final List<Widget> children = [const SizedBox(width: 25.0)];
   for (int i = 0; i < 4; i++) {
     if (arrowPosition == i) {
-      children.add(_arrowWidget(arrowType, height));
+      children.add(_ArrowIcon(arrow: arrow, size: height));
     } else {
       // Setting this height makes sure the menu table doesn't move on the
       // screen if the up arrow is not visible.
@@ -128,8 +133,8 @@ TableRow _verticleArrow(emotiva.Menu menu, emotiva.Arrow arrowType) {
   return TableRow(children: children);
 }
 
-class OnScreenDisplay extends StatelessWidget {
-  const OnScreenDisplay({super.key});
+class _OnScreenDisplay extends StatelessWidget {
+  const _OnScreenDisplay();
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +175,7 @@ class OnScreenDisplay extends StatelessWidget {
           4: FixedColumnWidth(25.0),
         },
         children: <TableRow>[
-          _verticleArrow(device.menuContents, emotiva.Arrow.up),
+          _verticalArrow(device.menuContents, emotiva.Arrow.up),
           TableRow(
             children: _row(device, 4),
             decoration: const BoxDecoration(
@@ -188,15 +193,15 @@ class OnScreenDisplay extends StatelessWidget {
             ),
             children: _row(device, 6),
           ),
-          _verticleArrow(device.menuContents, emotiva.Arrow.down),
+          _verticalArrow(device.menuContents, emotiva.Arrow.down),
         ],
       ),
     );
   }
 }
 
-class Controls extends StatelessWidget {
-  const Controls({super.key});
+class _Controls extends StatelessWidget {
+  const _Controls();
 
   @override
   Widget build(BuildContext context) {
@@ -315,10 +320,10 @@ class MenuPage extends StatelessWidget {
     return const Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        OnScreenDisplay(),
+        _OnScreenDisplay(),
         Flexible(
           fit: FlexFit.loose,
-          child: Controls(),
+          child: _Controls(),
         ),
       ],
     );

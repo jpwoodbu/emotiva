@@ -1936,6 +1936,10 @@ Future<FakeDevice> futureFakeDevice() async =>
     FakeDevice(InternetAddress('192.168.42.1'), 1, 2, 3);
 
 // These enums represet the UI elements of the on-screen display menu.
+
+/// Arrow direction. This would be named ArrowDirection except that I wanted to
+/// be consistent with reusing names of the attributes in the XML as described
+/// in the Emotiva API docs.
 enum Arrow {
   no,
   up,

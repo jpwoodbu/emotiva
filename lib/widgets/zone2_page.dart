@@ -195,7 +195,7 @@ class Zone2Page extends StatelessWidget {
 
   Widget _build(BuildContext context, emotiva.Device device) {
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(kPadding),
       child: ListView(
         children: [
           Column(

@@ -943,7 +943,7 @@ class InputsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(kPadding),
       child: ListView(
         children: [
           if (device.menuDisplayed) menuWarning(context),
