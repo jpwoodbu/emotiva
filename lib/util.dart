@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// Padding used for text containers like bottom sheets and screens with mostly
-// text like the help page.
+/// Padding used for text containers like bottom sheets and screens with mostly
+/// text like the help page.
 const double kPadding = 15.0;
 
 dynamic addHaptic(Function function) {

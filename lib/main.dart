@@ -27,7 +27,7 @@ import 'widgets/volume_controls.dart';
 final _log = Logger('main');
 const String kSettingMultiDevice = 'multiDeviceEnabled';
 
-void main() async {
+Future<void> main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print

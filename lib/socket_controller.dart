@@ -23,7 +23,7 @@ class SocketController {
   /// Consumers should listen to this stream to read the received [Datagram]s.
   late Stream<Datagram> stream;
   /// The [StreamController] managing [stream]. It should be considered private,
-  /// but it has been made public ful for testing.
+  /// but it has been made public for testing.
   final controller = StreamController<Datagram>();
   RawDatagramSocket? _socket;
   StreamSubscription? _subscription;
