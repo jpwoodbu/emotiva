@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../util.dart';
+import 'package:emotiva_remote/util.dart';
 
 class KnownIssues extends StatelessWidget {
   const KnownIssues({super.key});
 
-  final String _issue1 =
+  static const String _issue1 =
       'Some setting changes on Emotiva processors take around 10 seconds before they\'re communicated to the app. E.g. changing inputs.';
-  final String _issue2 =
+  static const String _issue2 =
       'Speaker trim levels are not updated in the app if the level is changed using another remote. E.g. another app or the IR remote.';
-  final String _issue3 =
+  static const String _issue3 =
       'HDMI color space, chroma subsamping, and HDR state are missing.';
-  final String _issue4 =
+  static const String _issue4 =
       'Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.';
 
   @override
@@ -25,15 +25,16 @@ class KnownIssues extends StatelessWidget {
             itemBuilder: (_, index) {
               switch (index) {
                 case 0:
-                  return KnownIssueItem(
+                  return const _KnownIssueItem(
                       title: 'Slow updates', issueText: _issue1);
                 case 1:
-                  return KnownIssueItem(
+                  return const _KnownIssueItem(
                       title: 'Speaker trim', issueText: _issue2);
                 case 2:
-                  return KnownIssueItem(title: 'HDMI info', issueText: _issue3);
+                  return const _KnownIssueItem(
+                      title: 'HDMI info', issueText: _issue3);
                 case 3:
-                  return KnownIssueItem(
+                  return const _KnownIssueItem(
                       title: 'Zone 2 and the Tuner', issueText: _issue4);
                 default:
                   return const SizedBox();
@@ -48,24 +49,24 @@ class KnownIssues extends StatelessWidget {
   }
 }
 
-class KnownIssueItem extends StatelessWidget {
-  const KnownIssueItem(
-      {super.key, required this.title, required this.issueText});
+class _KnownIssueItem extends StatelessWidget {
+  const _KnownIssueItem({required String title, required String issueText})
+      : _issueText = issueText,
+        _title = title;
 
-  final String title;
-  final String issueText;
+  final String _title;
+  final String _issueText;
 
   @override
   Widget build(BuildContext context) {
-    final headerStyle = Theme.of(context).textTheme.titleLarge;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(title, style: headerStyle),
+          child: Text(_title, style: Theme.of(context).textTheme.titleLarge),
         ),
-        Text(issueText),
+        Text(_issueText),
       ],
     );
   }
