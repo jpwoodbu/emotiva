@@ -218,7 +218,7 @@ class InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final device = context.read<DeviceChanges>().device;
+    final device = context.watch<DeviceChanges>().device;
     return RefreshIndicator(
       semanticsLabel: 'Info page',
       onRefresh: () => addHaptic(device.updateAll),
