@@ -7,6 +7,7 @@ import 'inputs_page.dart';
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
+import 'package:emotiva_remote/widgets/volume_row.dart';
 
 /// Displays an adaptive modal to select an input which doesn't fit into another
 /// category. Note that this list of inputs is different from the "other" inputs
@@ -90,27 +91,6 @@ class _PowerRow extends StatelessWidget {
             ),
           ],
         )
-      ],
-    );
-  }
-}
-
-// TODO(jpwoodbu) Is this duplicated elsewhere?
-class _VolumeRow extends StatelessWidget {
-  const _VolumeRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final device = context.watch<DeviceChanges>().device;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Volume',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text('${device.zone2Volume.toString()}dB',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -223,7 +203,7 @@ class Zone2Page extends StatelessWidget {
           if (device.menuDisplayed) menuWarning(context),
           const _PowerRow(),
           const SizedBox(height: 10),
-          const _VolumeRow(),
+          const VolumeRow(zone2: true),
           const SizedBox(height: 10),
           const _InputRow(),
           const SizedBox(height: 20),

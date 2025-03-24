@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
+import 'package:emotiva_remote/widgets/volume_row.dart';
 
 class _EnableTuner extends StatelessWidget {
   const _EnableTuner();
@@ -107,27 +108,6 @@ class _RDS extends StatelessWidget {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
         ),
         const Divider(),
-      ],
-    );
-  }
-}
-
-// TODO(jpwoodbu) Is this duplicated in other pages?
-class _VolumeRow extends StatelessWidget {
-  const _VolumeRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final device = context.watch<DeviceChanges>().device;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Volume',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text('${device.volume.toString()}dB',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -311,7 +291,7 @@ class TunerPage extends StatelessWidget {
               const SizedBox(height: 5.0),
               const _RDS(),
               const SizedBox(height: 5.0),
-              const _VolumeRow(),
+              const VolumeRow(),
               const SizedBox(height: 15.0),
               const _BandRow(),
               const SizedBox(height: 5.0),

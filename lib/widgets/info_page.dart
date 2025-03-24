@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
+import 'package:emotiva_remote/widgets/volume_row.dart';
 
 class _NameRow extends StatelessWidget {
   const _NameRow();
@@ -44,26 +45,6 @@ class _NameRow extends StatelessWidget {
             ),
           ],
         )
-      ],
-    );
-  }
-}
-
-class _VolumeRow extends StatelessWidget {
-  const _VolumeRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final device = context.watch<DeviceChanges>().device;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Volume',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-        Text('${device.volume.toString()}dB',
-            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -233,7 +214,7 @@ class InfoPage extends StatelessWidget {
                 if (device.menuDisplayed) menuWarning(context),
                 const _NameRow(),
                 const SizedBox(height: 5),
-                const _VolumeRow(),
+                const VolumeRow(fontSize: 25),
                 const SizedBox(height: 20),
                 const _InfoTable(),
                 const SizedBox(height: 30),

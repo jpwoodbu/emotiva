@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
+import 'package:emotiva_remote/widgets/volume_row.dart';
 
 const double _tableCellPadding = 8.0;
 
@@ -916,26 +917,6 @@ class _Status extends StatelessWidget {
   }
 }
 
-class _VolumeRow extends StatelessWidget {
-  const _VolumeRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final device = context.watch<DeviceChanges>().device;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Volume',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
-        Text('${device.volume.toString()}dB',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-}
-
 class InputsPage extends StatelessWidget {
   const InputsPage({super.key});
 
@@ -949,7 +930,7 @@ class InputsPage extends StatelessWidget {
           if (device.menuDisplayed) menuWarning(context),
           const _Status(),
           const SizedBox(height: 15),
-          const _VolumeRow(),
+          const VolumeRow(),
           const SizedBox(height: 15),
           const _Inputs(),
           const SizedBox(height: 25),
