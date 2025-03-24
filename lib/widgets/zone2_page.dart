@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 
 import 'inputs_page.dart';
 
-import '../emotiva.dart' as emotiva;
-import '../device_changes.dart';
-import '../util.dart';
+import 'package:emotiva_remote/emotiva.dart' as emotiva;
+import 'package:emotiva_remote/device_changes.dart';
+import 'package:emotiva_remote/util.dart';
 
+/// Displays an adaptive modal to select an input which doesn't fit into another
+/// category. Note that this list of inputs is different from the "other" inputs
+/// list for the main zone.
 void _otherInputsSelector(BuildContext context, emotiva.Device device) {
   if (isApple(context)) {
     showCupertinoModalPopup(
@@ -52,69 +55,93 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
   }
 }
 
-Widget _powerRow(emotiva.Device device) {
-  return Row(
-    mainAxisSize: MainAxisSize.max,
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        'Zone 2',
-        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-      ),
-      Row(
-        children: [
-          IconButton(
-            onPressed: () => addHaptic(device.updateAll),
-            icon: const Icon(
-              Icons.refresh,
-              size: 30,
-              semanticLabel: 'Refresh data',
+class _PowerRow extends StatelessWidget {
+  const _PowerRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Zone 2',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () => addHaptic(device.updateAll),
+              icon: const Icon(
+                Icons.refresh,
+                size: 30,
+                semanticLabel: 'Refresh data',
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () => addHaptic(device.zone2TogglePower),
-            icon: Icon(
-              Icons.power_settings_new,
-              color: device.zone2Power ? Colors.blue : Colors.amber,
-              size: 30,
-              semanticLabel: 'Toggle zone 2 power',
+            IconButton(
+              onPressed: () => addHaptic(device.zone2TogglePower),
+              icon: Icon(
+                Icons.power_settings_new,
+                color: device.zone2Power ? Colors.blue : Colors.amber,
+                size: 30,
+                semanticLabel: 'Toggle zone 2 power',
+              ),
             ),
-          ),
-        ],
-      )
-    ],
-  );
+          ],
+        )
+      ],
+    );
+  }
 }
 
-Widget _volumeRow(emotiva.Device device) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        'Volume',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      ),
-      Text('${device.zone2Volume.toString()}dB',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-    ],
-  );
+// TODO(jpwoodbu) Is this duplicated elsewhere?
+class _VolumeRow extends StatelessWidget {
+  const _VolumeRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Volume',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        Text('${device.zone2Volume.toString()}dB',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
 }
 
-Widget _inputRow(emotiva.Device device) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        'Input',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      ),
-      Text(device.zone2Input,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-    ],
-  );
+class _InputRow extends StatelessWidget {
+  const _InputRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Input',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        Text(device.zone2Input,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
 }
 
-Widget _inputSelection(BuildContext context, emotiva.Device device) {
+class _InputSelection extends StatelessWidget {
+  const _InputSelection();
+
+  @override
+  Widget build(BuildContext context) {
+    final device = context.watch<DeviceChanges>().device;
   const double tableCellPadding = 8.0;
   return Table(
     children: [
@@ -180,6 +207,7 @@ Widget _inputSelection(BuildContext context, emotiva.Device device) {
       ]),
     ],
   );
+  }
 }
 
 class Zone2Page extends StatelessWidget {
@@ -187,30 +215,19 @@ class Zone2Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DeviceChanges>(
-        builder: (BuildContext context, DeviceChanges deviceChanges, _) {
-      return _build(context, deviceChanges.device);
-    });
-  }
-
-  Widget _build(BuildContext context, emotiva.Device device) {
+    final device = context.watch<DeviceChanges>().device;
     return Padding(
       padding: const EdgeInsets.all(kPadding),
       child: ListView(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (device.menuDisplayed) menuWarning(context),
-              _powerRow(device),
-              const SizedBox(height: 10),
-              _volumeRow(device),
-              const SizedBox(height: 10),
-              _inputRow(device),
-              const SizedBox(height: 20),
-              _inputSelection(context, device),
-            ],
-          ),
+          if (device.menuDisplayed) menuWarning(context),
+          const _PowerRow(),
+          const SizedBox(height: 10),
+          const _VolumeRow(),
+          const SizedBox(height: 10),
+          const _InputRow(),
+          const SizedBox(height: 20),
+          const _InputSelection(),
         ],
       ),
     );
