@@ -99,16 +99,14 @@ class MultiDeviceDiscover {
     _pinger = Timer.periodic(const Duration(seconds: 5), (_) => _ping());
     await for (final event in _socket!) {
       switch (event) {
-        case RawSocketEvent.write:
-          break;
         case RawSocketEvent.read:
           final datagram = _socket!.receive();
           final data = String.fromCharCodes(datagram!.data);
           _log.info('received: $data');
           final device = parseTransponder(data, datagram.address);
           yield device;
+        case RawSocketEvent.write:
         case RawSocketEvent.closed:
-          break;
         case RawSocketEvent.readClosed:
           break;
         default:
@@ -680,13 +678,10 @@ class Device {
           power = _valueAttribute(element.attributes).toLowerCase() == 'on'
               ? true
               : false;
-          break;
         case 'source':
           source = _valueAttribute(element.attributes);
-          break;
         case 'mode':
           mode = _valueAttribute(element.attributes);
-          break;
         case 'volume':
           try {
             final reportedVolume = _valueAttribute(element.attributes)
@@ -704,60 +699,42 @@ class Device {
             // If parsing fails, that could mean the device is in standby.
             _log.severe('Unable to parse message: $e');
           }
-          break;
         case 'loudness':
           loudness = _valueAttribute(element.attributes).toLowerCase() == 'on'
               ? true
               : false;
-          break;
         case 'audio_input':
           audioInput = _valueAttribute(element.attributes);
-          break;
         case 'audio_bitstream':
           audioBitstream = _valueAttribute(element.attributes);
-          break;
         case 'audio_bits':
           audioBits = _valueAttribute(element.attributes);
-          break;
         case 'video_input':
           videoInput = _valueAttribute(element.attributes);
-          break;
         case 'video_format':
           videoFormat = _valueAttribute(element.attributes);
-          break;
         case 'video_space':
           videoSpace = _valueAttribute(element.attributes);
-          break;
         case 'dim':
           dim = int.parse(_valueAttribute(element.attributes));
-          break;
         case 'speaker_preset':
           speakerPreset = _valueAttribute(element.attributes);
-          break;
         case 'center':
           centerTrim = _getSpeakerTrim(element);
-          break;
         case 'subwoofer':
           subwooferTrim = _getSpeakerTrim(element);
-          break;
         case 'surround':
           surroundTrim = _getSpeakerTrim(element);
-          break;
         case 'back':
           backTrim = _getSpeakerTrim(element);
-          break;
         case 'width':
           widthTrim = _getSpeakerTrim(element);
-          break;
         case 'height':
           heightTrim = _getSpeakerTrim(element);
-          break;
         case 'treble':
           trebleTrim = _getDoubleAttribute(_valueAttribute(element.attributes));
-          break;
         case 'bass':
           bassTrim = _getDoubleAttribute(_valueAttribute(element.attributes));
-          break;
         // "mode_*" fields indicate whether these modes are selectable on the
         // device via the "visible" atttribute.
         case 'mode_ref_stereo' ||
@@ -771,13 +748,10 @@ class Device {
               'mode_auto' ||
               'mode_surround':
           visibility[field] = _visibleAttribute(element.attributes);
-          break;
         case 'selected_mode':
           selectedMode = _valueAttribute(element.attributes);
-          break;
         case 'selected_movie_music':
           selectedMovieMusic = _valueAttribute(element.attributes);
-          break;
         case 'zone2_power':
           final value = _valueAttribute(element.attributes);
           if (value == 'On') {
@@ -785,7 +759,6 @@ class Device {
           } else {
             zone2Power = false;
           }
-          break;
         case 'zone2_volume':
           try {
             final reportedVolume = _valueAttribute(element.attributes);
@@ -799,10 +772,8 @@ class Device {
             // If parsing fails, that could mean the device is in standby.
             _log.severe('Unable to parse message: $e');
           }
-          break;
         case 'zone2_input':
           zone2Input = _valueAttribute(element.attributes);
-          break;
         case 'tuner_band':
           final band = _valueAttribute(element.attributes).toLowerCase();
           if (band == 'am') {
@@ -812,19 +783,14 @@ class Device {
           } else {
             _log.severe('Unrecognized tuner band: $band');
           }
-          break;
         case 'tuner_channel':
           tunerChannel = _valueAttribute(element.attributes);
-          break;
         case 'tuner_signal':
           tunerSignal = _valueAttribute(element.attributes);
-          break;
         case 'tuner_program':
           tunerProgram = _valueAttribute(element.attributes);
-          break;
         case 'tuner_RDS':
           tunerRds = _valueAttribute(element.attributes);
-          break;
         case 'input_1' ||
               'input_2' ||
               'input_3' ||
@@ -835,14 +801,12 @@ class Device {
               'input_8':
           names[field] = _valueAttribute(element.attributes);
           visibility[field] = _visibleAttribute(element.attributes);
-          break;
         case 'menu':
           if (_valueAttribute(element.attributes).toLowerCase() == 'on') {
             menuDisplayed = true;
           } else {
             menuDisplayed = false;
           }
-          break;
         case 'menu_update':
           // There's no data in these tags that we need. Menu contents come from
           // MenuNotify messages.
@@ -854,7 +818,6 @@ class Device {
           break;
         default:
           _log.severe('Could not parse ${element.toXmlString()}');
-          break;
       }
     }
   }
@@ -1266,7 +1229,6 @@ class FakeDevice extends Device {
             'height',
             'width',
           ]);
-          break;
         case 'power_off':
           power = false;
           visibility['center'] = false;
@@ -1284,11 +1246,9 @@ class FakeDevice extends Device {
             'height',
             'width',
           ]);
-          break;
         case 'mode':
           mode = _getValue(element);
           updatedFields.add(field);
-          break;
         case 'volume':
           try {
             final delta = double.parse(_getValue(element));
@@ -1299,19 +1259,15 @@ class FakeDevice extends Device {
             _log.severe(
                 'Unable to parse volume delta: ${element.toXmlString()}');
           }
-          break;
         case 'loudness':
           _toggleLoudness();
           updatedFields.add(field);
-          break;
         case 'audio_input':
           audioInput = _getValue(element);
           updatedFields.add(field);
-          break;
         case 'video_input':
           videoInput = _getValue(element);
           updatedFields.add(field);
-          break;
         case 'mute':
           if (muted) {
             muted = false;
@@ -1328,174 +1284,115 @@ class FakeDevice extends Device {
           } else {
             dim += 20;
           }
-          break;
         case 'hdmi1':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi2':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi3':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi4':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi5':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi6':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi7':
-          _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'hdmi8':
           _handleHdmiControlRequest(field, updatedFields);
-          break;
         case 'coax1':
-          _handleCoaxControlRequest(field, updatedFields);
-          break;
         case 'coax2':
-          _handleCoaxControlRequest(field, updatedFields);
-          break;
         case 'coax3':
-          _handleCoaxControlRequest(field, updatedFields);
-          break;
         case 'coax4':
-          _handleCoaxControlRequest(field, updatedFields);
-          break;
         case 'coax5':
           _handleCoaxControlRequest(field, updatedFields);
         case 'optical1':
-          _handleOpticalControlRequest(field, updatedFields);
-          break;
         case 'optical2':
-          _handleOpticalControlRequest(field, updatedFields);
-          break;
         case 'optical3':
-          _handleOpticalControlRequest(field, updatedFields);
-          break;
         case 'optical4':
           _handleOpticalControlRequest(field, updatedFields);
-          break;
         case 'ARC':
           audioInput = 'HDMI ARC';
           source = audioInput;
           updatedFields.addAll(['audio_input', 'source']);
-          break;
         case 'usb_stream':
           audioInput = 'USB Stream';
           source = audioInput;
           updatedFields.addAll(['audio_input', 'source']);
-          break;
         case 'tuner':
           audioInput = 'Tuner';
           source = audioInput;
           updatedFields.addAll(['audio_input', 'source']);
-          break;
         case 'analog1':
-          _handleAnalogControlRequest(field, updatedFields);
-          break;
         case 'analog2':
-          _handleAnalogControlRequest(field, updatedFields);
-          break;
         case 'analog3':
-          _handleAnalogControlRequest(field, updatedFields);
-          break;
         case 'analog5':
           _handleAnalogControlRequest(field, updatedFields);
-          break;
         case 'front_in':
           audioInput = 'Front';
           source = audioInput;
           updatedFields.addAll(['audio_input', 'source']);
-          break;
         case 'source_1':
           audioInput = 'Balanced In';
           videoInput = 'HDMI 1';
           source = names['input_1']!;
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_2':
           audioInput = 'Analog 1';
           source = names['input_2']!;
           updatedFields.addAll(['audio_input', 'source']);
-          break;
         case 'source_3':
           audioInput = 'HDMI 3';
           videoInput = 'HDMI 3';
           source = 'HDMI 3';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_4':
           audioInput = 'HDMI 4';
           videoInput = 'HDMI 4';
           source = 'HDMI 4';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_5':
           audioInput = 'HDMI 5';
           videoInput = 'HDMI 5';
           source = 'HDMI 5';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_6':
           audioInput = 'HDMI 6';
           videoInput = 'HDMI 6';
           source = 'HDMI 6';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_7':
           audioInput = 'HDMI 7';
           videoInput = 'HDMI 7';
           source = 'HDMI 7';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'source_8':
           audioInput = 'HDMI 8';
           videoInput = 'HDMI 8';
           source = 'HDMI 8';
           updatedFields.addAll(['audio_input', 'video_input', 'source']);
-          break;
         case 'auto':
           // Dolby Surround is a reasonable fake since it's usually what's
           // chosen if the source is 2 channel.
           mode = 'Dolby Surround';
           updatedFields.add('mode');
-          break;
         case 'stereo':
           mode = 'Stereo';
           updatedFields.add('mode');
-          break;
         case 'direct':
           mode = 'Direct';
           updatedFields.add('mode');
-          break;
         case 'reference_stereo':
           mode = 'Reference Stereo';
           updatedFields.add('mode');
-          break;
         case 'dolby':
           mode = 'Dolby Surround';
           updatedFields.add('mode');
-          break;
         case 'dts':
           mode = 'dts Neural:X';
           updatedFields.add('mode');
-          break;
         case 'all_stereo':
           mode = 'All Stereo';
           updatedFields.add('mode');
-          break;
         case 'preset1':
           speakerPreset = 'Preset 1';
           updatedFields.add('speaker_preset');
-          break;
         case 'preset2':
           speakerPreset = 'Preset 2';
           updatedFields.add('speaker_preset');
-          break;
         case 'center_trim_set':
           final rawTrim = double.parse(_getValue(element));
           final sanitizedTrim = _sanitizeTrimValue(rawTrim);
@@ -1503,65 +1400,46 @@ class FakeDevice extends Device {
           // device.
           centerTrim = sanitizedTrim / 2;
           updatedFields.add('center');
-          break;
         case 'subwoofer_trim_set':
           final rawTrim = double.parse(_getValue(element));
           final sanitizedTrim = _sanitizeTrimValue(rawTrim);
           subwooferTrim = sanitizedTrim / 2;
           updatedFields.add('subwoofer');
-          break;
         case 'surround_trim_set':
           final rawTrim = double.parse(_getValue(element));
           final sanitizedTrim = _sanitizeTrimValue(rawTrim);
           surroundTrim = sanitizedTrim / 2;
           updatedFields.add('surround');
-          break;
         case 'back_trim_set':
           final rawTrim = double.parse(_getValue(element));
           final sanitizedTrim = _sanitizeTrimValue(rawTrim);
           backTrim = sanitizedTrim / 2;
           updatedFields.add('back');
-          break;
         case 'treble_up':
           trebleTrim += 0.5;
           updatedFields.add('treble');
-          break;
         case 'treble_down':
           trebleTrim -= 0.5;
           updatedFields.add('treble');
-          break;
         case 'bass_up':
           bassTrim += 0.5;
           updatedFields.add('bass');
-          break;
         case 'bass_down':
           bassTrim -= 0.5;
           updatedFields.add('bass');
-          break;
         case 'menu':
           menuDisplayed = menuDisplayed ? false : true;
           updatedFields.add('menu');
           if (menuDisplayed) _notifyMenuSubscribers();
-          break;
         case 'up':
-          _notifyMenuSubscribers();
-          break;
         case 'down':
-          _notifyMenuSubscribers();
-          break;
         case 'left':
-          _notifyMenuSubscribers();
-          break;
         case 'right':
-          _notifyMenuSubscribers();
-          break;
         case 'enter':
           _notifyMenuSubscribers();
-          break;
         case 'zone2_power':
           zone2Power = zone2Power ? false : true;
           updatedFields.add('zone2_power');
-          break;
         case 'zone2_volume':
           try {
             final delta = double.parse(_getValue(element));
@@ -1572,7 +1450,6 @@ class FakeDevice extends Device {
             _log.severe(
                 'Unable to parse zone 2 volume delta: ${element.toXmlString()}');
           }
-          break;
         case 'zone2_mute':
           zone2Muted = zone2Muted ? false : true;
           // Emotiva uses the volume field to indicate whether the device is
@@ -1581,75 +1458,57 @@ class FakeDevice extends Device {
         case 'zone2_analog1':
           zone2Input = 'Analog 1';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_analog2':
           zone2Input = 'Analog 2';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_analog3':
           zone2Input = 'Analog 3';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_analog4':
           zone2Input = 'Analog 4';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_analog5':
           zone2Input = 'Balanced In';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_front_in':
           zone2Input = 'Front';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_follow_main':
           zone2Input = audioInput;
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_coax1':
           zone2Input = 'Coax 1';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_coax2':
           zone2Input = 'Coax 2';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_coax3':
           zone2Input = 'Coax 3';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_coax4':
           zone2Input = 'Coax 4';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_coax5':
           zone2Input = 'AES/EBU';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_optical1':
           zone2Input = 'Optical 1';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_optical2':
           zone2Input = 'Optical 2';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_optical3':
           zone2Input = 'Optical 3';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_optical4':
           zone2Input = 'Optical 4';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_usb_stream':
           zone2Input = 'USB Stream';
           updatedFields.add('zone2_input');
-          break;
         case 'zone2_tuner':
           zone2Input = 'Tuner';
           updatedFields.add('zone2_input');
-          break;
         case 'zone1_band':
           if (tunerBand == TunerBand.am) {
             tunerBand = TunerBand.fm;
@@ -1671,10 +1530,8 @@ class FakeDevice extends Device {
             'tuner_RDS',
             'tuner_signal'
           ]);
-          break;
         default:
           _log.warning('FakeDevice does not support: $field');
-          break;
       }
     }
     _notifySubscribers(updatedFields);
@@ -1905,16 +1762,12 @@ class FakeDevice extends Device {
     switch (requestType) {
       case 'emotivaControl':
         _parseControlRequest(root.childElements);
-        break;
       case 'emotivaUpdate':
         _parseUpdateRequest(fields);
-        break;
       case 'emotivaSubscription':
         _parseSubscriptionRequest(fields);
-        break;
       case 'emotivaUnsubscribe':
         _parseUnsubscribeRequest(fields);
-        break;
       default:
         throw 'Unknown request type $requestType';
     }
@@ -2026,27 +1879,20 @@ Column _parseMenuNotifyColumn(XmlElement element) {
         } catch (e) {
           _log.severe('Unable to parse highlight as bool: ${a.toXmlString()}');
         }
-        break;
       case 'arrow':
         switch (value.toLowerCase()) {
           case 'no':
             column.arrow = Arrow.no;
-            break;
           case 'up':
             column.arrow = Arrow.up;
-            break;
           case 'down':
             column.arrow = Arrow.down;
-            break;
           case 'right':
             column.arrow = Arrow.right;
-            break;
           case 'left':
             column.arrow = Arrow.left;
-            break;
           default:
             _log.severe('Unexpected value for "arrow": $value');
-            break;
         }
       case 'fixedWidth':
         try {
@@ -2054,40 +1900,31 @@ Column _parseMenuNotifyColumn(XmlElement element) {
         } catch (e) {
           _log.severe('Unable to parse fixedWidth as bool: ${a.toXmlString()}');
         }
-        break;
       case 'offset':
         try {
           column.offset = int.parse(value);
         } catch (e) {
           _log.severe('Unable to parse offset as int: ${a.toXmlString()}');
         }
-        break;
       case 'checkbox':
         switch (value) {
           case 'on':
             column.checkbox = true;
-            break;
           case 'off':
             column.checkbox = false;
-            break;
           default:
             _log.severe('Unable to parse checkbox as bool: ${a.toXmlString()}');
-            break;
         }
-        break;
       case 'value':
         column.value = value;
-        break;
       case 'number':
         try {
           column.number = int.parse(value);
         } catch (e) {
           _log.severe('Unable to parse number as int: ${a.toXmlString()}');
         }
-        break;
       default:
         _log.severe('Unexpected attribute name in menu notify message: $name');
-        break;
     }
   }
   return column;
@@ -2105,12 +1942,10 @@ int arrowPosition(Menu menu, Arrow arrow) {
       switch (arrow) {
         case Arrow.up || Arrow.down:
           if (column.arrow == arrow) return column.number;
-          break;
         case Arrow.left || Arrow.right:
           if (column.arrow == arrow) return row.number;
-          break;
-        default:
-          break;
+        case Arrow.no:
+          continue;
       }
     }
   }
