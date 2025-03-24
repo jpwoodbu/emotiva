@@ -47,10 +47,8 @@ Future<T> waitAtLeast<T>(
 }
 
 bool isApple(BuildContext context) {
-  switch (Theme.of(context).platform) {
-    case TargetPlatform.iOS || TargetPlatform.macOS:
-      return true;
-    default:
-      return false;
-  }
+  return switch (Theme.of(context).platform) {
+   TargetPlatform.iOS || TargetPlatform.macOS => true,
+   _ => false,
+  };
 }
