@@ -221,7 +221,7 @@ class InfoPage extends StatelessWidget {
     final device = context.watch<DeviceChanges>().device;
     return RefreshIndicator(
       semanticsLabel: 'Info page',
-      onRefresh: () => addHaptic(device.updateAll),
+      onRefresh: () async => addHaptic(device.updateAll),
       child: Padding(
         padding: const EdgeInsets.all(kPadding),
         child: ListView(
