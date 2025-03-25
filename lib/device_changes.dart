@@ -9,35 +9,29 @@ class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
 
   DeviceChanges(this.device) {
-    _handleControlPackets();
+    device.controlStream().listen(_handleControlPacket);
     _log.info('handling control packets');
-    _handleNotifyPackets();
+    device.notifyStream().listen(_handleNotifyPacket);
     _log.info('handling notify packets');
-    _handleMenuNotifyPackets();
+    device.menuNotifyStream().listen(_handleMenuNotifyPacket);
     _log.info('handling menu notify packets');
   }
 
-  Future<void> _handleControlPackets() async {
-    await for (final packet in device.controlStream()) {
-      _log.fine('packet arrived on control port');
-      device.parsePacket(packet);
-      notifyListeners();
-    }
+  void _handleControlPacket(String packet) {
+    _log.fine('packet arrived on control port');
+    device.parsePacket(packet);
+    notifyListeners();
   }
 
-  Future<void> _handleNotifyPackets() async {
-    await for (final packet in device.notifyStream()) {
-      _log.fine('packet arrived on notify port');
-      device.parsePacket(packet);
-      notifyListeners();
-    }
+  void _handleNotifyPacket(String packet) {
+    _log.fine('packet arrived on notify port');
+    device.parsePacket(packet);
+    notifyListeners();
   }
 
-  Future<void> _handleMenuNotifyPackets() async {
-    await for (final packet in device.menuNotifyStream()) {
-      _log.fine('packet arrived on menu notify port');
-      device.parsePacket(packet);
-      notifyListeners();
-    }
+  void _handleMenuNotifyPacket(String packet) {
+    _log.fine('packet arrived on menu notify port');
+    device.parsePacket(packet);
+    notifyListeners();
   }
 }
