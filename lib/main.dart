@@ -23,6 +23,7 @@ import 'package:emotiva_remote/widgets/menu_page.dart';
 import 'package:emotiva_remote/widgets/tuner_page.dart';
 import 'package:emotiva_remote/widgets/volume_controls.dart';
 import 'package:emotiva_remote/widgets/zone2_page.dart';
+import 'package:emotiva_remote/widgets/connection_help.dart';
 
 final _log = Logger('main');
 const String kSettingMultiDevice = 'multiDeviceEnabled';
@@ -421,6 +422,17 @@ class DiscoveryError extends StatelessWidget {
                   },
                   child: const Text('Demo mode'),
                 ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ConnectionHelp()),
+                    );
+                  },
+                  child: const Text('Troubleshooting tips'),
+                ),
               ],
             ),
           ),
@@ -552,6 +564,16 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
       builder: (context, _) => SafeArea(
         child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConnectionHelp(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.help)),
           body: ListView(
             padding: const EdgeInsets.all(25.0),
             children: <Widget>[
