@@ -236,7 +236,7 @@ class _MainViewState extends State<MainView> {
                   ),
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const Help()),
+                    MaterialPageRoute(builder: (context) => const Help()),
                   ),
                 ),
                 actions: [
@@ -271,7 +271,8 @@ class _MainViewState extends State<MainView> {
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const KnownIssues()),
+                            builder: (context) => const KnownIssues(),
+                          ),
                         ),
                       ),
                       MenuItemButton(
@@ -404,7 +405,8 @@ class DiscoveryError extends StatelessWidget {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const Discovery()),
+                        builder: (context) => const Discovery(),
+                      ),
                       (Route<dynamic> route) => false,
                     );
                   },
@@ -416,7 +418,8 @@ class DiscoveryError extends StatelessWidget {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const Discovery(useFake: true)),
+                        builder: (context) => const Discovery(useFake: true),
+                      ),
                       (Route<dynamic> route) => false,
                     );
                   },
@@ -428,7 +431,8 @@ class DiscoveryError extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ConnectionHelp()),
+                        builder: (context) => const ConnectionHelp(),
+                      ),
                     );
                   },
                   child: const Text('Troubleshooting tips'),
@@ -588,8 +592,9 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    const Discovery(useFake: true)),
+                              builder: (context) =>
+                                  const Discovery(useFake: true),
+                            ),
                             (Route<dynamic> route) => false,
                           );
                         },
@@ -636,7 +641,8 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-          builder: (context) => Discovery(providedDevice: device)),
+        builder: (context) => Discovery(providedDevice: device),
+      ),
       (Route<dynamic> route) => false,
     );
   }
