@@ -26,7 +26,7 @@ import 'package:emotiva_remote/widgets/zone2_page.dart';
 import 'package:emotiva_remote/widgets/connection_help.dart';
 
 final _log = Logger('main');
-const String kSettingMultiDevice = 'multiDeviceEnabled';
+const String settingMultiDevice = 'multiDeviceEnabled';
 
 Future<void> main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
@@ -116,7 +116,7 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
               return const Text('Error fetching settings.');
             }
             final p = snapshot.data!;
-            final multiDeviceEnable = p.getBool(kSettingMultiDevice) ?? false;
+            final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
             return multiDeviceEnable
                 ? const MultiDeviceDiscovery()
                 : const Discovery();
@@ -160,15 +160,15 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
               return const Text('Error fetching settings.');
             } else {
               final p = snapshot.data!;
-              final currentSetting = p.getBool(kSettingMultiDevice) ?? false;
+              final currentSetting = p.getBool(settingMultiDevice) ?? false;
               return TextButton.icon(
                 icon: currentSetting
                     ? const Icon(Icons.check_box)
                     : const Icon(Icons.check_box_outline_blank),
                 onPressed: () async {
-                  await p.setBool(kSettingMultiDevice, !currentSetting);
+                  await p.setBool(settingMultiDevice, !currentSetting);
                   _log.fine(
-                      'multi-device mode -> ${p.getBool(kSettingMultiDevice)}');
+                      'multi-device mode -> ${p.getBool(settingMultiDevice)}');
                   setState(() {});
                 },
                 label: const Text('Multi-device mode'),
@@ -394,7 +394,7 @@ class DiscoveryError extends StatelessWidget {
       child: Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(kPadding),
+            padding: const EdgeInsets.all(padding),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

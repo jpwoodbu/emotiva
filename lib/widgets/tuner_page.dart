@@ -276,7 +276,7 @@ class TunerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Padding(
-      padding: const EdgeInsets.all(kPadding),
+      padding: const EdgeInsets.all(padding),
       child: ListView(
         children: [
           Column(

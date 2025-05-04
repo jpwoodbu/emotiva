@@ -22,7 +22,7 @@ class InformationPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(title: Text(title)),
         body: Padding(
-          padding: const EdgeInsets.all(kPadding),
+          padding: const EdgeInsets.all(padding),
           child: ListView.separated(
             itemBuilder: (context, index) =>
                 _Item(title: sections[index].title, body: sections[index].body),

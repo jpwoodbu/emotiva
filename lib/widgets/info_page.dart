@@ -204,7 +204,7 @@ class InfoPage extends StatelessWidget {
       semanticsLabel: 'Info page',
       onRefresh: () async => addHaptic(device.updateAll),
       child: Padding(
-        padding: const EdgeInsets.all(kPadding),
+        padding: const EdgeInsets.all(padding),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [

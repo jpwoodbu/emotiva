@@ -10,16 +10,16 @@ import 'package:xml/xpath.dart';
 import 'package:emotiva_remote/socket_controller.dart';
 
 final _log = Logger('Emotiva');
-const int _kPingPort = 7000;
-const int _kTransponderPort = 7001;
-const String _kBroadcastAddress = '255.255.255.255';
+const int _pingPort = 7000;
+const int _transponderPort = 7001;
+const String _broadcastAddress = '255.255.255.255';
 // The highest protocol version this library supports.
-const String _kProtocolVersion = '3.0';
+const String _protocolVersion = '3.0';
 
 String _pingRequest() {
   final builder = XmlBuilder()
     ..processing('xml', 'version="1.0"')
-    ..element('emotivaPing', attributes: {'protocol': _kProtocolVersion});
+    ..element('emotivaPing', attributes: {'protocol': _protocolVersion});
   return builder.buildDocument().toXmlString();
 }
 
@@ -30,7 +30,7 @@ String _pingRequest() {
 /// socket waits for [timeoutSec] before giving up and throwing an exception.
 Future<Device> discover(int timeoutSec) async {
   final socket =
-      await RawDatagramSocket.bind(InternetAddress.anyIPv4, _kTransponderPort);
+      await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
   socket.broadcastEnabled = true;
   final stream = socket.timeout(Duration(seconds: timeoutSec));
   final ping = _pingRequest();
@@ -38,7 +38,7 @@ Future<Device> discover(int timeoutSec) async {
     switch (event) {
       case RawSocketEvent.write:
         final bytesSent = socket.send(
-            ping.codeUnits, InternetAddress(_kBroadcastAddress), _kPingPort);
+            ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
@@ -83,7 +83,7 @@ class MultiDeviceDiscover {
   void _ping() {
     final ping = _pingRequest();
     final bytesSent = _socket!
-        .send(ping.codeUnits, InternetAddress(_kBroadcastAddress), _kPingPort);
+        .send(ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
     if (bytesSent == 0) {
       _log.severe('Unable to send broadcast ping.');
     } else {
@@ -93,7 +93,7 @@ class MultiDeviceDiscover {
 
   Stream<Device> stream() async* {
     _socket = await RawDatagramSocket.bind(
-        InternetAddress.anyIPv4, _kTransponderPort);
+        InternetAddress.anyIPv4, _transponderPort);
     _socket!.broadcastEnabled = true;
     _ping();
     _pinger = Timer.periodic(const Duration(seconds: 5), (_) => _ping());
@@ -357,7 +357,7 @@ class Device {
   /// The protocol version to request after device discovery.
   String __protocolVersion() {
     // We currently only support minor version 0 of major version 3.
-    if (controlVersion.startsWith('3.')) return _kProtocolVersion;
+    if (controlVersion.startsWith('3.')) return _protocolVersion;
     // Fall back to 2.0 otherwise.
     return '2.0';
   }

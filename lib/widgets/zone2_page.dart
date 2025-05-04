@@ -2,11 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-import 'inputs_page.dart';
-
 import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
+import 'package:emotiva_remote/widgets/inputs_page.dart';
 import 'package:emotiva_remote/widgets/volume_row.dart';
 
 /// Displays an adaptive modal to select an input which doesn't fit into another
@@ -35,7 +34,7 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) {
       scrollControlDisabledMaxHeightRatio: 1.0,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(kPadding),
+          padding: const EdgeInsets.all(padding),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +196,7 @@ class Zone2Page extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Padding(
-      padding: const EdgeInsets.all(kPadding),
+      padding: const EdgeInsets.all(padding),
       child: ListView(
         children: [
           if (device.menuDisplayed) menuWarning(context),

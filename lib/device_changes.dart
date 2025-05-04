@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
 
-import 'emotiva.dart' as emotiva;
+import 'package:emotiva_remote/emotiva.dart' as emotiva;
 
 final _log = Logger('DeviceChanges');
 
