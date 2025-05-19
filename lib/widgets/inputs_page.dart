@@ -11,131 +11,8 @@ const double _tableCellPadding = 8.0;
 
 /// This is a workaround for not getting notify messages when changing inputs
 /// for zone 2.
-void _delayedUpdateAll(emotiva.Device device) {
+void delayedUpdateAll(emotiva.Device device) {
   Future.delayed(const Duration(seconds: 2), device.updateAll);
-}
-
-void _addHapticAndPop(BuildContext context, Function function) {
-  addHaptic(function);
-  Navigator.pop(context);
-}
-
-void _setSource(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.setSource(input));
-}
-
-void _setHdmi(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.setHdmi(input));
-}
-
-void _setCoax(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.setCoax(input));
-}
-
-void _setCoaxZone2(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.zone2SetCoax(input));
-  _delayedUpdateAll(device);
-}
-
-void _setAesEbu(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setAesEbu());
-}
-
-void _setAesEbuZone2(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.zone2SetAesEbu());
-  _delayedUpdateAll(device);
-}
-
-void _setOptical(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.setOptical(input));
-}
-
-void _setOpticalZone2(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.zone2SetOptical(input));
-  _delayedUpdateAll(device);
-}
-
-void _setAnalog(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.setAnalog(input));
-}
-
-void _setAnalogZone2(BuildContext context, emotiva.Device device, int input) {
-  _addHapticAndPop(context, () => device.zone2SetAnalog(input));
-  _delayedUpdateAll(device);
-}
-
-void _setBalancedInput(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setBalancedInput());
-}
-
-void _setBalancedInputZone2(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.zone2SetBalancedInput());
-  _delayedUpdateAll(device);
-}
-
-void _setArc(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setArc());
-}
-
-void _setUsb(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setUsb());
-}
-
-/// This is only used for zone 2 controls, but it makes use of functions in this
-/// library.
-void setUsbZone2(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.zone2SetUsb());
-  _delayedUpdateAll(device);
-}
-
-void _setTuner(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setTuner());
-}
-
-void _setFront(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.setFront());
-}
-
-/// This is only used for zone 2 controls, but it makes use of functions in this
-/// library.
-void setFrontZone2(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.zone2SetFront());
-  _delayedUpdateAll(device);
-}
-
-/// This is only used for zone 2 controls, but it makes use of functions in this
-/// library.
-void setFollowMain(emotiva.Device device) {
-  addHaptic(device.zone2FollowMain);
-  _delayedUpdateAll(device);
-}
-
-void _setModeAuto(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeAuto());
-}
-
-void _setModeStereo(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeStereo());
-}
-
-void _setModeDirect(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeDirect());
-}
-
-void _setModeReferenceStereo(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeReferenceStereo());
-}
-
-void _setModeDolby(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeDolby());
-}
-
-void _setModeDts(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeDts());
-}
-
-void _setModeAllStereo(BuildContext context, emotiva.Device device) {
-  _addHapticAndPop(context, () => device.modeAllStereo());
 }
 
 void _bumpCenterTrim(double step, emotiva.Device device) {
@@ -168,6 +45,34 @@ void _bumpWidthTrim(double step, emotiva.Device device) {
   addHaptic(() => device.trimWidth(trim));
 }
 
+Future<T?> showCustomBottomSheet<T>(
+    {required BuildContext context,
+    required List<Widget> children,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center}) {
+  return showModalBottomSheet(
+    context: context,
+    scrollControlDisabledMaxHeightRatio: 1.0, // allows a full height sheet
+    builder: (BuildContext context) {
+      // SafeArea is needed because this widget doesn't inherit the SafeArea
+      // properties from the main app. And without SafeArea, it's been observed
+      // that the Android navigation buttons overlap some of the key parts of
+      // this sheet.
+      return SafeArea(
+        child: Padding(
+          // Bottom padding is not needed for a bottom sheet. And the bottom
+          // margin should be sufficiently handled by the SafeArea wrapper.
+          padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: crossAxisAlignment,
+            children: children,
+          ),
+        ),
+      );
+    },
+  );
+}
+
 List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
   List<Widget> widgets = [];
   for (var i = 1; i < 9; i++) {
@@ -177,18 +82,17 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
       name = 'Source $i';
     }
     if (visible) {
-      void onPressed() => _setSource(context, device, i);
       if (isApple(context)) {
         widgets.add(
           CupertinoActionSheetAction(
-            onPressed: onPressed,
+            onPressed: () => Navigator.pop<int>(context, i),
             child: Text(name),
           ),
         );
       } else {
         widgets.add(
           ElevatedButton.icon(
-            onPressed: onPressed,
+            onPressed: () => Navigator.pop<int>(context, i),
             icon: const Icon(Icons.person),
             label: Text(name),
           ),
@@ -200,398 +104,428 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
 }
 
 /// Displays an adaptive modal to select a source.
-void _sourceSelector(BuildContext context, emotiva.Device device) {
+void _sourceSelector(BuildContext context, emotiva.Device device) async {
+  int? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<int>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: _buildSourceList(context, device),
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<int>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _buildSourceList(context, device),
-          ),
-        );
-      },
+      children: _buildSourceList(context, device),
     );
+  }
+  if (selection != null) {
+    addHaptic(() => device.setSource(selection!));
   }
 }
 
 /// Displays an adaptive modal to select an HDMI input.
-void _hdmiSelector(BuildContext context, emotiva.Device device) {
+void _hdmiSelector(BuildContext context, emotiva.Device device) async {
+  int? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<int>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(8, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: () => _setHdmi(context, device, number),
+            onPressed: () => Navigator.pop<int>(context, number),
             child: Text('HDMI $number'),
           );
         }),
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<int>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(8, (index) {
-              final number = index + 1;
-              return ElevatedButton.icon(
-                onPressed: () => _setHdmi(context, device, number),
-                icon: const Icon(Icons.settings_input_hdmi),
-                label: Text('HDMI $number'),
-              );
-            }),
-          ),
+      children: List<Widget>.generate(8, (index) {
+        final number = index + 1;
+        return ElevatedButton.icon(
+          onPressed: () => Navigator.pop<int>(context, number),
+          icon: const Icon(Icons.settings_input_hdmi),
+          label: Text('HDMI $number'),
         );
-      },
+      }),
     );
+  }
+  if (selection != null) {
+    addHaptic(() => device.setHdmi(selection!));
   }
 }
 
 /// Displays an adaptive modal to select a coax input. Also used for Zone 2.
 void coaxSelector(BuildContext context, emotiva.Device device,
-    {bool zone2 = false}) {
+    {bool zone2 = false}) async {
+  int? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<int>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: zone2
-                ? () => _setCoaxZone2(context, device, number)
-                : () => _setCoax(context, device, number),
+            onPressed: () => Navigator.pop<int>(context, number),
             child: Text('Coax $number'),
           );
         }),
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<int>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(4, (index) {
-              final number = index + 1;
-              return ElevatedButton.icon(
-                  onPressed: zone2
-                      ? () => _setCoaxZone2(context, device, number)
-                      : () => _setCoax(context, device, number),
-                  icon: const Icon(Icons.settings_input_composite),
-                  label: Text('Coax $number'));
-            }),
-          ),
-        );
-      },
+      children: List<Widget>.generate(4, (index) {
+        final number = index + 1;
+        return ElevatedButton.icon(
+            onPressed: () => Navigator.pop<int>(context, number),
+            icon: const Icon(Icons.settings_input_composite),
+            label: Text('Coax $number'));
+      }),
     );
+  }
+  if (selection != null) {
+    if (zone2) {
+      addHaptic(() => device.zone2SetCoax(selection!));
+      delayedUpdateAll(device);
+    } else {
+      addHaptic(() => device.setCoax(selection!));
+    }
   }
 }
 
 /// Displays an adaptive modal to select an optical input. Also used for Zone 2.
 void opticalSelector(BuildContext context, emotiva.Device device,
-    {bool zone2 = false}) {
+    {bool zone2 = false}) async {
+  int? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<int>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: zone2
-                ? () => _setOpticalZone2(context, device, number)
-                : () => _setOptical(context, device, number),
+            onPressed: () => Navigator.pop<int>(context, number),
             child: Text('Optical $number'),
           );
         }),
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<int>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(4, (index) {
-              final number = index + 1;
-              return ElevatedButton.icon(
-                  onPressed: zone2
-                      ? () => _setOpticalZone2(context, device, number)
-                      : () => _setOptical(context, device, number),
-                  icon: const Icon(Icons.lightbulb),
-                  label: Text('Optical $number'));
-            }),
-          ),
-        );
-      },
+      children: List<Widget>.generate(4, (index) {
+        final number = index + 1;
+        return ElevatedButton.icon(
+            onPressed: () => Navigator.pop<int>(context, number),
+            icon: const Icon(Icons.lightbulb),
+            label: Text('Optical $number'));
+      }),
     );
+  }
+  if (selection != null) {
+    if (zone2) {
+      addHaptic(() => device.zone2SetOptical(selection!));
+      delayedUpdateAll(device);
+    } else {
+      addHaptic(() => device.setOptical(selection!));
+    }
   }
 }
 
+enum XlrSelection { aesebu, balanced }
+
 /// Displays an adaptive modal to select an XLR input. Also used for Zone 2.
 void xlrSelector(BuildContext context, emotiva.Device device,
-    {bool zone2 = false}) {
+    {bool zone2 = false}) async {
+  XlrSelection? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<XlrSelection>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <Widget>[
           CupertinoActionSheetAction(
-            onPressed: zone2
-                ? () => _setAesEbuZone2(context, device)
-                : () => _setAesEbu(context, device),
+            onPressed: () =>
+                Navigator.pop<XlrSelection>(context, XlrSelection.aesebu),
             child: const Text('AES/EBU'),
           ),
           CupertinoActionSheetAction(
-            onPressed: zone2
-                ? () => _setBalancedInputZone2(context, device)
-                : () => _setBalancedInput(context, device),
+            onPressed: () =>
+                Navigator.pop<XlrSelection>(context, XlrSelection.balanced),
             child: const Text('Balanced Input'),
           ),
         ],
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<XlrSelection>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ElevatedButton.icon(
-                  onPressed: zone2
-                      ? () => _setAesEbuZone2(context, device)
-                      : () => _setAesEbu(context, device),
-                  icon: const Icon(Icons.developer_board),
-                  label: const Text('AES/EBU')),
-              ElevatedButton.icon(
-                  onPressed: zone2
-                      ? () => _setBalancedInputZone2(context, device)
-                      : () => _setBalancedInput(context, device),
-                  icon: const Icon(Icons.album),
-                  label: const Text('Balanced Input')),
-            ],
-          ),
-        );
-      },
+      children: <Widget>[
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<XlrSelection>(context, XlrSelection.aesebu),
+            icon: const Icon(Icons.developer_board),
+            label: const Text('AES/EBU')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<XlrSelection>(context, XlrSelection.balanced),
+            icon: const Icon(Icons.album),
+            label: const Text('Balanced Input')),
+      ],
     );
+  }
+  switch (selection) {
+    case XlrSelection.aesebu:
+      if (zone2) {
+        addHaptic(() => device.zone2SetAesEbu());
+        delayedUpdateAll(device);
+      } else {
+        addHaptic(() => device.setAesEbu());
+      }
+    case XlrSelection.balanced:
+      if (zone2) {
+        addHaptic(() => device.zone2SetBalancedInput());
+        delayedUpdateAll(device);
+      } else {
+        addHaptic(() => device.setBalancedInput());
+      }
+    case null: // do nothing
   }
 }
 
 /// Displays an adaptive modal to select an analog input. Also used for Zone 2.
 void analogSelector(BuildContext context, emotiva.Device device,
-    {bool zone2 = false}) {
+    {bool zone2 = false}) async {
+  int? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<int>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(3, (index) {
           final number = index + 1;
           return CupertinoActionSheetAction(
-            onPressed: zone2
-                ? () => _setAnalogZone2(context, device, number)
-                : () => _setAnalog(context, device, number),
+            onPressed: () => Navigator.pop<int>(context, number),
             child: Text('Analog $number'),
           );
         }),
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<int>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(3, (index) {
-              final number = index + 1;
-              return ElevatedButton.icon(
-                onPressed: zone2
-                    ? () => _setAnalogZone2(context, device, number)
-                    : () => _setAnalog(context, device, number),
-                icon: const Icon(Icons.settings_input_component),
-                label: Text('Analog $number'),
-              );
-            }),
-          ),
+      children: List<Widget>.generate(3, (index) {
+        final number = index + 1;
+        return ElevatedButton.icon(
+          onPressed: () => Navigator.pop<int>(context, number),
+          icon: const Icon(Icons.settings_input_component),
+          label: Text('Analog $number'),
         );
-      },
+      }),
     );
+  }
+  if (selection != null) {
+    if (zone2) {
+      addHaptic(() => device.zone2SetAnalog(selection!));
+      delayedUpdateAll(device);
+    } else {
+      addHaptic(() => device.setAnalog(selection!));
+    }
   }
 }
 
+enum OtherSelection { arc, usb, tuner, front }
+
 /// Displays an adaptive modal to select an input which doesn't fall into any
 /// other category.
-void _otherInputsSelector(BuildContext context, emotiva.Device device) {
+void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
+  OtherSelection? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<OtherSelection>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <Widget>[
           CupertinoActionSheetAction(
-            onPressed: () => _setArc(context, device),
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.arc),
             child: const Text('ARC'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setUsb(context, device),
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.usb),
             child: const Text('USB'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setTuner(context, device),
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.tuner),
             child: const Text('Tuner'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setFront(context, device),
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.front),
             child: const Text('Front'),
           ),
         ],
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<OtherSelection>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ElevatedButton.icon(
-                  onPressed: () => _setArc(context, device),
-                  icon: const Icon(Icons.settings_input_hdmi),
-                  label: const Text('ARC')),
-              ElevatedButton.icon(
-                  onPressed: () => _setUsb(context, device),
-                  icon: const Icon(Icons.usb),
-                  label: const Text('USB')),
-              ElevatedButton.icon(
-                  onPressed: () => _setTuner(context, device),
-                  icon: const Icon(Icons.radio),
-                  label: const Text('Tuner')),
-              ElevatedButton.icon(
-                  onPressed: () => _setFront(context, device),
-                  icon: const Icon(Icons.smartphone),
-                  label: const Text('Front')),
-            ],
-          ),
-        );
-      },
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.arc),
+            icon: const Icon(Icons.settings_input_hdmi),
+            label: const Text('ARC')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.usb),
+            icon: const Icon(Icons.usb),
+            label: const Text('USB')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.tuner),
+            icon: const Icon(Icons.radio),
+            label: const Text('Tuner')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<OtherSelection>(context, OtherSelection.front),
+            icon: const Icon(Icons.smartphone),
+            label: const Text('Front')),
+      ],
     );
+  }
+  switch (selection) {
+    case OtherSelection.arc:
+      addHaptic(() => device.setArc());
+    case OtherSelection.front:
+      addHaptic(() => device.setFront());
+    case OtherSelection.tuner:
+      addHaptic(() => device.setTuner());
+    case OtherSelection.usb:
+      addHaptic(() => device.setUsb());
+    case null: // do nothing
   }
 }
 
+enum ModeSelection {
+  auto,
+  stereo,
+  direct,
+  referenceStereo,
+  dolby,
+  dts,
+  allStereo
+}
+
 /// Displays an adaptive modal to select a playback mode.
-void _modeSelector(BuildContext context, emotiva.Device device) {
+void _modeSelector(BuildContext context, emotiva.Device device) async {
+  ModeSelection? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<ModeSelection>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <Widget>[
           CupertinoActionSheetAction(
-            onPressed: () => _setModeAuto(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.auto),
             child: const Text('Auto'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeStereo(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.stereo),
             child: const Text('Stereo'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeDirect(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.direct),
             child: const Text('Direct'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeReferenceStereo(context, device),
+            onPressed: () => Navigator.pop<ModeSelection>(
+                context, ModeSelection.referenceStereo),
             child: const Text('Reference Stereo'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeDolby(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.dolby),
             child: const Text('Dolby'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeDts(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.dts),
             child: const Text('DTS'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => _setModeAllStereo(context, device),
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.allStereo),
             child: const Text('All Stereo'),
           ),
         ],
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<ModeSelection>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ElevatedButton.icon(
-                  onPressed: () => _setModeAuto(context, device),
-                  icon: const Icon(Icons.surround_sound),
-                  label: const Text('Auto')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeStereo(context, device),
-                  icon: const Icon(Icons.speaker_group),
-                  label: const Text('Stereo')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeDirect(context, device),
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Direct')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeReferenceStereo(context, device),
-                  icon: const Icon(Icons.hearing),
-                  label: const Text('Reference Stereo')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeDolby(context, device),
-                  icon: const Icon(Icons.surround_sound),
-                  label: const Text('Dolby')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeDts(context, device),
-                  icon: const Icon(Icons.surround_sound),
-                  label: const Text('DTS')),
-              ElevatedButton.icon(
-                  onPressed: () => _setModeAllStereo(context, device),
-                  icon: const Icon(Icons.hub),
-                  label: const Text('All Stereo')),
-            ],
-          ),
-        );
-      },
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.auto),
+            icon: const Icon(Icons.surround_sound),
+            label: const Text('Auto')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.stereo),
+            icon: const Icon(Icons.speaker_group),
+            label: const Text('Stereo')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.direct),
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Direct')),
+        ElevatedButton.icon(
+            onPressed: () => Navigator.pop<ModeSelection>(
+                context, ModeSelection.referenceStereo),
+            icon: const Icon(Icons.hearing),
+            label: const Text('Reference Stereo')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.dolby),
+            icon: const Icon(Icons.surround_sound),
+            label: const Text('Dolby')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.dts),
+            icon: const Icon(Icons.surround_sound),
+            label: const Text('DTS')),
+        ElevatedButton.icon(
+            onPressed: () =>
+                Navigator.pop<ModeSelection>(context, ModeSelection.allStereo),
+            icon: const Icon(Icons.hub),
+            label: const Text('All Stereo')),
+      ],
     );
+  }
+  switch (selection) {
+    case ModeSelection.allStereo:
+      addHaptic(() => device.modeAllStereo());
+    case ModeSelection.auto:
+      addHaptic(() => device.modeAuto());
+    case ModeSelection.direct:
+      addHaptic(() => device.modeDirect());
+    case ModeSelection.dolby:
+      addHaptic(() => device.modeDolby());
+    case ModeSelection.dts:
+      addHaptic(() => device.modeDts());
+    case ModeSelection.referenceStereo:
+      addHaptic(() => device.modeReferenceStereo());
+    case ModeSelection.stereo:
+      addHaptic(() => device.modeStereo());
+    case null: // do nothing
   }
 }
 

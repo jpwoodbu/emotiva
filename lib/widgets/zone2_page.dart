@@ -8,50 +8,57 @@ import 'package:emotiva_remote/util.dart';
 import 'package:emotiva_remote/widgets/inputs_page.dart';
 import 'package:emotiva_remote/widgets/volume_row.dart';
 
+enum Zone2OtherSelection { usb, front }
+
 /// Displays an adaptive modal to select an input which doesn't fit into another
 /// category. Note that this list of inputs is different from the "other" inputs
 /// list for the main zone.
-void _otherInputsSelector(BuildContext context, emotiva.Device device) {
+void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
+  Zone2OtherSelection? selection;
   if (isApple(context)) {
-    showCupertinoModalPopup(
+    selection = await showCupertinoModalPopup<Zone2OtherSelection>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <Widget>[
           CupertinoActionSheetAction(
-            onPressed: () => setUsbZone2(context, device),
+            onPressed: () => Navigator.pop<Zone2OtherSelection>(
+                context, Zone2OtherSelection.usb),
             child: const Text('USB'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () => setFrontZone2(context, device),
+            onPressed: () => Navigator.pop<Zone2OtherSelection>(
+                context, Zone2OtherSelection.front),
             child: const Text('Front'),
           ),
         ],
       ),
     );
   } else {
-    showModalBottomSheet(
+    selection = await showCustomBottomSheet<Zone2OtherSelection>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 1.0,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ElevatedButton.icon(
-                  onPressed: () => setUsbZone2(context, device),
-                  icon: const Icon(Icons.usb),
-                  label: const Text('USB')),
-              ElevatedButton.icon(
-                  onPressed: () => setFrontZone2(context, device),
-                  icon: const Icon(Icons.smartphone),
-                  label: const Text('Front')),
-            ],
-          ),
-        );
-      },
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ElevatedButton.icon(
+            onPressed: () => Navigator.pop<Zone2OtherSelection>(
+                context, Zone2OtherSelection.usb),
+            icon: const Icon(Icons.usb),
+            label: const Text('USB')),
+        ElevatedButton.icon(
+            onPressed: () => Navigator.pop<Zone2OtherSelection>(
+                context, Zone2OtherSelection.front),
+            icon: const Icon(Icons.smartphone),
+            label: const Text('Front')),
+      ],
     );
+  }
+  switch (selection) {
+    case Zone2OtherSelection.front:
+      addHaptic(() => device.zone2SetFront());
+      delayedUpdateAll(device);
+    case Zone2OtherSelection.usb:
+      addHaptic(() => device.zone2SetUsb());
+      delayedUpdateAll(device);
+    case null: // do nothing
   }
 }
 
@@ -121,71 +128,74 @@ class _InputSelection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
-  const double tableCellPadding = 8.0;
-  return Table(
-    children: [
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => opticalSelector(context, device, zone2: true),
-            icon: const Icon(Icons.lightbulb),
-            label: const Text('Optical'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+    const double tableCellPadding = 8.0;
+    return Table(
+      children: [
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => opticalSelector(context, device, zone2: true),
+              icon: const Icon(Icons.lightbulb),
+              label: const Text('Optical'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => coaxSelector(context, device, zone2: true),
-            icon: const Icon(Icons.settings_input_composite),
-            label: const Text('Coax'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => coaxSelector(context, device, zone2: true),
+              icon: const Icon(Icons.settings_input_composite),
+              label: const Text('Coax'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => analogSelector(context, device, zone2: true),
-            icon: const Icon(Icons.settings_input_component),
-            label: const Text('Analog'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => analogSelector(context, device, zone2: true),
+              icon: const Icon(Icons.settings_input_component),
+              label: const Text('Analog'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => xlrSelector(context, device, zone2: true),
-            icon: const Icon(Icons.donut_large),
-            label: const Text('XLR'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => xlrSelector(context, device, zone2: true),
+              icon: const Icon(Icons.donut_large),
+              label: const Text('XLR'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-      TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => _otherInputsSelector(context, device),
-            icon: const Icon(Icons.more),
-            label: const Text('Other'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+        ]),
+        TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () => _otherInputsSelector(context, device),
+              icon: const Icon(Icons.more),
+              label: const Text('Other'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(tableCellPadding),
-          child: ElevatedButton.icon(
-            onPressed: () => setFollowMain(device),
-            icon: const Icon(Icons.sync_alt),
-            label: const Text('Follow Main'),
-            style: const ButtonStyle(alignment: Alignment.centerLeft),
+          Padding(
+            padding: const EdgeInsets.all(tableCellPadding),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                addHaptic(device.zone2FollowMain);
+                delayedUpdateAll(device);
+              },
+              icon: const Icon(Icons.sync_alt),
+              label: const Text('Follow Main'),
+              style: const ButtonStyle(alignment: Alignment.centerLeft),
+            ),
           ),
-        ),
-      ]),
-    ],
-  );
+        ]),
+      ],
+    );
   }
 }
 
