@@ -77,7 +77,6 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const DiscoverySwitch(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
