@@ -1,7 +1,7 @@
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@pip//:requirements.bzl", "requirement")
-load("//bazel/python:defs.bzl", "py_interactive")
+load("@rules_python_interactive//python:defs.bzl", "py_interactive")
 
 compile_pip_requirements(
     name = "requirements",

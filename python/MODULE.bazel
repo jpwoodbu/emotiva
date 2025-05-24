@@ -2,8 +2,14 @@ module(
     name = "emotiva",
 )
 
-bazel_dep(name = "rules_python", version = "1.0.0")
-bazel_dep(name = "bazel_skylib", version = "1.7.1") 
+bazel_dep(name = "rules_python", version = "1.4.1")
+bazel_dep(name = "rules_python_interactive", version = "0.1.0")
+
+git_override(
+    module_name = "rules_python_interactive",
+    remote = "https://github.com/jpwoodbu/rules_python_interactive.git",
+    branch = "main",
+)
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 
