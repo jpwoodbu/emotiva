@@ -92,8 +92,8 @@ class MultiDeviceDiscover {
   }
 
   Stream<Device> stream() async* {
-    _socket = await RawDatagramSocket.bind(
-        InternetAddress.anyIPv4, _transponderPort);
+    _socket =
+        await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
     _socket!.broadcastEnabled = true;
     _ping();
     _pinger = Timer.periodic(const Duration(seconds: 5), (_) => _ping());
@@ -182,6 +182,15 @@ Device parseTransponder(String data, InternetAddress address) {
 }
 
 enum TunerBand { unknown, am, fm }
+
+/// Converts a [trim] value in dB into a value compatible with the Emotiva API.
+///
+/// The Emotiva API takes [trim] values as a double between -24 and 24
+/// representing 0.5dB steps between -12dB and +12dB.
+String _convertTrim(double trim) {
+  trim = trim * 2;
+  return trim.toString();
+}
 
 /// A model of an Emotiva device.
 class Device {
@@ -893,59 +902,47 @@ class Device {
 
   /// Adjusts the center speaker trim.
   ///
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimCenter(double trim) {
-    trim = trim * 2;
-    return control('center_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in dB.
+  void trimCenter(double trim) =>
+      control('center_trim_set', value: _convertTrim(trim));
 
   /// Adjusts the subwoofer trim.
   ///
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimSubwoofer(double trim) {
-    trim = trim * 2;
-    return control('subwoofer_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in dB.
+  void trimSubwoofer(double trim) =>
+      control('subwoofer_trim_set', value: _convertTrim(trim));
 
   /// Adjusts the trim for surround speakers.
   ///
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimSurround(double trim) {
-    trim = trim * 2;
-    return control('surround_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in dB.
+  void trimSurround(double trim) =>
+      control('surround_trim_set', value: _convertTrim(trim));
 
   /// Adjusts the trim for back (i.e. rear) speakers.
   ///
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimBack(double trim) {
-    trim = trim * 2;
-    return control('back_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in dB.
+  void trimBack(double trim) =>
+      control('back_trim_set', value: _convertTrim(trim));
 
   /// Adjusts the trim for height speakers.
   ///
   /// Only available in protocol version >= 3.0.
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimHeight(double trim) {
-    trim = trim * 2;
-    return control('height_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in db.
+  void trimHeight(double trim) =>
+      control('height_trim_set', value: _convertTrim(trim));
 
   /// Adjusts the trim for width speakers.
   ///
   /// Only available in protocol version >= 3.0.
-  /// [trim] is a value between -24 and 24 representing 0.5dB steps between
-  /// -12dB and +12dB.
-  void trimWidth(double trim) {
-    trim = trim * 2;
-    return control('width_trim_set', value: trim.toString());
-  }
+  /// [trim] is should be a value between -12.0 and 12.0 in 0.5 increments which
+  /// represent the volume setting for the channel in db.
+  void trimWidth(double trim) =>
+      control('width_trim_set', value: _convertTrim(trim));
 
   void trebleUp() => control('treble_up');
   void trebleDown() => control('treble_down');
