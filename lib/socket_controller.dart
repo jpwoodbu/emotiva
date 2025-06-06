@@ -6,22 +6,25 @@ import 'package:logging/logging.dart';
 final _log = Logger('SocketController');
 
 /// An intermediate for socket consumers to manage the socket lifecycle.
-/// 
+///
 /// When the socket is closed by the OS, which can easily happen on a mobile OS
 /// when the app is backgrounded, the socket is automatically recreated.
 /// The [stream] used by consumers of this class is not disrupted when the
 /// socket needs to be recreated.
-/// 
+///
 /// This class is meant for sockets which only receieve data. If you want to be
 /// able to send data, use [SendSocketController].
 class SocketController {
   /// The port on which to listen for inbound [Datagram]s.
   int port;
-  /// The address of the Emotiva device. [Datagram]s received from other addresses
-  /// will be discard.
+
+  /// The address of the Emotiva device. [Datagram]s received from other
+  /// addresses will be discard.
   InternetAddress address;
+
   /// Consumers should listen to this stream to read the received [Datagram]s.
   late Stream<Datagram> stream;
+
   /// The [StreamController] managing [stream]. It should be considered private,
   /// but it has been made public for testing.
   final controller = StreamController<Datagram>();
@@ -82,10 +85,10 @@ class SocketController {
 }
 
 /// An intermediate for socket users to manage the socket lifecycle.
-/// 
+///
 /// When the socket is closed by the OS, which can easily happen on a mobile OS
 /// when the app is backgrounded, the socket is automatically recreated.
-/// 
+///
 /// This class is meant for sockets which only send data. If you want to receive
 /// data, use [SocketController].
 class SendSocketController {
