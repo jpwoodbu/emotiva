@@ -63,12 +63,12 @@ class SocketController {
             final datagram = _socket!.receive();
             if (datagram == null) {
               _log.warning('$event on port $port with a null datagram');
-              break;
+              return;
             }
             // Drop packets not from the provided address.
             if (datagram.address != address) {
               _log.warning('Ignoring packet from ${datagram.address}');
-              break;
+              return;
             }
             controller.add(datagram);
           case RawSocketEvent.readClosed:
