@@ -77,6 +77,8 @@ class _ArrowText extends StatelessWidget {
         textStyle:
             const TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0));
     return Container(
+      // TODO(jpwoodbu) DRY the size with the icon height for the icon arrows.
+      height: 25.0,
       // TODO(jpwoodbu) The margin and padding in the _row() function is
       // different from what I'm using here and I am not certain why this config
       // was needed to get the proper alignment. Using a different character,
