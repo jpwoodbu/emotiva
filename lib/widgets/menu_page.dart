@@ -47,19 +47,61 @@ class _ArrowIcon extends StatelessWidget {
   }
 }
 
-List<Widget> _row(emotiva.Device device, int rowIndex) {
+/// This widget is used when the verticle arrows are over fixed width text.
+/// Typically, the text is an input which can be changed by pressing the up/down
+/// controls to cycle through different characters. The vertical arrows indicate
+/// which character is currently editable and therefore needs to be able to
+/// offset horizontally to align with the editable character. The icon version
+/// of this widget is both wider than a single character and, with the font
+/// config being used, would be very tricky to position in line with the
+/// editable character. This is why a character from the same font is used to
+/// render the arrows in this widget.
+class _ArrowText extends StatelessWidget {
+  const _ArrowText({required emotiva.Arrow arrow, required int offset})
+      : _arrow = arrow,
+        _offset = offset;
+
+  final emotiva.Arrow _arrow;
+  final int _offset;
+
+  @override
+  Widget build(BuildContext context) {
+    final character = switch (_arrow) {
+      emotiva.Arrow.up => '▲',
+      emotiva.Arrow.down => '▼',
+      // We should only see up or down arrows passed to this widget.
+      _ => '❌',
+    };
+    // TODO(jpwoodbu) Make this DRY with the config the _row() function.
+    final style = GoogleFonts.robotoMono(
+        textStyle:
+            const TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0));
+    return Container(
+      // TODO(jpwoodbu) The margin and padding in the _row() function is
+      // different from what I'm using here and I am not certain why this config
+      // was needed to get the proper alignment. Using a different character,
+      // like ⇑, seemed to align better while using the same margin and padding
+      // from _row(). Layout is too hard.
+      margin: const EdgeInsets.fromLTRB(1.0, 0.0, 0.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(1.0, 0.0, 0.0, 0.0),
+      alignment: Alignment.centerLeft,
+      // Left pad with a space for each column offset indicated.
+      child: Text(' ' * _offset + character, style: style),
+    );
+  }
+}
+
+List<Widget> _row(emotiva.Menu menu, int rowIndex) {
   const inset = 2.0;
   const size = 25.0;
-  final leftArrowPosition =
-      emotiva.arrowPosition(device.menuContents, emotiva.Arrow.left);
-  final rightArrowPosition =
-      emotiva.arrowPosition(device.menuContents, emotiva.Arrow.right);
+  final leftArrowPosition = menu.leftArrow();
+  final rightArrowPosition = menu.rightArrow();
   // Leave space for a potential arrow.
   List<Widget> columns = [const SizedBox(width: size)];
-  if (rowIndex == leftArrowPosition) {
+  if (rowIndex == leftArrowPosition.track) {
     columns[0] = const _ArrowIcon(arrow: emotiva.Arrow.left, size: size);
   }
-  for (final column in device.menuContents.rows[rowIndex].columns) {
+  for (final column in menu.rows[rowIndex].columns) {
     Color? color;
     Color? backgroundColor;
     if (column.highlight) {
@@ -109,7 +151,7 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
       );
     }
   }
-  if (rowIndex == rightArrowPosition) {
+  if (rowIndex == rightArrowPosition.track) {
     columns.add(const _ArrowIcon(arrow: emotiva.Arrow.right, size: size));
   } else {
     columns.add(const SizedBox(width: size));
@@ -117,13 +159,19 @@ List<Widget> _row(emotiva.Device device, int rowIndex) {
   return columns;
 }
 
-TableRow _verticalArrow(emotiva.Menu menu, emotiva.Arrow arrow) {
+/// Puts an empty box or a vertical arrow in each cell of the row.
+TableRow _verticalArrow(emotiva.ArrowPosition arrowPosition) {
   const height = 25.0;
-  final arrowPosition = emotiva.arrowPosition(menu, arrow);
   final List<Widget> children = [const SizedBox(width: 25.0)];
   for (int i = 0; i < 4; i++) {
-    if (arrowPosition == i) {
-      children.add(_ArrowIcon(arrow: arrow, size: height));
+    if (arrowPosition.track == i) {
+      if (arrowPosition.fixedWidth) {
+        children.add(_ArrowText(
+            arrow: arrowPosition.arrow, offset: arrowPosition.offset));
+      } else {
+        // TODO(jpwoodbu) Should I pass the icon data instead of the arrow?
+        children.add(_ArrowIcon(arrow: arrowPosition.arrow, size: height));
+      }
     } else {
       // Setting this height makes sure the menu table doesn't move on the
       // screen if the up arrow is not visible.
@@ -132,6 +180,9 @@ TableRow _verticalArrow(emotiva.Menu menu, emotiva.Arrow arrow) {
   }
   return TableRow(children: children);
 }
+
+TableRow _upArrow(emotiva.Menu menu) => _verticalArrow(menu.upArrow());
+TableRow _downArrow(emotiva.Menu menu) => _verticalArrow(menu.downArrow());
 
 class _OnScreenDisplay extends StatelessWidget {
   const _OnScreenDisplay();
@@ -175,25 +226,25 @@ class _OnScreenDisplay extends StatelessWidget {
           4: FixedColumnWidth(25.0),
         },
         children: <TableRow>[
-          _verticalArrow(device.menuContents, emotiva.Arrow.up),
+          _upArrow(device.menuContents),
           TableRow(
-            children: _row(device, 4),
+            children: _row(device.menuContents, 4),
             decoration: const BoxDecoration(
               border: Border(
                 top: BorderSide(color: borderColor),
               ),
             ),
           ),
-          TableRow(children: _row(device, 5)),
+          TableRow(children: _row(device.menuContents, 5)),
           TableRow(
             decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: borderColor),
               ),
             ),
-            children: _row(device, 6),
+            children: _row(device.menuContents, 6),
           ),
-          _verticalArrow(device.menuContents, emotiva.Arrow.down),
+          _downArrow(device.menuContents),
         ],
       ),
     );

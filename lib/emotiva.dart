@@ -1822,8 +1822,50 @@ class Row {
   Row(this.number);
 }
 
+class ArrowPosition {
+  final Arrow arrow;
+  final int track;
+  final int offset;
+  final bool fixedWidth;
+
+  const ArrowPosition(this.arrow, this.track, this.offset, this.fixedWidth);
+}
+
 class Menu {
   List<Row> rows = [];
+
+  /// Provide the column/row position for an [arrow].
+  ///
+  /// A value of -1 means that [arrow] is not currently visible. If the [arrow] is
+  /// left or right, the returned value respresents which row should display the
+  /// arrow. If the [arrow] is up or down, the returned value represents which
+  /// column should display the arrow.
+  ArrowPosition _arrowPosition(Arrow arrow) {
+    for (final row in rows) {
+      for (final column in row.columns) {
+        switch (arrow) {
+          case Arrow.up || Arrow.down:
+            if (column.arrow == arrow) {
+              return ArrowPosition(
+                  arrow, column.number, column.offset ?? 0, column.fixedWidth);
+            }
+          case Arrow.left || Arrow.right:
+            if (column.arrow == arrow) {
+              return ArrowPosition(
+                  arrow, row.number, column.offset ?? 0, column.fixedWidth);
+            }
+          case Arrow.no:
+            continue;
+        }
+      }
+    }
+    return const ArrowPosition(Arrow.no, -1, 0, false);
+  }
+
+  ArrowPosition upArrow() => _arrowPosition(Arrow.up);
+  ArrowPosition downArrow() => _arrowPosition(Arrow.down);
+  ArrowPosition leftArrow() => _arrowPosition(Arrow.left);
+  ArrowPosition rightArrow() => _arrowPosition(Arrow.right);
 }
 
 Menu _parseMenuNotify(XmlElement element) {
@@ -1925,26 +1967,4 @@ Column _parseMenuNotifyColumn(XmlElement element) {
     }
   }
   return column;
-}
-
-/// Provide the column/row position for an [arrow].
-///
-/// A value of -1 means that [arrow] is not currently visible. If the [arrow] is
-/// left or right, the returned value respresents which row should display the
-/// arrow. If the [arrow] is up or down, the returned value represents which
-/// column should display the arrow.
-int arrowPosition(Menu menu, Arrow arrow) {
-  for (final row in menu.rows) {
-    for (final column in row.columns) {
-      switch (arrow) {
-        case Arrow.up || Arrow.down:
-          if (column.arrow == arrow) return column.number;
-        case Arrow.left || Arrow.right:
-          if (column.arrow == arrow) return row.number;
-        case Arrow.no:
-          continue;
-      }
-    }
-  }
-  return -1;
 }
