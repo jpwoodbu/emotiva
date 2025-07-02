@@ -75,7 +75,7 @@ class _ArrowText extends StatelessWidget {
       _ => '❌',
     };
     // TODO(jpwoodbu) Make this DRY with the config the _row() function.
-    final style = GoogleFonts.robotoMono(
+    final style = GoogleFonts.firaCode(
         textStyle:
             const TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0));
     const inset = EdgeInsets.all(2.0);
@@ -143,11 +143,12 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
         Container(
           margin: inset,
           padding: inset,
+          // alignment: Alignment.centerLeft,
           color: backgroundColor,
           child: Text(
             column.value,
             style: column.fixedWidth
-                ? GoogleFonts.robotoMono(textStyle: textStyle)
+                ? GoogleFonts.firaCode(textStyle: textStyle)
                 : textStyle,
           ),
         ),
