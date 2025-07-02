@@ -6,7 +6,9 @@ import 'package:emotiva_remote/emotiva.dart' as emotiva;
 import 'package:emotiva_remote/device_changes.dart';
 import 'package:emotiva_remote/util.dart';
 
-double _iconSize(BoxConstraints constraints) {
+const double _arrowSize = 25.0;
+
+double _buttonSize(BoxConstraints constraints) {
   // There are 4 rows in the controls table. Divide the height evenly by the
   // number of rows. I don't yet understand why diving by 3.0 (there are 3
   // columns) looks bad when the screen is in landscape mode.
@@ -76,17 +78,14 @@ class _ArrowText extends StatelessWidget {
     final style = GoogleFonts.robotoMono(
         textStyle:
             const TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0));
+    const inset = EdgeInsets.all(2.0);
     return Container(
-      // TODO(jpwoodbu) DRY the size with the icon height for the icon arrows.
-      height: 25.0,
-      // TODO(jpwoodbu) The margin and padding in the _row() function is
-      // different from what I'm using here and I am not certain why this config
-      // was needed to get the proper alignment. Using a different character,
-      // like ⇑, seemed to align better while using the same margin and padding
-      // from _row(). Layout is too hard.
-      margin: const EdgeInsets.fromLTRB(1.0, 0.0, 0.0, 0.0),
-      padding: const EdgeInsets.fromLTRB(1.0, 0.0, 0.0, 0.0),
-      alignment: Alignment.centerLeft,
+      // This container should be the same height as the arrow icon which is
+      // normally displayed for the arrow graphic. This makes for better visual
+      // spacing.
+      height: _arrowSize,
+      margin: inset, 
+      padding: inset,
       // Left pad with a space for each column offset indicated.
       child: Text(' ' * _offset + character, style: style),
     );
@@ -94,14 +93,13 @@ class _ArrowText extends StatelessWidget {
 }
 
 List<Widget> _row(emotiva.Menu menu, int rowIndex) {
-  const inset = 2.0;
-  const size = 25.0;
+  const inset = EdgeInsets.all(2.0);
   final leftArrowPosition = menu.leftArrow();
   final rightArrowPosition = menu.rightArrow();
   // Leave space for a potential arrow.
-  List<Widget> columns = [const SizedBox(width: size)];
+  List<Widget> columns = [const SizedBox(width: _arrowSize)];
   if (rowIndex == leftArrowPosition.track) {
-    columns[0] = const _ArrowIcon(arrow: emotiva.Arrow.left, size: size);
+    columns[0] = const _ArrowIcon(arrow: emotiva.Arrow.left, size: _arrowSize);
   }
   for (final column in menu.rows[rowIndex].columns) {
     Color? color;
@@ -112,11 +110,12 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
     }
     if (column.checkbox != null) {
       const iconSize = 17.0;
+      // Checkbox filled
       if (column.checkbox!) {
         columns.add(
           Container(
-            margin: const EdgeInsets.all(inset),
-            padding: const EdgeInsets.all(inset),
+            margin: inset,
+            padding: inset,
             alignment: Alignment.centerLeft,
             color: backgroundColor,
             child: Icon(Icons.disabled_by_default_outlined,
@@ -124,10 +123,11 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
           ),
         );
       } else {
+        // Checkbox empty
         columns.add(
           Container(
-            margin: const EdgeInsets.all(inset),
-            padding: const EdgeInsets.all(inset),
+            margin: inset,
+            padding: inset,
             alignment: Alignment.centerLeft,
             color: backgroundColor,
             child: Icon(Icons.check_box_outline_blank,
@@ -136,12 +136,13 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
         );
       }
     } else {
+      // Standard text content
       final textStyle =
           TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0, color: color);
       columns.add(
         Container(
-          margin: const EdgeInsets.all(inset),
-          padding: const EdgeInsets.all(inset),
+          margin: inset,
+          padding: inset,
           color: backgroundColor,
           child: Text(
             column.value,
@@ -154,9 +155,9 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
     }
   }
   if (rowIndex == rightArrowPosition.track) {
-    columns.add(const _ArrowIcon(arrow: emotiva.Arrow.right, size: size));
+    columns.add(const _ArrowIcon(arrow: emotiva.Arrow.right, size: _arrowSize));
   } else {
-    columns.add(const SizedBox(width: size));
+    columns.add(const SizedBox(width: _arrowSize));
   }
   return columns;
 }
@@ -271,7 +272,7 @@ class _Controls extends StatelessWidget {
                 onPressed: () => addHaptic(device.menuUp),
                 icon: Icon(
                   Icons.keyboard_arrow_up,
-                  size: _iconSize(constraints),
+                  size: _buttonSize(constraints),
                   semanticLabel: 'up',
                 ),
               ),
@@ -285,7 +286,7 @@ class _Controls extends StatelessWidget {
                 onPressed: () => addHaptic(device.menuLeft),
                 icon: Icon(
                   Icons.keyboard_arrow_left,
-                  size: _iconSize(constraints),
+                  size: _buttonSize(constraints),
                   semanticLabel: 'left',
                 ),
               ),
@@ -294,7 +295,7 @@ class _Controls extends StatelessWidget {
                 onPressed: () => addHaptic(device.menuEnter),
                 icon: Icon(
                   Icons.circle_outlined,
-                  size: _iconSize(constraints),
+                  size: _buttonSize(constraints),
                   semanticLabel: 'enter',
                 ),
               ),
@@ -303,7 +304,7 @@ class _Controls extends StatelessWidget {
                 onPressed: () => addHaptic(device.menuRight),
                 icon: Icon(
                   Icons.keyboard_arrow_right,
-                  size: _iconSize(constraints),
+                  size: _buttonSize(constraints),
                   semanticLabel: 'right',
                 ),
               ),
@@ -317,7 +318,7 @@ class _Controls extends StatelessWidget {
                 onPressed: () => addHaptic(device.menuDown),
                 icon: Icon(
                   Icons.keyboard_arrow_down,
-                  size: _iconSize(constraints),
+                  size: _buttonSize(constraints),
                   semanticLabel: 'down',
                 ),
               ),
@@ -333,21 +334,21 @@ class _Controls extends StatelessWidget {
                 // table to appear to scale before it must. The padding makes
                 // the row approximiately the size it would have been had the
                 // icon size not been reduced (see below).
-                padding: EdgeInsets.all(_iconSize(constraints) * 0.2),
+                padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
                 onPressed: () => addHaptic(device.info),
                 icon: Icon(
                   Icons.info,
-                  size: _iconSize(constraints) * 0.6,
+                  size: _buttonSize(constraints) * 0.6,
                   semanticLabel: 'show on screen display info table',
                 ),
               ),
               const SizedBox(),
               IconButton(
-                padding: EdgeInsets.all(_iconSize(constraints) * 0.2),
+                padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
                 onPressed: () => addHaptic(device.toggleMenu),
                 icon: Icon(
                   Icons.menu,
-                  size: _iconSize(constraints) * 0.6,
+                  size: _buttonSize(constraints) * 0.6,
                   semanticLabel:
                       'toggles entering and exiting the Emotiva menu',
                 ),
