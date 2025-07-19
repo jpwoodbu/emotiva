@@ -116,6 +116,7 @@ void _sourceSelector(BuildContext context, emotiva.Device device) async {
   } else {
     selection = await showCustomBottomSheet<int>(
       context: context,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: _buildSourceList(context, device),
     );
   }
@@ -263,6 +264,7 @@ void xlrSelector(BuildContext context, emotiva.Device device,
   } else {
     selection = await showCustomBottomSheet<XlrSelection>(
       context: context,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ElevatedButton.icon(
             onPressed: () =>
