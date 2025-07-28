@@ -31,7 +31,7 @@ class _NameRow extends StatelessWidget {
             ),
             IconButton(
               onPressed: () async {
-                await addHaptic(device.togglePower);
+                addHaptic(device.togglePower);
                 // Workaround for no notification when the devices powers on and
                 // sets the initial power-on config.
                 Future.delayed(const Duration(seconds: 2), device.updateAll);

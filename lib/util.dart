@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 /// text like the help page.
 const double padding = 15.0;
 
-dynamic addHaptic(Function function) {
+T addHaptic<T>(T Function() function) {
   HapticFeedback.lightImpact();
   return function();
 }
