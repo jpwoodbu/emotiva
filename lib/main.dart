@@ -436,6 +436,11 @@ class DiscoveryError extends StatelessWidget {
                   },
                   child: const Text('Troubleshooting tips'),
                 ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => LogConsole.open(context),
+                  child: const Text('Debug logs'),
+                ),
               ],
             ),
           ),
