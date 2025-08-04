@@ -13,8 +13,11 @@ class DeviceChanges with ChangeNotifier {
     _log.info('handling control packets');
     device.notifyStream().listen(_handleNotifyPacket);
     _log.info('handling notify packets');
-    device.menuNotifyStream().listen(_handleMenuNotifyPacket);
-    _log.info('handling menu notify packets');
+
+    if (device.menuNotifyPort != null) {
+      device.menuNotifyStream().listen(_handleMenuNotifyPacket);
+      _log.info('handling menu notify packets');
+    }
   }
 
   void _handleControlPacket(String packet) {

@@ -11,27 +11,27 @@ String createUpdateXml(String name, String value, {bool visible = true}) {
     </emotivaUpdate>''';
 }
 
-Device fakeDevice() => Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+Device fakeDevice() => Device(InternetAddress('1.1.1.1'), 1, 2);
 
 void main() {
   group('operator ==', () {
     test('Devices with the same IP address are considered the same device', () {
-      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
-      final device2 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2);
+      final device2 = Device(InternetAddress('1.1.1.1'), 1, 2);
 
       expect(device1 == device2, true);
     });
 
     test('Devices with a different IP address are considered different devices',
         () {
-      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
-      final device2 = Device(InternetAddress('1.1.1.2'), 1, 2, 3);
+      final device1 = Device(InternetAddress('1.1.1.1'), 1, 2);
+      final device2 = Device(InternetAddress('1.1.1.2'), 1, 2);
 
       expect(device1 == device2, false);
     });
 
     test('The same device object is considered the same device', () {
-      final device = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+      final device = Device(InternetAddress('1.1.1.1'), 1, 2);
 
       expect(device == device, true);
     });
@@ -42,7 +42,7 @@ void main() {
 
     late Device device;
     setUp(() {
-      device = Device(InternetAddress('1.1.1.1'), 1, 2, 3);
+      device = Device(InternetAddress('1.1.1.1'), 1, 2);
     });
 
     test('power on', () {
@@ -298,8 +298,6 @@ void main() {
     <version>3.0</version>
     <controlPort>7002</controlPort>
     <notifyPort>7003</notifyPort>
-    <infoPort>7004</infoPort>
-    <menuNotifyPort>7005</menuNotifyPort>
   </control>
 </emotivaTransponder>
 ''';
@@ -310,8 +308,6 @@ void main() {
       expect(device.controlVersion, '3.0');
       expect(device.controlPort, 7002);
       expect(device.notifyPort, 7003);
-      expect(device.infoPort, 7004);
-      expect(device.menuNotifyPort, 7005);
     });
   });
 

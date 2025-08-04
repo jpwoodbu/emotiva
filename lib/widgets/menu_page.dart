@@ -84,7 +84,7 @@ class _ArrowText extends StatelessWidget {
       // normally displayed for the arrow graphic. This makes for better visual
       // spacing.
       height: _arrowSize,
-      margin: inset, 
+      margin: inset,
       padding: inset,
       // Left pad with a space for each column offset indicated.
       child: Text(' ' * _offset + character, style: style),
@@ -196,6 +196,15 @@ class _OnScreenDisplay extends StatelessWidget {
     final device = context.watch<DeviceChanges>().device;
     const Color borderColor = Colors.white;
     const padding = 10.0;
+    if (device.menuNotifyPort == null) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(padding, 24.0, padding, 0.0),
+        child: Text('Menu mirror not supported on this firmware',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.error)),
+      );
+    }
     if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
       const rowHeight = 25.0;
       return Padding(
@@ -255,12 +264,23 @@ class _OnScreenDisplay extends StatelessWidget {
   }
 }
 
+bool _menuAvailable(emotiva.Device d) => d.menuNotifyPort != null;
+
 class _Controls extends StatelessWidget {
   const _Controls();
 
   @override
   Widget build(BuildContext context) {
     final device = context.read<DeviceChanges>().device;
+    // TODO(jpwoodbu) Dedupe this opacitity feature with its use in
+    // menu_page.dart.
+
+    // opacity of 1.0 is the default. Reduce the opacity of these controls to
+    // 38% when disabled. This is based on how Material 3 describes how to
+    // change the opacity for disabled inputs. I looked for how this could be
+    // done more directly, but didn't find a way.
+    double opacity = _menuAvailable(device) ? 1.0 : 0.38;
+
     return LayoutBuilder(
       builder: (_, constraints) => Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -268,13 +288,18 @@ class _Controls extends StatelessWidget {
           TableRow(
             children: [
               const SizedBox(),
-              IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => addHaptic(device.menuUp),
-                icon: Icon(
-                  Icons.keyboard_arrow_up,
-                  size: _buttonSize(constraints),
-                  semanticLabel: 'up',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.menuUp)
+                      : null,
+                  icon: Icon(
+                    Icons.keyboard_arrow_up,
+                    size: _buttonSize(constraints),
+                    semanticLabel: 'up',
+                  ),
                 ),
               ),
               const SizedBox(),
@@ -282,31 +307,46 @@ class _Controls extends StatelessWidget {
           ),
           TableRow(
             children: [
-              IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => addHaptic(device.menuLeft),
-                icon: Icon(
-                  Icons.keyboard_arrow_left,
-                  size: _buttonSize(constraints),
-                  semanticLabel: 'left',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.menuLeft)
+                      : null,
+                  icon: Icon(
+                    Icons.keyboard_arrow_left,
+                    size: _buttonSize(constraints),
+                    semanticLabel: 'left',
+                  ),
                 ),
               ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => addHaptic(device.menuEnter),
-                icon: Icon(
-                  Icons.circle_outlined,
-                  size: _buttonSize(constraints),
-                  semanticLabel: 'enter',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.menuEnter)
+                      : null,
+                  icon: Icon(
+                    Icons.circle_outlined,
+                    size: _buttonSize(constraints),
+                    semanticLabel: 'enter',
+                  ),
                 ),
               ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => addHaptic(device.menuRight),
-                icon: Icon(
-                  Icons.keyboard_arrow_right,
-                  size: _buttonSize(constraints),
-                  semanticLabel: 'right',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.menuRight)
+                      : null,
+                  icon: Icon(
+                    Icons.keyboard_arrow_right,
+                    size: _buttonSize(constraints),
+                    semanticLabel: 'right',
+                  ),
                 ),
               ),
             ],
@@ -314,13 +354,18 @@ class _Controls extends StatelessWidget {
           TableRow(
             children: [
               const SizedBox(),
-              IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => addHaptic(device.menuDown),
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  size: _buttonSize(constraints),
-                  semanticLabel: 'down',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.menuDown)
+                      : null,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: _buttonSize(constraints),
+                    semanticLabel: 'down',
+                  ),
                 ),
               ),
               const SizedBox(),
@@ -328,30 +373,40 @@ class _Controls extends StatelessWidget {
           ),
           TableRow(
             children: [
-              IconButton(
-                // There's some special padding math here because these icons
-                // are just too big without scaling them down. But making their
-                // size different reduces the row height, which causes the whole
-                // table to appear to scale before it must. The padding makes
-                // the row approximiately the size it would have been had the
-                // icon size not been reduced (see below).
-                padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
-                onPressed: () => addHaptic(device.info),
-                icon: Icon(
-                  Icons.info,
-                  size: _buttonSize(constraints) * 0.6,
-                  semanticLabel: 'show on screen display info table',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  // There's some special padding math here because these icons
+                  // are just too big without scaling them down. But making their
+                  // size different reduces the row height, which causes the whole
+                  // table to appear to scale before it must. The padding makes
+                  // the row approximiately the size it would have been had the
+                  // icon size not been reduced (see below).
+                  padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.info)
+                      : null,
+                  icon: Icon(
+                    Icons.info,
+                    size: _buttonSize(constraints) * 0.6,
+                    semanticLabel: 'show on screen display info table',
+                  ),
                 ),
               ),
               const SizedBox(),
-              IconButton(
-                padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
-                onPressed: () => addHaptic(device.toggleMenu),
-                icon: Icon(
-                  Icons.menu,
-                  size: _buttonSize(constraints) * 0.6,
-                  semanticLabel:
-                      'toggles entering and exiting the Emotiva menu',
+              Opacity(
+                opacity: opacity,
+                child: IconButton(
+                  padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
+                  onPressed: _menuAvailable(device)
+                      ? () => addHaptic(device.toggleMenu)
+                      : null,
+                  icon: Icon(
+                    Icons.menu,
+                    size: _buttonSize(constraints) * 0.6,
+                    semanticLabel:
+                        'toggles entering and exiting the Emotiva menu',
+                  ),
                 ),
               ),
             ],
@@ -372,15 +427,17 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _OnScreenDisplay(),
-        Flexible(
-          fit: FlexFit.loose,
-          child: _Controls(),
-        ),
-      ],
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _OnScreenDisplay(),
+          Flexible(
+            fit: FlexFit.loose,
+            child: _Controls(),
+          ),
+        ],
+      ),
     );
   }
 }

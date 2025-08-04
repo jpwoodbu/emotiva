@@ -148,21 +148,19 @@ Device parseTransponder(String data, InternetAddress address) {
   String controlVersion;
   int controlPort;
   int notifyPort;
-  int menuNotifyPort;
   try {
     model = _textFromElement(root, 'model');
     name = _textFromElement(root, 'name');
     controlVersion = _textFromElement(root, './control/version');
     controlPort = _intFromElement(root, './control/controlPort');
     notifyPort = _intFromElement(root, './control/notifyPort');
-    menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
   } catch (e) {
     _log.severe(e);
     throw ('The response from your Emotiva processor is missing some required '
         'fields. Your Emotiva processor may require a firmware update to work '
         'with this app.');
   }
-  final device = Device(address, controlPort, notifyPort, menuNotifyPort);
+  final device = Device(address, controlPort, notifyPort);
   device.model = model;
   device.name = name;
   device.controlVersion = controlVersion;
@@ -170,6 +168,9 @@ Device parseTransponder(String data, InternetAddress address) {
   // devices in the fields. E.g. an XMC-1, perhaps running an older firmware.
   // For those fields, log warnings instead of hard failing.
   try {
+    // menuNotifyPort is not available on processors using protocol versions <
+    // 2.1.
+    device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
     device.infoPort = _intFromElement(root, './control/infoPort');
     device.dataRevision = _textFromElement(root, 'dataRevision');
     device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
@@ -201,7 +202,6 @@ class Device {
   String controlVersion = '';
   int controlPort;
   int notifyPort;
-  int menuNotifyPort;
   int infoPort = 0;
   int setupPortTcp = 0;
   int setupXmlVersion = 0;
@@ -342,13 +342,13 @@ class Device {
   // port number we need to use to send control commands to the processor.
   late SocketController _control;
   late SocketController _notify;
-  late SocketController _menuNotify;
+  int? _menuNotifyPort;
+  SocketController? _menuNotify;
   final _sender = SendSocketController();
 
-  Device(this.address, this.controlPort, this.notifyPort, this.menuNotifyPort) {
+  Device(this.address, this.controlPort, this.notifyPort) {
     _control = SocketController(address, controlPort);
     _notify = SocketController(address, notifyPort);
-    _menuNotify = SocketController(address, menuNotifyPort);
   }
 
   // The hashCode and == operator override allow Device to be placed into a Set.
@@ -371,11 +371,18 @@ class Device {
     return '2.0';
   }
 
+  set menuNotifyPort(int? port) {
+    _menuNotifyPort = port;
+    if (port != null) _menuNotify = SocketController(address, port);
+  }
+
+  int? get menuNotifyPort => _menuNotifyPort;
+
   Future<void> bindSockets() async {
     _log.info('Binding all sockets.');
     await _control.bind();
     await _notify.bind();
-    await _menuNotify.bind();
+    await _menuNotify?.bind();
     await _sender.bind();
   }
 
@@ -383,7 +390,7 @@ class Device {
     _log.info('Closing all sockets.');
     await _control.close();
     await _notify.close();
-    await _menuNotify.close();
+    await _menuNotify?.close();
     await _sender.close();
   }
 
@@ -401,8 +408,11 @@ class Device {
   /// Stream of messages arriving on the notify stream.
   Stream<String> notifyStream() => _decode(_notify.stream);
 
-  /// Stream of messages arriving on the menu notify stream.
-  Stream<String> menuNotifyStream() => _decode(_menuNotify.stream);
+  /// Stream of messages arriving on the menu notify streami.
+  ///
+  /// A null assertion error is thrown if this is called when [menuNotifyPort]
+  /// is null.
+  Stream<String> menuNotifyStream() => _decode(_menuNotify!.stream);
 
   void _send(String request, int destinationPort) async {
     _log.info('sending: $request');
@@ -1017,8 +1027,8 @@ class FakeDevice extends Device {
     super.address,
     super.controlPort,
     super.notifyPort,
-    super.menuNotifyPort,
   ) {
+    menuNotifyPort = 1234;
     model = 'Fake Emotiva';
     name = 'Fake name';
     controlVersion = '3.0';
@@ -1564,7 +1574,7 @@ class FakeDevice extends Device {
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _sequence++;
-    _menuNotify.controller.add(_encode(response));
+    _menuNotify!.controller.add(_encode(response));
   }
 
   void _notifySubscribers(Set<String> updatedFields) {
@@ -1785,7 +1795,7 @@ class FakeDevice extends Device {
 
 /// This function is meant to be mostly a stand-in replacement for [discover].
 Future<FakeDevice> futureFakeDevice() async =>
-    FakeDevice(InternetAddress('192.168.42.1'), 1, 2, 3);
+    FakeDevice(InternetAddress('192.168.42.1'), 1, 2);
 
 // These enums represet the UI elements of the on-screen display menu.
 

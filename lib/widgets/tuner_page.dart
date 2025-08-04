@@ -156,10 +156,10 @@ class _Controls extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     const double arrowSize = 50.0;
-    // opacity of 1.0 is the default. Reduce the opacity of these controls to 38%
-    // when disabled. This is based on how Material 3 describes how to change the
-    // opacity for disabled inputs. I looked for how this could be done more
-    // directly, but didn't find a way.
+    // opacity of 1.0 is the default. Reduce the opacity of these controls to
+    // 38% when disabled. This is based on how Material 3 describes how to
+    // change the opacity for disabled inputs. I looked for how this could be
+    // done more directly, but didn't find a way.
     double opacity = 1.0;
     if (!_tunerActiveInput(device)) opacity = 0.38;
     return Table(
