@@ -11,6 +11,8 @@ const List<InfoSection> _sections = [
       'HDMI color space, chroma subsamping, and HDR state are missing.'),
   InfoSection('Zone 2 and the Tuner',
       'Zone 2 cannot explicitly set its input to Tuner. It can use Tuner as its input only if Tuner is selected for Main and Zone 2 has its input set to Following Main.'),
+  InfoSection('Speaker preset names',
+      'Custom speaker preset names are not displayed. The generic name (e.g. Preset 1 or Preset 2) is shown instead.'),
 ];
 
 class KnownIssues extends StatelessWidget {
