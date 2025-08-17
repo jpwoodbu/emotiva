@@ -856,6 +856,9 @@ class Device {
   /// Brightness values cycle through 0%, 20%, 40%, 60%, 80%, and 100%.
   void cycleFrontDisplayBrightness() => control('dim');
 
+  /// On some older firmware, the menu feature is not available and the device
+  /// will not advertise a menu notify port.
+  bool menuAvailable() => menuNotifyPort != null;
   void toggleMenu() => control('menu');
   void menuUp() => control('up');
   void menuDown() => control('down');
@@ -909,6 +912,9 @@ class Device {
   void modeAllStereo() => control('all_stereo');
   void speakerPreset1() => control('preset1');
   void speakerPreset2() => control('preset2');
+  /// The Dirac speaker preset might only be available on older models, like the
+  /// XMC-1.
+  void speakerPresetDirac() => control('dirac');
 
   /// Adjusts the center speaker trim.
   ///

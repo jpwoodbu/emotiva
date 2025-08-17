@@ -264,8 +264,6 @@ class _OnScreenDisplay extends StatelessWidget {
   }
 }
 
-bool _menuAvailable(emotiva.Device d) => d.menuNotifyPort != null;
-
 class _Controls extends StatelessWidget {
   const _Controls();
 
@@ -279,7 +277,7 @@ class _Controls extends StatelessWidget {
     // 38% when disabled. This is based on how Material 3 describes how to
     // change the opacity for disabled inputs. I looked for how this could be
     // done more directly, but didn't find a way.
-    double opacity = _menuAvailable(device) ? 1.0 : 0.38;
+    double opacity = device.menuAvailable() ? 1.0 : 0.38;
 
     return LayoutBuilder(
       builder: (_, constraints) => Table(
@@ -292,7 +290,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuUp)
                       : null,
                   icon: Icon(
@@ -311,7 +309,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuLeft)
                       : null,
                   icon: Icon(
@@ -325,7 +323,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuEnter)
                       : null,
                   icon: Icon(
@@ -339,7 +337,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuRight)
                       : null,
                   icon: Icon(
@@ -358,7 +356,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuDown)
                       : null,
                   icon: Icon(
@@ -383,7 +381,7 @@ class _Controls extends StatelessWidget {
                   // the row approximiately the size it would have been had the
                   // icon size not been reduced (see below).
                   padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.info)
                       : null,
                   icon: Icon(
@@ -398,7 +396,7 @@ class _Controls extends StatelessWidget {
                 opacity: opacity,
                 child: IconButton(
                   padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
-                  onPressed: _menuAvailable(device)
+                  onPressed: device.menuAvailable()
                       ? () => addHaptic(device.toggleMenu)
                       : null,
                   icon: Icon(

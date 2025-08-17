@@ -119,6 +119,13 @@ class _SpeakerPresetRow extends StatelessWidget {
               child: const Text('Preset 2'),
               onPressed: () => addHaptic(device.speakerPreset2),
             ),
+            // It is believed that the Dirac speaker preset is only available on
+            // the XMC-1 model.
+            if (device.model == 'XMC-1')
+              MenuItemButton(
+                child: const Text('Dirac'),
+                onPressed: () => addHaptic(device.speakerPresetDirac),
+              ),
           ],
         ),
       ],
