@@ -71,19 +71,25 @@ class MultiDeviceDiscover {
   Timer? _pinger;
 
   void close() {
-    if (_socket != null) {
-      _socket!.close();
+    final socket = _socket;
+    final pinger = _pinger;
+    if (socket != null) {
+      socket.close();
       _log.info('No longer listening for Emotiva transponder packets.');
+      _socket = null;
     }
-    if (_pinger != null) {
-      _pinger!.cancel();
+    if (pinger != null) {
+      pinger.cancel();
+      _pinger = null;
     }
   }
 
   void _ping() {
+    final socket = _socket;
+    if (socket == null) return;
     final ping = _pingRequest();
-    final bytesSent = _socket!
-        .send(ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+    final bytesSent = socket.send(
+        ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
     if (bytesSent == 0) {
       _log.severe('Unable to send broadcast ping.');
     } else {
@@ -92,16 +98,27 @@ class MultiDeviceDiscover {
   }
 
   Stream<Device> stream() async* {
+    if (_socket != null) {
+      throw StateError('The socket was already established. '
+          'Was stream() called more than once without calling close()?');
+    }
     _socket =
         await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
-    _socket!.broadcastEnabled = true;
+    final socket = _socket!;
+    socket.broadcastEnabled = true;
     _ping();
     _pinger = Timer.periodic(const Duration(seconds: 5), (_) => _ping());
-    await for (final event in _socket!) {
+    await for (final event in socket) {
       switch (event) {
         case RawSocketEvent.read:
-          final datagram = _socket!.receive();
-          final data = String.fromCharCodes(datagram!.data);
+          final datagram = socket.receive();
+          if (datagram == null) {
+            // I'm not sure if this indicates a problem, but I at least want to
+            // log it to see if it's happening.
+            _log.warning('Got a socket read event with an empty datagram');
+            continue;
+          }
+          final data = String.fromCharCodes(datagram.data);
           _log.info('received: $data');
           final device = parseTransponder(data, datagram.address);
           yield device;
