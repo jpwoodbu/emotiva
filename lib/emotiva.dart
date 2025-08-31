@@ -643,7 +643,7 @@ class Device {
     if (packetType == 'emotivaUnsubscribe') {
       // If we get a response from an unsubscribe request before we tear down
       // the socket, catch it and do nothing.
-      _log.info('Recieved an unsubscribe request: ${root.toXmlString()}');
+      _log.info('Received an unsubscribe request: ${root.toXmlString()}');
       return;
     }
     if (packetType == 'emotivaNotify' || packetType == 'emotivaMenuNotify') {
