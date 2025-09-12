@@ -18,17 +18,15 @@ class InformationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: Padding(
-          padding: const EdgeInsets.all(padding),
-          child: ListView.separated(
-            itemBuilder: (context, index) =>
-                _Item(title: sections[index].title, body: sections[index].body),
-            separatorBuilder: (context, index) => const Divider(),
-            itemCount: sections.length,
-          ),
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Padding(
+        padding: const EdgeInsets.all(padding),
+        child: ListView.separated(
+          itemBuilder: (context, index) =>
+              _Item(title: sections[index].title, body: sections[index].body),
+          separatorBuilder: (context, index) => const Divider(),
+          itemCount: sections.length,
         ),
       ),
     );
