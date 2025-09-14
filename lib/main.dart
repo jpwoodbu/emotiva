@@ -220,6 +220,10 @@ class _MainViewState extends State<MainView> {
       width: 72.0,
     );
     return SafeArea(
+      // The bottom navigation bar avoids rendering in an unsafe area. Setting
+      // bottom to false allows the background color to render all the way to
+      // the bottom of the screen.
+      bottom: false,
       child: Scaffold(
         appBar: _pageIndexModel.pageIndex == 0
             ? AppBar(
@@ -390,6 +394,7 @@ class DiscoveryError extends StatelessWidget {
         : 'No Emotiva device was found.';
     if (error is String) message = error.toString();
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         body: Center(
           child: Padding(
@@ -456,6 +461,7 @@ class ScanningPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         body: Center(
           child: Column(
@@ -571,6 +577,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
     return ChangeNotifierProvider(
       create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
       builder: (context, _) => SafeArea(
+        bottom: false,
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
               onPressed: () {
@@ -583,7 +590,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
               },
               child: const Icon(Icons.help)),
           body: ListView(
-            padding: const EdgeInsets.all(25.0),
+            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
             children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
