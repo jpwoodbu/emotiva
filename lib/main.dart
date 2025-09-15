@@ -219,94 +219,90 @@ class _MainViewState extends State<MainView> {
       height: 72.0,
       width: 72.0,
     );
-    return SafeArea(
-      // The bottom navigation bar avoids rendering in an unsafe area. Setting
-      // bottom to false allows the background color to render all the way to
-      // the bottom of the screen.
-      bottom: false,
-      child: Scaffold(
-        appBar: _pageIndexModel.pageIndex == 0
-            ? AppBar(
-                title: Center(
-                  child: isApple(context)
-                      ? const Text('Remote Control')
-                      : const Text('Emotiva Remote'),
+    return Scaffold(
+      appBar: _pageIndexModel.pageIndex == 0
+          ? AppBar(
+              title: Center(
+                child: isApple(context)
+                    ? const Text('Remote Control')
+                    : const Text('Emotiva Remote'),
+              ),
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.help,
+                  semanticLabel: 'show help',
                 ),
-                leading: IconButton(
-                  icon: const Icon(
-                    Icons.help,
-                    semanticLabel: 'show help',
-                  ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Help()),
-                  ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Help()),
                 ),
-                actions: [
-                  // https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                  // suggest migrating to MenuAnchor.
-                  MenuAnchor(
-                    builder:
-                        (BuildContext context, MenuController controller, _) {
-                      return IconButton(
-                        onPressed: () {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                        icon: const Icon(Icons.more_vert),
-                      );
-                    },
-                    menuChildren: [
-                      MenuItemButton(
-                        child: const Text('Device discovery'),
-                        onPressed: () async {
-                          final device = context.read<DeviceChanges>().device;
-                          device.unsubscribeAll();
-                          await device.closeSockets();
-                          navigateToDiscovery();
-                        },
-                      ),
-                      MenuItemButton(
-                        child: const Text('Known issues'),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const KnownIssues(),
-                          ),
+              ),
+              actions: [
+                // https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+                // suggest migrating to MenuAnchor.
+                MenuAnchor(
+                  builder:
+                      (BuildContext context, MenuController controller, _) {
+                    return IconButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      icon: const Icon(Icons.more_vert),
+                    );
+                  },
+                  menuChildren: [
+                    MenuItemButton(
+                      child: const Text('Device discovery'),
+                      onPressed: () async {
+                        final device = context.read<DeviceChanges>().device;
+                        device.unsubscribeAll();
+                        await device.closeSockets();
+                        navigateToDiscovery();
+                      },
+                    ),
+                    MenuItemButton(
+                      child: const Text('Known issues'),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const KnownIssues(),
                         ),
                       ),
-                      MenuItemButton(
-                        child: const Text('Licenses'),
-                        onPressed: () => showLicensePage(
-                          context: context,
-                          applicationName: 'Unofficial Emotiva Remote',
-                          applicationIcon: isApple(context)
-                              // The iOS icon was required by Apple to be
-                              // different and I don't have an appropriate
-                              // version of the iOS icon to use here.
-                              ? null
-                              : appIcon,
-                        ),
+                    ),
+                    MenuItemButton(
+                      child: const Text('Licenses'),
+                      onPressed: () => showLicensePage(
+                        context: context,
+                        applicationName: 'Unofficial Emotiva Remote',
+                        applicationIcon: isApple(context)
+                            // The iOS icon was required by Apple to be
+                            // different and I don't have an appropriate
+                            // version of the iOS icon to use here.
+                            ? null
+                            : appIcon,
                       ),
-                      MenuItemButton(
-                        child: const Text('Debug logs'),
-                        onPressed: () => LogConsole.open(context),
-                      ),
-                      MenuItemButton(
-                        child: const MultiDeviceSetting(),
-                        // MuiltiDeviceSettings has its own gesture behavior.
-                        // But onPressed needs to be non-null here to get the
-                        // desired hover effect.
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            : null,
+                    ),
+                    MenuItemButton(
+                      child: const Text('Debug logs'),
+                      onPressed: () => LogConsole.open(context),
+                    ),
+                    MenuItemButton(
+                      child: const MultiDeviceSetting(),
+                      // MuiltiDeviceSettings has its own gesture behavior.
+                      // But onPressed needs to be non-null here to get the
+                      // desired hover effect.
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : null,
+      body: SafeArea(
         // Using IndexedStack is critical. It preserves the existance (I think)
         // of the widgets as the user navigates between them so that we don't
         // try to do something breaking like creating additional listeners for a
@@ -314,7 +310,7 @@ class _MainViewState extends State<MainView> {
         // GC'd.
         // It's tempting to wrap the body in a Padding widget, but MenuPage uses
         // different padding than the other pages.
-        body: IndexedStack(
+        child: IndexedStack(
           index: _pageIndexModel.pageIndex,
           children: const [
             InfoPage(),
@@ -324,42 +320,42 @@ class _MainViewState extends State<MainView> {
             Zone2Page(),
           ],
         ),
-        persistentFooterButtons: [
-          ChangeNotifierProvider.value(
-            value: _pageIndexModel,
-            child: const VolumeControls(),
-          )
+      ),
+      persistentFooterButtons: [
+        ChangeNotifierProvider.value(
+          value: _pageIndexModel,
+          child: const VolumeControls(),
+        )
+      ],
+      bottomNavigationBar: NavigationBar(
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.info),
+            label: 'Info',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.route),
+            label: 'Inputs',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.gamepad),
+            label: 'Menu',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.radio),
+            label: 'Tuner',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.location_on),
+            label: 'Zone 2',
+          ),
         ],
-        bottomNavigationBar: NavigationBar(
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.info),
-              label: 'Info',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.route),
-              label: 'Inputs',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.gamepad),
-              label: 'Menu',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.radio),
-              label: 'Tuner',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.location_on),
-              label: 'Zone 2',
-            ),
-          ],
-          selectedIndex: _pageIndexModel.pageIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              _pageIndexModel.setPageIndex(index);
-            });
-          },
-        ),
+        selectedIndex: _pageIndexModel.pageIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            _pageIndexModel.setPageIndex(index);
+          });
+        },
       ),
     );
   }
@@ -393,61 +389,58 @@ class DiscoveryError extends StatelessWidget {
         ? 'No device was found.'
         : 'No Emotiva device was found.';
     if (error is String) message = error.toString();
-    return SafeArea(
-      bottom: false,
-      child: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(padding),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(message),
-                const SizedBox(height: 25.0),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Discovery(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                  },
-                  child: const Text('Try again'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Discovery(useFake: true),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                  },
-                  child: const Text('Demo mode'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ConnectionHelp(),
-                      ),
-                    );
-                  },
-                  child: const Text('Troubleshooting tips'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => LogConsole.open(context),
-                  child: const Text('Debug logs'),
-                ),
-              ],
-            ),
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(padding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(message),
+              const SizedBox(height: 25.0),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Discovery(),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                child: const Text('Try again'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Discovery(useFake: true),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                child: const Text('Demo mode'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ConnectionHelp(),
+                    ),
+                  );
+                },
+                child: const Text('Troubleshooting tips'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => LogConsole.open(context),
+                child: const Text('Debug logs'),
+              ),
+            ],
           ),
         ),
       ),
@@ -460,20 +453,17 @@ class ScanningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              isApple(context)
-                  ? const Text('Searching for a device...')
-                  : const Text('Searching for an Emotiva device...'),
-              const SizedBox(height: 25.0),
-              const CircularProgressIndicator.adaptive(),
-            ],
-          ),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            isApple(context)
+                ? const Text('Searching for a device...')
+                : const Text('Searching for an Emotiva device...'),
+            const SizedBox(height: 25.0),
+            const CircularProgressIndicator.adaptive(),
+          ],
         ),
       ),
     );
@@ -576,20 +566,19 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
-      builder: (context, _) => SafeArea(
-        bottom: false,
-        child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ConnectionHelp(),
-                  ),
-                );
-              },
-              child: const Icon(Icons.help)),
-          body: ListView(
+      builder: (context, _) => Scaffold(
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ConnectionHelp(),
+                ),
+              );
+            },
+            child: const Icon(Icons.help)),
+        body: SafeArea(
+          child: ListView(
             padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
             children: <Widget>[
                   Row(
