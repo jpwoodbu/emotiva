@@ -36,7 +36,6 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
   } else {
     selection = await showCustomBottomSheet<Zone2OtherSelection>(
       context: context,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ElevatedButton.icon(
             onPressed: () => Navigator.pop<Zone2OtherSelection>(

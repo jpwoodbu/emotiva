@@ -45,10 +45,10 @@ void _bumpWidthTrim(double step, emotiva.Device device) {
   addHaptic(() => device.trimWidth(trim));
 }
 
-Future<T?> showCustomBottomSheet<T>(
-    {required BuildContext context,
-    required List<Widget> children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center}) {
+Future<T?> showCustomBottomSheet<T>({
+  required BuildContext context,
+  required List<Widget> children,
+}) {
   return showModalBottomSheet(
     context: context,
     scrollControlDisabledMaxHeightRatio: 1.0, // allows a full height sheet
@@ -64,7 +64,7 @@ Future<T?> showCustomBottomSheet<T>(
           padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: crossAxisAlignment,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: children,
           ),
         ),
@@ -116,7 +116,6 @@ void _sourceSelector(BuildContext context, emotiva.Device device) async {
   } else {
     selection = await showCustomBottomSheet<int>(
       context: context,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: _buildSourceList(context, device),
     );
   }
@@ -264,7 +263,6 @@ void xlrSelector(BuildContext context, emotiva.Device device,
   } else {
     selection = await showCustomBottomSheet<XlrSelection>(
       context: context,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ElevatedButton.icon(
             onPressed: () =>
@@ -375,7 +373,6 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
   } else {
     selection = await showCustomBottomSheet<OtherSelection>(
       context: context,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ElevatedButton.icon(
             onPressed: () =>
@@ -472,7 +469,6 @@ void _modeSelector(BuildContext context, emotiva.Device device) async {
   } else {
     selection = await showCustomBottomSheet<ModeSelection>(
       context: context,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ElevatedButton.icon(
             onPressed: () =>
