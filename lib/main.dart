@@ -303,6 +303,7 @@ class _MainViewState extends State<MainView> {
             )
           : null,
       body: SafeArea(
+        bottom: false,
         // Using IndexedStack is critical. It preserves the existance (I think)
         // of the widgets as the user navigates between them so that we don't
         // try to do something breaking like creating additional listeners for a
@@ -578,6 +579,7 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
             },
             child: const Icon(Icons.help)),
         body: SafeArea(
+          bottom: false,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
             children: <Widget>[

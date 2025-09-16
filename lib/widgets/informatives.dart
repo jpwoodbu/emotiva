@@ -21,6 +21,12 @@ class InformationPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
+        // Since we're using a scrollable widget, it's OK for the content to be
+        // visible in the "unsafe" area at the bottom edge of the screen. And I
+        // like the to-the-edge look.
+        // TODO(jpwoodbu) This is not working as I would expect. The content
+        // does not scroll to the bottom edge of the screen. Investigate.
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.all(padding),
           child: ListView.separated(
