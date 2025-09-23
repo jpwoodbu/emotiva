@@ -62,15 +62,55 @@ Future<T?> showCustomBottomSheet<T>({
           // Bottom padding is not needed for a bottom sheet. And the bottom
           // margin should be sufficiently handled by the SafeArea wrapper.
           padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
           ),
         ),
       );
     },
   );
+}
+
+class SelectionButton<T> extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final T selection;
+
+  const SelectionButton(
+      {required this.label,
+      required this.icon,
+      required this.selection,
+      super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      style: const ButtonStyle(alignment: Alignment.centerLeft),
+      onPressed: () => Navigator.pop<T>(context, selection),
+      icon: Icon(icon),
+      label: Text(label),
+    );
+  }
+}
+
+class CupertinoSelectionButton<T> extends StatelessWidget {
+  final String label;
+  final T selection;
+
+  const CupertinoSelectionButton(
+      {required this.label, required this.selection, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoActionSheetAction(
+      onPressed: () => Navigator.pop<T>(context, selection),
+      child: Text(label),
+    );
+  }
 }
 
 List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
@@ -83,20 +123,13 @@ List<Widget> _buildSourceList(BuildContext context, emotiva.Device device) {
     }
     if (visible) {
       if (isApple(context)) {
-        widgets.add(
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<int>(context, i),
-            child: Text(name),
-          ),
-        );
+        widgets.add(CupertinoSelectionButton<int>(label: name, selection: i));
       } else {
-        widgets.add(
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pop<int>(context, i),
-            icon: const Icon(Icons.person),
-            label: Text(name),
-          ),
-        );
+        widgets.add(SelectionButton<int>(
+          label: name,
+          icon: Icons.person,
+          selection: i,
+        ));
       }
     }
   }
@@ -133,10 +166,8 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) async {
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(8, (index) {
           final number = index + 1;
-          return CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<int>(context, number),
-            child: Text('HDMI $number'),
-          );
+          return CupertinoSelectionButton<int>(
+              label: 'HDMI $number', selection: number);
         }),
       ),
     );
@@ -145,11 +176,10 @@ void _hdmiSelector(BuildContext context, emotiva.Device device) async {
       context: context,
       children: List<Widget>.generate(8, (index) {
         final number = index + 1;
-        return ElevatedButton.icon(
-          onPressed: () => Navigator.pop<int>(context, number),
-          icon: const Icon(Icons.settings_input_hdmi),
-          label: Text('HDMI $number'),
-        );
+        return SelectionButton<int>(
+            label: 'HDMI $number',
+            icon: Icons.settings_input_hdmi,
+            selection: number);
       }),
     );
   }
@@ -168,10 +198,8 @@ void coaxSelector(BuildContext context, emotiva.Device device,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
-          return CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<int>(context, number),
-            child: Text('Coax $number'),
-          );
+          return CupertinoSelectionButton<int>(
+              label: 'Coax $number', selection: number);
         }),
       ),
     );
@@ -180,10 +208,10 @@ void coaxSelector(BuildContext context, emotiva.Device device,
       context: context,
       children: List<Widget>.generate(4, (index) {
         final number = index + 1;
-        return ElevatedButton.icon(
-            onPressed: () => Navigator.pop<int>(context, number),
-            icon: const Icon(Icons.settings_input_composite),
-            label: Text('Coax $number'));
+        return SelectionButton<int>(
+            label: 'Coax $number',
+            icon: Icons.settings_input_composite,
+            selection: number);
       }),
     );
   }
@@ -207,10 +235,8 @@ void opticalSelector(BuildContext context, emotiva.Device device,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(4, (index) {
           final number = index + 1;
-          return CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<int>(context, number),
-            child: Text('Optical $number'),
-          );
+          return CupertinoSelectionButton<int>(
+              label: 'Optical $number', selection: number);
         }),
       ),
     );
@@ -219,10 +245,8 @@ void opticalSelector(BuildContext context, emotiva.Device device,
       context: context,
       children: List<Widget>.generate(4, (index) {
         final number = index + 1;
-        return ElevatedButton.icon(
-            onPressed: () => Navigator.pop<int>(context, number),
-            icon: const Icon(Icons.lightbulb),
-            label: Text('Optical $number'));
+        return SelectionButton<int>(
+            label: 'Optical $number', icon: Icons.lightbulb, selection: number);
       }),
     );
   }
@@ -245,35 +269,27 @@ void xlrSelector(BuildContext context, emotiva.Device device,
   if (isApple(context)) {
     selection = await showCupertinoModalPopup<XlrSelection>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<XlrSelection>(context, XlrSelection.aesebu),
-            child: const Text('AES/EBU'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<XlrSelection>(context, XlrSelection.balanced),
-            child: const Text('Balanced Input'),
-          ),
+      builder: (BuildContext context) => const CupertinoActionSheet(
+        actions: <CupertinoSelectionButton<XlrSelection>>[
+          CupertinoSelectionButton(
+              label: 'AES/EBU', selection: XlrSelection.aesebu),
+          CupertinoSelectionButton(
+              label: 'Balanced Input', selection: XlrSelection.balanced),
         ],
       ),
     );
   } else {
     selection = await showCustomBottomSheet<XlrSelection>(
       context: context,
-      children: <Widget>[
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<XlrSelection>(context, XlrSelection.aesebu),
-            icon: const Icon(Icons.developer_board),
-            label: const Text('AES/EBU')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<XlrSelection>(context, XlrSelection.balanced),
-            icon: const Icon(Icons.album),
-            label: const Text('Balanced Input')),
+      children: const <SelectionButton<XlrSelection>>[
+        SelectionButton(
+            label: 'AES/EBU',
+            icon: Icons.developer_board,
+            selection: XlrSelection.aesebu),
+        SelectionButton(
+            label: 'Balanced Input',
+            icon: Icons.album,
+            selection: XlrSelection.balanced),
       ],
     );
   }
@@ -306,10 +322,8 @@ void analogSelector(BuildContext context, emotiva.Device device,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: List<Widget>.generate(3, (index) {
           final number = index + 1;
-          return CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<int>(context, number),
-            child: Text('Analog $number'),
-          );
+          return CupertinoSelectionButton<int>(
+              label: 'Analog $number', selection: number);
         }),
       ),
     );
@@ -318,11 +332,10 @@ void analogSelector(BuildContext context, emotiva.Device device,
       context: context,
       children: List<Widget>.generate(3, (index) {
         final number = index + 1;
-        return ElevatedButton.icon(
-          onPressed: () => Navigator.pop<int>(context, number),
-          icon: const Icon(Icons.settings_input_component),
-          label: Text('Analog $number'),
-        );
+        return SelectionButton<int>(
+            label: 'Analog $number',
+            icon: Icons.settings_input_component,
+            selection: number);
       }),
     );
   }
@@ -345,55 +358,33 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
   if (isApple(context)) {
     selection = await showCupertinoModalPopup<OtherSelection>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.arc),
-            child: const Text('ARC'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.usb),
-            child: const Text('USB'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.tuner),
-            child: const Text('Tuner'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.front),
-            child: const Text('Front'),
-          ),
+      builder: (BuildContext context) => const CupertinoActionSheet(
+        actions: <CupertinoSelectionButton<OtherSelection>>[
+          CupertinoSelectionButton(label: 'ARC', selection: OtherSelection.arc),
+          CupertinoSelectionButton(label: 'USB', selection: OtherSelection.usb),
+          CupertinoSelectionButton(
+              label: 'Tuner', selection: OtherSelection.tuner),
+          CupertinoSelectionButton(
+              label: 'Front', selection: OtherSelection.front),
         ],
       ),
     );
   } else {
     selection = await showCustomBottomSheet<OtherSelection>(
       context: context,
-      children: <Widget>[
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.arc),
-            icon: const Icon(Icons.settings_input_hdmi),
-            label: const Text('ARC')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.usb),
-            icon: const Icon(Icons.usb),
-            label: const Text('USB')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.tuner),
-            icon: const Icon(Icons.radio),
-            label: const Text('Tuner')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<OtherSelection>(context, OtherSelection.front),
-            icon: const Icon(Icons.smartphone),
-            label: const Text('Front')),
+      children: const <SelectionButton<OtherSelection>>[
+        SelectionButton(
+            label: 'ARC',
+            icon: Icons.settings_input_hdmi,
+            selection: OtherSelection.arc),
+        SelectionButton(
+            label: 'USB', icon: Icons.usb, selection: OtherSelection.usb),
+        SelectionButton(
+            label: 'Tuner', icon: Icons.radio, selection: OtherSelection.tuner),
+        SelectionButton(
+            label: 'Front',
+            icon: Icons.smartphone,
+            selection: OtherSelection.front),
       ],
     );
   }
@@ -426,85 +417,64 @@ void _modeSelector(BuildContext context, emotiva.Device device) async {
   if (isApple(context)) {
     selection = await showCupertinoModalPopup<ModeSelection>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.auto),
-            child: const Text('Auto'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.stereo),
-            child: const Text('Stereo'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.direct),
-            child: const Text('Direct'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<ModeSelection>(
-                context, ModeSelection.referenceStereo),
-            child: const Text('Reference Stereo'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.dolby),
-            child: const Text('Dolby'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.dts),
-            child: const Text('DTS'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.allStereo),
-            child: const Text('All Stereo'),
-          ),
+      builder: (BuildContext context) => const CupertinoActionSheet(
+        actions: <CupertinoSelectionButton<ModeSelection>>[
+          CupertinoSelectionButton(
+              label: 'Auto', selection: ModeSelection.auto),
+          CupertinoSelectionButton(
+              label: 'Stereo', selection: ModeSelection.stereo),
+          CupertinoSelectionButton(
+              label: 'Direct', selection: ModeSelection.direct),
+          CupertinoSelectionButton(
+              label: 'Reference Stereo',
+              selection: ModeSelection.referenceStereo),
+          CupertinoSelectionButton(
+              label: 'Dolby', selection: ModeSelection.dolby),
+          CupertinoSelectionButton(label: 'DTS', selection: ModeSelection.dts),
+          CupertinoSelectionButton(
+              label: 'All Stereo', selection: ModeSelection.allStereo),
         ],
       ),
     );
   } else {
     selection = await showCustomBottomSheet<ModeSelection>(
       context: context,
-      children: <Widget>[
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.auto),
-            icon: const Icon(Icons.surround_sound),
-            label: const Text('Auto')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.stereo),
-            icon: const Icon(Icons.speaker_group),
-            label: const Text('Stereo')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.direct),
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text('Direct')),
-        ElevatedButton.icon(
-            onPressed: () => Navigator.pop<ModeSelection>(
-                context, ModeSelection.referenceStereo),
-            icon: const Icon(Icons.hearing),
-            label: const Text('Reference Stereo')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.dolby),
-            icon: const Icon(Icons.surround_sound),
-            label: const Text('Dolby')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.dts),
-            icon: const Icon(Icons.surround_sound),
-            label: const Text('DTS')),
-        ElevatedButton.icon(
-            onPressed: () =>
-                Navigator.pop<ModeSelection>(context, ModeSelection.allStereo),
-            icon: const Icon(Icons.hub),
-            label: const Text('All Stereo')),
+      children: const <SelectionButton<ModeSelection>>[
+        SelectionButton(
+          label: 'Auto',
+          icon: Icons.surround_sound,
+          selection: ModeSelection.auto,
+        ),
+        SelectionButton(
+          label: 'Stereo',
+          icon: Icons.speaker_group,
+          selection: ModeSelection.stereo,
+        ),
+        SelectionButton(
+          label: 'Direct',
+          icon: Icons.arrow_forward,
+          selection: ModeSelection.direct,
+        ),
+        SelectionButton(
+          label: 'Reference Stereo',
+          icon: Icons.hearing,
+          selection: ModeSelection.referenceStereo,
+        ),
+        SelectionButton(
+          label: 'Dolby',
+          icon: Icons.surround_sound,
+          selection: ModeSelection.dolby,
+        ),
+        SelectionButton(
+          label: 'DTS',
+          icon: Icons.surround_sound,
+          selection: ModeSelection.dts,
+        ),
+        SelectionButton(
+          label: 'All Stereo',
+          icon: Icons.hub,
+          selection: ModeSelection.allStereo,
+        ),
       ],
     );
   }

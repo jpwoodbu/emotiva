@@ -18,35 +18,25 @@ void _otherInputsSelector(BuildContext context, emotiva.Device device) async {
   if (isApple(context)) {
     selection = await showCupertinoModalPopup<Zone2OtherSelection>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<Zone2OtherSelection>(
-                context, Zone2OtherSelection.usb),
-            child: const Text('USB'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop<Zone2OtherSelection>(
-                context, Zone2OtherSelection.front),
-            child: const Text('Front'),
-          ),
+      builder: (BuildContext context) => const CupertinoActionSheet(
+        actions: <CupertinoSelectionButton<Zone2OtherSelection>>[
+          CupertinoSelectionButton(
+              label: 'USB', selection: Zone2OtherSelection.usb),
+          CupertinoSelectionButton(
+              label: 'Front', selection: Zone2OtherSelection.front),
         ],
       ),
     );
   } else {
     selection = await showCustomBottomSheet<Zone2OtherSelection>(
       context: context,
-      children: <Widget>[
-        ElevatedButton.icon(
-            onPressed: () => Navigator.pop<Zone2OtherSelection>(
-                context, Zone2OtherSelection.usb),
-            icon: const Icon(Icons.usb),
-            label: const Text('USB')),
-        ElevatedButton.icon(
-            onPressed: () => Navigator.pop<Zone2OtherSelection>(
-                context, Zone2OtherSelection.front),
-            icon: const Icon(Icons.smartphone),
-            label: const Text('Front')),
+      children: const <SelectionButton<Zone2OtherSelection>>[
+        SelectionButton(
+            label: 'USB', icon: Icons.usb, selection: Zone2OtherSelection.usb),
+        SelectionButton(
+            label: 'Front',
+            icon: Icons.smartphone,
+            selection: Zone2OtherSelection.front),
       ],
     );
   }
