@@ -88,7 +88,7 @@ class SelectionButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
+    return TextButton.icon(
       style: const ButtonStyle(alignment: Alignment.centerLeft),
       onPressed: () => Navigator.pop<T>(context, selection),
       icon: Icon(icon),
