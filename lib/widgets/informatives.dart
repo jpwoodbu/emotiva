@@ -13,15 +13,18 @@ class InformationPage extends StatelessWidget {
   final String title;
   final List<InfoSection> sections;
 
-  const InformationPage(
-      {super.key, required this.title, required this.sections});
+  const InformationPage({
+    super.key,
+    required this.title,
+    required this.sections,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: padding),
+        minimum: const .symmetric(horizontal: padding),
         // Since we're using a scrollable widget, it's OK for the content to be
         // visible in the "unsafe" area at the bottom edge of the screen. And I
         // like the to-the-edge look.
@@ -48,10 +51,10 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
+          padding: const .only(bottom: 8.0),
           child: Text(title, style: Theme.of(context).textTheme.titleLarge),
         ),
         Text(body),

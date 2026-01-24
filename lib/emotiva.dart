@@ -29,8 +29,10 @@ String _pingRequest() {
 /// device. While open, a ping packet is broadcast on the network. The listening
 /// socket waits for [timeoutSec] before giving up and throwing an exception.
 Future<Device> discover(int timeoutSec) async {
-  final socket =
-      await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
+  final socket = await RawDatagramSocket.bind(
+    InternetAddress.anyIPv4,
+    _transponderPort,
+  );
   socket.broadcastEnabled = true;
   final stream = socket.timeout(Duration(seconds: timeoutSec));
   final ping = _pingRequest();
@@ -38,7 +40,10 @@ Future<Device> discover(int timeoutSec) async {
     switch (event) {
       case RawSocketEvent.write:
         final bytesSent = socket.send(
-            ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+          ping.codeUnits,
+          InternetAddress(_broadcastAddress),
+          _pingPort,
+        );
         if (bytesSent == 0) {
           throw 'Unable to send broadcast ping.';
         }
@@ -89,7 +94,10 @@ class MultiDeviceDiscover {
     if (socket == null) return;
     final ping = _pingRequest();
     final bytesSent = socket.send(
-        ping.codeUnits, InternetAddress(_broadcastAddress), _pingPort);
+      ping.codeUnits,
+      InternetAddress(_broadcastAddress),
+      _pingPort,
+    );
     if (bytesSent == 0) {
       _log.severe('Unable to send broadcast ping.');
     } else {
@@ -99,11 +107,15 @@ class MultiDeviceDiscover {
 
   Stream<Device> stream() async* {
     if (_socket != null) {
-      throw StateError('The socket was already established. '
-          'Was stream() called more than once without calling close()?');
+      throw StateError(
+        'The socket was already established. '
+        'Was stream() called more than once without calling close()?',
+      );
     }
-    _socket =
-        await RawDatagramSocket.bind(InternetAddress.anyIPv4, _transponderPort);
+    _socket = await RawDatagramSocket.bind(
+      InternetAddress.anyIPv4,
+      _transponderPort,
+    );
     final socket = _socket!;
     socket.broadcastEnabled = true;
     _ping();
@@ -158,7 +170,8 @@ Device parseTransponder(String data, InternetAddress address) {
   final root = document.rootElement;
   if (root.name.toString() != 'emotivaTransponder') {
     throw Exception(
-        'Received improperly formatted emotivaTransponder response.');
+      'Received improperly formatted emotivaTransponder response.',
+    );
   }
   String model;
   String name;
@@ -253,7 +266,7 @@ class Device {
   double zone2Volume = 0.0;
   bool zone2Muted = false;
   String zone2Input = '';
-  TunerBand tunerBand = TunerBand.unknown;
+  TunerBand tunerBand = .unknown;
   String tunerChannel = '';
   String tunerSignal = '';
   String tunerProgram = '';
@@ -435,8 +448,11 @@ class Device {
     _log.info('sending: $request');
     // OMG, send() does not return a Future. Since UDP is fire-and-forget, I
     // don't suppose it was necessary for it to.
-    final bytesSent =
-        _sender.socket!.send(request.codeUnits, address, destinationPort);
+    final bytesSent = _sender.socket!.send(
+      request.codeUnits,
+      address,
+      destinationPort,
+    );
     _log.fine('bytes sent: $bytesSent; ${address.address}:$destinationPort');
     if (bytesSent == 0) {
       throw 'No bytes were sent';
@@ -445,12 +461,15 @@ class Device {
 
   String _requestWithFields(String requestType, Iterable<String> fields) {
     final builder = XmlBuilder()..processing('xml', 'version="1.0"');
-    builder.element(requestType, attributes: {'protocol': __protocolVersion()},
-        nest: () {
-      for (final f in fields) {
-        builder.element(f);
-      }
-    });
+    builder.element(
+      requestType,
+      attributes: {'protocol': __protocolVersion()},
+      nest: () {
+        for (final f in fields) {
+          builder.element(f);
+        }
+      },
+    );
     return builder.buildDocument().toXmlString();
   }
 
@@ -514,11 +533,16 @@ class Device {
   String _controlRequest(String command, String value, bool ack) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaControl',
-        attributes: {'protocol': __protocolVersion()}, nest: () {
-      builder.element(command,
-          attributes: {'value': value, 'ack': ack ? 'yes' : 'no'});
-    });
+    builder.element(
+      'emotivaControl',
+      attributes: {'protocol': __protocolVersion()},
+      nest: () {
+        builder.element(
+          command,
+          attributes: {'value': value, 'ack': ack ? 'yes' : 'no'},
+        );
+      },
+    );
     return builder.buildDocument().toString();
   }
 
@@ -657,8 +681,10 @@ class Device {
           // Set the initial sequence number.
           _sequenceNumber = serverSequence;
         } else if (delta > 1) {
-          _log.warning("It looks like we're behind one or more messages. "
-              "Updating all fields.");
+          _log.warning(
+            "It looks like we're behind one or more messages. "
+            "Updating all fields.",
+          );
           _sequenceNumber = serverSequence;
           updateAll();
         } else {
@@ -672,8 +698,10 @@ class Device {
             _sequenceNumber = serverSequence;
             _log.info('Sequence rollover heuristic has kicked in.');
           }
-          _log.warning("Received a message with an old sequence number. "
-              "Calling updateAll() in case we've missed something.");
+          _log.warning(
+            "Received a message with an old sequence number. "
+            "Calling updateAll() in case we've missed something.",
+          );
           updateAll();
           return;
         }
@@ -774,15 +802,15 @@ class Device {
         // "mode_*" fields indicate whether these modes are selectable on the
         // device via the "visible" atttribute.
         case 'mode_ref_stereo' ||
-              'mode_stereo' ||
-              'mode_music' ||
-              'mode_movie' ||
-              'mode_direct' ||
-              'mode_dolby' ||
-              'mode_dts' ||
-              'mode_all_stereo' ||
-              'mode_auto' ||
-              'mode_surround':
+            'mode_stereo' ||
+            'mode_music' ||
+            'mode_movie' ||
+            'mode_direct' ||
+            'mode_dolby' ||
+            'mode_dts' ||
+            'mode_all_stereo' ||
+            'mode_auto' ||
+            'mode_surround':
           visibility[field] = _visibleAttribute(element.attributes);
         case 'selected_mode':
           selectedMode = _valueAttribute(element.attributes);
@@ -813,9 +841,9 @@ class Device {
         case 'tuner_band':
           final band = _valueAttribute(element.attributes).toLowerCase();
           if (band == 'am') {
-            tunerBand = TunerBand.am;
+            tunerBand = .am;
           } else if (band == 'fm') {
-            tunerBand = TunerBand.fm;
+            tunerBand = .fm;
           } else {
             _log.severe('Unrecognized tuner band: $band');
           }
@@ -828,13 +856,13 @@ class Device {
         case 'tuner_RDS':
           tunerRds = _valueAttribute(element.attributes);
         case 'input_1' ||
-              'input_2' ||
-              'input_3' ||
-              'input_4' ||
-              'input_5' ||
-              'input_6' ||
-              'input_7' ||
-              'input_8':
+            'input_2' ||
+            'input_3' ||
+            'input_4' ||
+            'input_5' ||
+            'input_6' ||
+            'input_7' ||
+            'input_8':
           names[field] = _valueAttribute(element.attributes);
           visibility[field] = _visibleAttribute(element.attributes);
         case 'menu':
@@ -929,6 +957,7 @@ class Device {
   void modeAllStereo() => control('all_stereo');
   void speakerPreset1() => control('preset1');
   void speakerPreset2() => control('preset2');
+
   /// The Dirac speaker preset might only be available on older models, like the
   /// XMC-1.
   void speakerPresetDirac() => control('dirac');
@@ -1046,11 +1075,7 @@ class Device {
 class FakeDevice extends Device {
   int _sequence = 0;
 
-  FakeDevice(
-    super.address,
-    super.controlPort,
-    super.notifyPort,
-  ) {
+  FakeDevice(super.address, super.controlPort, super.notifyPort) {
     menuNotifyPort = 1234;
     model = 'Fake Emotiva';
     name = 'Fake name';
@@ -1081,7 +1106,7 @@ class FakeDevice extends Device {
     menuContents = _initMenuContent();
     zone2Input = 'Optical 1';
     zone2Volume = -40.0;
-    tunerBand = TunerBand.fm;
+    tunerBand = .fm;
     tunerSignal = '35 dBuV';
     tunerProgram = 'Classical';
     tunerRds = 'WCPE: Mahler 5';
@@ -1090,11 +1115,12 @@ class FakeDevice extends Device {
 
   Datagram _encode(String request) {
     return Datagram(
-        // In the fake, the address and port don't matter, but are required by
-        // DataGram.
-        Uint8List.fromList(request.codeUnits),
-        address,
-        notifyPort);
+      // In the fake, the address and port don't matter, but are required by
+      // DataGram.
+      Uint8List.fromList(request.codeUnits),
+      address,
+      notifyPort,
+    );
   }
 
   Menu _initMenuContent() {
@@ -1104,27 +1130,27 @@ class FakeDevice extends Device {
       final row = Row(i);
       // Their API docs say there are always 3 columns.
       for (int j = 0; j < 3; j++) {
-        final column = Column(j, false, Arrow.no, false);
+        final column = Column(j, false, .no, false);
         row.columns.add(column);
       }
       // We only display rows 4, 5, and 6. The actual front display of the
       // RMC-1L does the same thing.
       if (i == 4) {
         row.columns[1].value = 'Lip Synch Auto';
-        row.columns[1].arrow = Arrow.up;
+        row.columns[1].arrow = .up;
         row.columns[2].checkbox = true;
       }
       if (i == 5) {
         row.columns[0].value = 'HDMI 1';
-        row.columns[0].arrow = Arrow.left;
+        row.columns[0].arrow = .left;
         row.columns[1].value = 'Button';
         row.columns[1].highlight = true;
         row.columns[2].value = 'Input 1';
-        row.columns[2].arrow = Arrow.right;
+        row.columns[2].arrow = .right;
       }
       if (i == 6) {
         row.columns[1].value = '5.1 Mode';
-        row.columns[1].arrow = Arrow.down;
+        row.columns[1].arrow = .down;
         row.columns[2].value = 'Auto';
       }
       menu.rows.add(row);
@@ -1141,28 +1167,37 @@ class FakeDevice extends Device {
   }
 
   void _updateBuilder(builder, String field, String value) {
-    builder.element('property', attributes: {
-      'name': field,
-      'value': value,
-      'visible': _getVisibilityForField(field),
-      'status': 'ack'
-    });
+    builder.element(
+      'property',
+      attributes: {
+        'name': field,
+        'value': value,
+        'visible': _getVisibilityForField(field),
+        'status': 'ack',
+      },
+    );
   }
 
   void _parseUpdateRequest(Iterable<String> fields) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
-    builder.element('emotivaUpdate', attributes: {'protocol': '3.0'}, nest: () {
-      for (final f in fields) {
-        try {
-          _updateBuilder(builder, f, _getValueForField(f));
-        } catch (e) {
-          // Unknown field.
-          builder.element(f,
-              attributes: {'value': '', 'visible': 'true', 'status': 'nak'});
+    builder.element(
+      'emotivaUpdate',
+      attributes: {'protocol': '3.0'},
+      nest: () {
+        for (final f in fields) {
+          try {
+            _updateBuilder(builder, f, _getValueForField(f));
+          } catch (e) {
+            // Unknown field.
+            builder.element(
+              f,
+              attributes: {'value': '', 'visible': 'true', 'status': 'nak'},
+            );
+          }
         }
-      }
-    });
+      },
+    );
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _control.controller.add(_encode(response));
@@ -1287,7 +1322,8 @@ class FakeDevice extends Device {
             updatedFields.add(field);
           } catch (e) {
             _log.severe(
-                'Unable to parse volume delta: ${element.toXmlString()}');
+              'Unable to parse volume delta: ${element.toXmlString()}',
+            );
           }
         case 'loudness':
           _toggleLoudness();
@@ -1478,7 +1514,8 @@ class FakeDevice extends Device {
             updatedFields.add(field);
           } catch (e) {
             _log.severe(
-                'Unable to parse zone 2 volume delta: ${element.toXmlString()}');
+              'Unable to parse zone 2 volume delta: ${element.toXmlString()}',
+            );
           }
         case 'zone2_mute':
           zone2Muted = zone2Muted ? false : true;
@@ -1541,13 +1578,13 @@ class FakeDevice extends Device {
           updatedFields.add('zone2_input');
         case 'zone1_band':
           if (tunerBand == TunerBand.am) {
-            tunerBand = TunerBand.fm;
+            tunerBand = .fm;
             tunerChannel = 'FM 89.7';
             tunerProgram = 'Classical';
             tunerRds = 'WCPE: Mahler 5';
             tunerSignal = '45 dBuV';
           } else {
-            tunerBand = TunerBand.am;
+            tunerBand = .am;
             tunerChannel = 'AM 680';
             tunerProgram = 'News';
             tunerRds = 'Nothing but good news all day long.';
@@ -1558,7 +1595,7 @@ class FakeDevice extends Device {
             'tuner_channel',
             'tuner_program',
             'tuner_RDS',
-            'tuner_signal'
+            'tuner_signal',
           ]);
         default:
           _log.warning('FakeDevice does not support: $field');
@@ -1569,31 +1606,38 @@ class FakeDevice extends Device {
 
   void _notifyMenuSubscribers() {
     final builder = XmlBuilder()..processing('xml', 'version="1.0"');
-    builder.element('emotivaMenuNotify',
-        attributes: {'sequence': _sequence.toString()}, nest: () {
-      for (final row in menuContents.rows) {
-        builder.element('row', attributes: {'number': row.number.toString()},
+    builder.element(
+      'emotivaMenuNotify',
+      attributes: {'sequence': _sequence.toString()},
+      nest: () {
+        for (final row in menuContents.rows) {
+          builder.element(
+            'row',
+            attributes: {'number': row.number.toString()},
             nest: () {
-          for (final column in row.columns) {
-            Map<String, String> attributes = {
-              'number': column.number.toString(),
-              'value': column.value,
-              'fixedWidth': column.fixedWidth.toString(),
-              'highlight': column.highlight.toString(),
-              'arrow': column.arrow.name,
-            };
-            if (column.fixedWidth) {
-              attributes['offset'] = '5'; // just making something up for now
-            }
-            if (column.checkbox ?? false) {
-              attributes.remove('value');
-              attributes['checkbox'] = 'on';
-            }
-            builder.element('col', attributes: attributes);
-          }
-        });
-      }
-    });
+              for (final column in row.columns) {
+                Map<String, String> attributes = {
+                  'number': column.number.toString(),
+                  'value': column.value,
+                  'fixedWidth': column.fixedWidth.toString(),
+                  'highlight': column.highlight.toString(),
+                  'arrow': column.arrow.name,
+                };
+                if (column.fixedWidth) {
+                  attributes['offset'] =
+                      '5'; // just making something up for now
+                }
+                if (column.checkbox ?? false) {
+                  attributes.remove('value');
+                  attributes['checkbox'] = 'on';
+                }
+                builder.element('col', attributes: attributes);
+              }
+            },
+          );
+        }
+      },
+    );
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _sequence++;
@@ -1604,15 +1648,20 @@ class FakeDevice extends Device {
     // Note that updatedFields has already been vetted by other methods before
     // this method is called.
     final builder = XmlBuilder()..processing('xml', 'version="1.0"');
-    builder.element('emotivaNotify',
-        attributes: {'sequence': _sequence.toString()}, nest: () {
-      for (final field in updatedFields) {
-        String value = _getValueForField(field);
-        String visible = _getVisibilityForField(field);
-        builder.element('property',
-            attributes: {'name': field, 'value': value, 'visible': visible});
-      }
-    });
+    builder.element(
+      'emotivaNotify',
+      attributes: {'sequence': _sequence.toString()},
+      nest: () {
+        for (final field in updatedFields) {
+          String value = _getValueForField(field);
+          String visible = _getVisibilityForField(field);
+          builder.element(
+            'property',
+            attributes: {'name': field, 'value': value, 'visible': visible},
+          );
+        }
+      },
+    );
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _sequence++;
@@ -1747,23 +1796,29 @@ class FakeDevice extends Device {
 
   void _parseSubscriptionRequest(Iterable<String> fields) {
     final builder = XmlBuilder()..processing('xml', 'version="1.0"');
-    builder.element('emotivaSubscription', attributes: {'protocol': '3.0'},
-        nest: () {
-      for (final field in fields) {
-        if (Device._fields.contains(field)) {
-          _subscribedFields.add(field);
-          builder.element('property', attributes: {
-            'name': field,
-            'value': _getValueForField(field),
-            'status': 'ack',
-            'visible': _getVisibilityForField(field),
-          });
-        } else {
-          // Return nak status for unknown fields.
-          builder.element(field, attributes: {'status': 'nak'});
+    builder.element(
+      'emotivaSubscription',
+      attributes: {'protocol': '3.0'},
+      nest: () {
+        for (final field in fields) {
+          if (Device._fields.contains(field)) {
+            _subscribedFields.add(field);
+            builder.element(
+              'property',
+              attributes: {
+                'name': field,
+                'value': _getValueForField(field),
+                'status': 'ack',
+                'visible': _getVisibilityForField(field),
+              },
+            );
+          } else {
+            // Return nak status for unknown fields.
+            builder.element(field, attributes: {'status': 'nak'});
+          }
         }
-      }
-    });
+      },
+    );
     final response = builder.buildDocument().toXmlString(pretty: true);
     _log.info('response: $response');
     _control.controller.add(_encode(response));
@@ -1772,15 +1827,18 @@ class FakeDevice extends Device {
   void _parseUnsubscribeRequest(Iterable<String> fields) {
     String status = 'nak';
     final builder = XmlBuilder()..processing('xml', 'version="1.0"');
-    builder.element('emotivaUnsubscribe', nest: () {
-      for (final f in fields) {
-        _subscribedFields.remove(f);
-        if (Device._fields.contains(f)) {
-          status = 'ack';
+    builder.element(
+      'emotivaUnsubscribe',
+      nest: () {
+        for (final f in fields) {
+          _subscribedFields.remove(f);
+          if (Device._fields.contains(f)) {
+            status = 'ack';
+          }
+          builder.element(f, attributes: {'status': status});
         }
-        builder.element(f, attributes: {'status': status});
-      }
-    });
+      },
+    );
   }
 
   void _parseRequest(String request) {
@@ -1825,13 +1883,7 @@ Future<FakeDevice> futureFakeDevice() async =>
 /// Arrow direction. This would be named ArrowDirection except that I wanted to
 /// be consistent with reusing names of the attributes in the XML as described
 /// in the Emotiva API docs.
-enum Arrow {
-  no,
-  up,
-  down,
-  right,
-  left;
-}
+enum Arrow { no, up, down, right, left }
 
 class Column {
   int number = 0;
@@ -1844,8 +1896,15 @@ class Column {
   bool? checkbox;
   String value;
 
-  Column(this.number, this.highlight, this.arrow, this.fixedWidth,
-      {this.offset, this.checkbox, this.value = ''});
+  Column(
+    this.number,
+    this.highlight,
+    this.arrow,
+    this.fixedWidth, {
+    this.offset,
+    this.checkbox,
+    this.value = '',
+  });
 }
 
 class Row {
@@ -1880,12 +1939,20 @@ class Menu {
           case Arrow.up || Arrow.down:
             if (column.arrow == arrow) {
               return ArrowPosition(
-                  arrow, column.number, column.offset ?? 0, column.fixedWidth);
+                arrow,
+                column.number,
+                column.offset ?? 0,
+                column.fixedWidth,
+              );
             }
           case Arrow.left || Arrow.right:
             if (column.arrow == arrow) {
               return ArrowPosition(
-                  arrow, row.number, column.offset ?? 0, column.fixedWidth);
+                arrow,
+                row.number,
+                column.offset ?? 0,
+                column.fixedWidth,
+              );
             }
           case Arrow.no:
             continue;
@@ -1954,15 +2021,15 @@ Column _parseMenuNotifyColumn(XmlElement element) {
       case 'arrow':
         switch (value.toLowerCase()) {
           case 'no':
-            column.arrow = Arrow.no;
+            column.arrow = .no;
           case 'up':
-            column.arrow = Arrow.up;
+            column.arrow = .up;
           case 'down':
-            column.arrow = Arrow.down;
+            column.arrow = .down;
           case 'right':
-            column.arrow = Arrow.right;
+            column.arrow = .right;
           case 'left':
-            column.arrow = Arrow.left;
+            column.arrow = .left;
           default:
             _log.severe('Unexpected value for "arrow": $value');
         }

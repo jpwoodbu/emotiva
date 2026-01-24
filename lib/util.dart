@@ -13,14 +13,14 @@ T addHaptic<T>(T Function() function) {
 Widget menuWarning(BuildContext context) {
   final errorColor = Theme.of(context).colorScheme.error;
   return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
+    mainAxisAlignment: .center,
     children: [
       Icon(Icons.warning, color: errorColor),
       const SizedBox(width: 15.0),
       Flexible(
         child: Text(
           'Many settings cannot be changed while the OSD menu is active.',
-          style: TextStyle(fontWeight: FontWeight.bold, color: errorColor),
+          style: TextStyle(fontWeight: .bold, color: errorColor),
         ),
       ),
     ],
@@ -40,13 +40,15 @@ Widget menuWarning(BuildContext context) {
 /// that you're displaying a loading indicator. Using this function prevents the
 /// loading indicator from flashing on the screen very briefly, which can look
 /// like jank to a user.
-Future<T> waitAtLeast<T>(
-    {required Future<T> future, required Duration duration}) async {
+Future<T> waitAtLeast<T>({
+  required Future<T> future,
+  required Duration duration,
+}) async {
   final results = await Future.wait([future, Future.delayed(duration)]);
   return Future<T>.value(results[0]);
 }
 
 bool isApple(BuildContext context) {
   final p = Theme.of(context).platform;
-  return p == TargetPlatform.iOS || p == TargetPlatform.macOS;
+  return p == .iOS || p == .macOS;
 }

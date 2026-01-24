@@ -22,8 +22,8 @@ double _buttonSize(BoxConstraints constraints) {
 
 class _ArrowIcon extends StatelessWidget {
   const _ArrowIcon({required emotiva.Arrow arrow, required double size})
-      : _arrow = arrow,
-        _size = size;
+    : _arrow = arrow,
+      _size = size;
 
   final emotiva.Arrow _arrow;
   final double _size;
@@ -33,19 +33,22 @@ class _ArrowIcon extends StatelessWidget {
     IconData icon;
     var alignment = Alignment.centerLeft;
     switch (_arrow) {
-      case emotiva.Arrow.up:
+      case .up:
         icon = Icons.keyboard_arrow_up;
-      case emotiva.Arrow.down:
+      case .down:
         icon = Icons.keyboard_arrow_down;
-      case emotiva.Arrow.left:
+      case .left:
         icon = Icons.keyboard_arrow_left;
-      case emotiva.Arrow.right:
+      case .right:
         icon = Icons.keyboard_arrow_right;
         alignment = Alignment.centerRight;
       default:
         icon = Icons.error;
     }
-    return Container(alignment: alignment, child: Icon(icon, size: _size));
+    return Container(
+      alignment: alignment,
+      child: Icon(icon, size: _size),
+    );
   }
 }
 
@@ -60,8 +63,8 @@ class _ArrowIcon extends StatelessWidget {
 /// render the arrows in this widget.
 class _ArrowText extends StatelessWidget {
   const _ArrowText({required emotiva.Arrow arrow, required int offset})
-      : _arrow = arrow,
-        _offset = offset;
+    : _arrow = arrow,
+      _offset = offset;
 
   final emotiva.Arrow _arrow;
   final int _offset;
@@ -69,15 +72,15 @@ class _ArrowText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final character = switch (_arrow) {
-      emotiva.Arrow.up => '▲',
-      emotiva.Arrow.down => '▼',
+      .up => '▲',
+      .down => '▼',
       // We should only see up or down arrows passed to this widget.
       _ => '❌',
     };
     // TODO(jpwoodbu) Make this DRY with the config the _row() function.
     final style = GoogleFonts.firaCode(
-        textStyle:
-            const TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0));
+      textStyle: const TextStyle(fontWeight: .w400, fontSize: 12.0),
+    );
     const inset = EdgeInsets.all(2.0);
     return Container(
       // This container should be the same height as the arrow icon which is
@@ -99,7 +102,7 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
   // Leave space for a potential arrow.
   List<Widget> columns = [const SizedBox(width: _arrowSize)];
   if (rowIndex == leftArrowPosition.track) {
-    columns[0] = const _ArrowIcon(arrow: emotiva.Arrow.left, size: _arrowSize);
+    columns[0] = const _ArrowIcon(arrow: .left, size: _arrowSize);
   }
   for (final column in menu.rows[rowIndex].columns) {
     Color? color;
@@ -116,10 +119,13 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
           Container(
             margin: inset,
             padding: inset,
-            alignment: Alignment.centerLeft,
+            alignment: .centerLeft,
             color: backgroundColor,
-            child: Icon(Icons.disabled_by_default_outlined,
-                color: color, size: iconSize),
+            child: Icon(
+              Icons.disabled_by_default_outlined,
+              color: color,
+              size: iconSize,
+            ),
           ),
         );
       } else {
@@ -128,22 +134,27 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
           Container(
             margin: inset,
             padding: inset,
-            alignment: Alignment.centerLeft,
+            alignment: .centerLeft,
             color: backgroundColor,
-            child: Icon(Icons.check_box_outline_blank,
-                color: color, size: iconSize),
+            child: Icon(
+              Icons.check_box_outline_blank,
+              color: color,
+              size: iconSize,
+            ),
           ),
         );
       }
     } else {
       // Standard text content
-      final textStyle =
-          TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0, color: color);
+      final textStyle = TextStyle(
+        fontWeight: .w400,
+        fontSize: 12.0,
+        color: color,
+      );
       columns.add(
         Container(
           margin: inset,
           padding: inset,
-          // alignment: Alignment.centerLeft,
           color: backgroundColor,
           child: Text(
             column.value,
@@ -156,7 +167,7 @@ List<Widget> _row(emotiva.Menu menu, int rowIndex) {
     }
   }
   if (rowIndex == rightArrowPosition.track) {
-    columns.add(const _ArrowIcon(arrow: emotiva.Arrow.right, size: _arrowSize));
+    columns.add(const _ArrowIcon(arrow: .right, size: _arrowSize));
   } else {
     columns.add(const SizedBox(width: _arrowSize));
   }
@@ -170,8 +181,9 @@ TableRow _verticalArrow(emotiva.ArrowPosition arrowPosition) {
   for (int i = 0; i < 4; i++) {
     if (arrowPosition.track == i) {
       if (arrowPosition.fixedWidth) {
-        children.add(_ArrowText(
-            arrow: arrowPosition.arrow, offset: arrowPosition.offset));
+        children.add(
+          _ArrowText(arrow: arrowPosition.arrow, offset: arrowPosition.offset),
+        );
       } else {
         // TODO(jpwoodbu) Should I pass the icon data instead of the arrow?
         children.add(_ArrowIcon(arrow: arrowPosition.arrow, size: height));
@@ -199,10 +211,13 @@ class _OnScreenDisplay extends StatelessWidget {
     if (device.menuNotifyPort == null) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(padding, 24.0, padding, 0.0),
-        child: Text('Menu mirror not supported on this firmware',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error)),
+        child: Text(
+          'Menu mirror not supported on this firmware',
+          style: TextStyle(
+            fontWeight: .bold,
+            color: Theme.of(context).colorScheme.error,
+          ),
+        ),
       );
     }
     if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
@@ -215,13 +230,15 @@ class _OnScreenDisplay extends StatelessWidget {
             TableRow(
               children: [SizedBox(height: rowHeight)],
               decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: borderColor))),
+                border: Border(top: BorderSide(color: borderColor)),
+              ),
             ),
             TableRow(children: [SizedBox(height: rowHeight)]),
             TableRow(
               children: [SizedBox(height: rowHeight)],
               decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: borderColor))),
+                border: Border(bottom: BorderSide(color: borderColor)),
+              ),
             ),
             TableRow(children: [SizedBox(height: rowHeight)]),
           ],
@@ -243,17 +260,13 @@ class _OnScreenDisplay extends StatelessWidget {
           TableRow(
             children: _row(device.menuContents, 4),
             decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: borderColor),
-              ),
+              border: Border(top: BorderSide(color: borderColor)),
             ),
           ),
           TableRow(children: _row(device.menuContents, 5)),
           TableRow(
             decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: borderColor),
-              ),
+              border: Border(bottom: BorderSide(color: borderColor)),
             ),
             children: _row(device.menuContents, 6),
           ),
@@ -289,7 +302,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.zero,
+                  padding: .zero,
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuUp)
                       : null,
@@ -308,7 +321,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.zero,
+                  padding: .zero,
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuLeft)
                       : null,
@@ -322,7 +335,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.zero,
+                  padding: .zero,
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuEnter)
                       : null,
@@ -336,7 +349,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.zero,
+                  padding: .zero,
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuRight)
                       : null,
@@ -355,7 +368,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.zero,
+                  padding: .zero,
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.menuDown)
                       : null,
@@ -380,7 +393,7 @@ class _Controls extends StatelessWidget {
                   // table to appear to scale before it must. The padding makes
                   // the row approximiately the size it would have been had the
                   // icon size not been reduced (see below).
-                  padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
+                  padding: .all(_buttonSize(constraints) * 0.2),
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.info)
                       : null,
@@ -395,7 +408,7 @@ class _Controls extends StatelessWidget {
               Opacity(
                 opacity: opacity,
                 child: IconButton(
-                  padding: EdgeInsets.all(_buttonSize(constraints) * 0.2),
+                  padding: .all(_buttonSize(constraints) * 0.2),
                   onPressed: device.menuAvailable()
                       ? () => addHaptic(device.toggleMenu)
                       : null,
@@ -409,11 +422,9 @@ class _Controls extends StatelessWidget {
               ),
             ],
           ),
-          const TableRow(children: [
-            SizedBox(height: 15.0),
-            SizedBox(),
-            SizedBox(),
-          ]),
+          const TableRow(
+            children: [SizedBox(height: 15.0), SizedBox(), SizedBox()],
+          ),
         ],
       ),
     );
@@ -427,13 +438,10 @@ class MenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: .spaceBetween,
         children: [
           _OnScreenDisplay(),
-          Flexible(
-            fit: FlexFit.loose,
-            child: _Controls(),
-          ),
+          Flexible(fit: .loose, child: _Controls()),
         ],
       ),
     );

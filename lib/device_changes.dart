@@ -9,31 +9,27 @@ class DeviceChanges with ChangeNotifier {
   final emotiva.Device device;
 
   DeviceChanges(this.device) {
-    device.controlStream().listen(_handleControlPacket);
+    device.controlStream().listen((packet) {
+      _log.fine('packet arrived on control port');
+      _onPacket(packet);
+    });
     _log.info('handling control packets');
-    device.notifyStream().listen(_handleNotifyPacket);
+    device.notifyStream().listen((packet) {
+      _log.fine('packet arrived on notify port');
+      _onPacket(packet);
+    });
     _log.info('handling notify packets');
 
     if (device.menuNotifyPort != null) {
-      device.menuNotifyStream().listen(_handleMenuNotifyPacket);
+      device.menuNotifyStream().listen((packet) {
+        _log.fine('packet arrived on menu notify port');
+        _onPacket(packet);
+      });
       _log.info('handling menu notify packets');
     }
   }
 
-  void _handleControlPacket(String packet) {
-    _log.fine('packet arrived on control port');
-    device.parsePacket(packet);
-    notifyListeners();
-  }
-
-  void _handleNotifyPacket(String packet) {
-    _log.fine('packet arrived on notify port');
-    device.parsePacket(packet);
-    notifyListeners();
-  }
-
-  void _handleMenuNotifyPacket(String packet) {
-    _log.fine('packet arrived on menu notify port');
+  void _onPacket(String packet) {
     device.parsePacket(packet);
     notifyListeners();
   }

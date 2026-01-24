@@ -12,12 +12,12 @@ class _NameRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: .max,
+      mainAxisAlignment: .spaceBetween,
       children: [
         Text(
           device.name,
-          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 25, fontWeight: .bold),
         ),
         Row(
           children: [
@@ -44,7 +44,7 @@ class _NameRow extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -58,21 +58,27 @@ class _InfoTable extends StatelessWidget {
     final device = context.watch<DeviceChanges>().device;
     return Table(
       children: <TableRow>[
-        TableRow(children: [
-          Text(device.source),
-          Text(device.mode, overflow: TextOverflow.visible, softWrap: false),
-          const Text(''),
-        ]),
-        TableRow(children: [
-          Text('A: ${device.audioInput}'),
-          Text(device.audioBitstream),
-          Text(device.audioBits),
-        ]),
-        TableRow(children: [
-          Text('V: ${device.videoInput}'),
-          Text(device.videoFormat),
-          Text(device.videoSpace),
-        ])
+        TableRow(
+          children: [
+            Text(device.source),
+            Text(device.mode, overflow: .visible, softWrap: false),
+            const Text(''),
+          ],
+        ),
+        TableRow(
+          children: [
+            Text('A: ${device.audioInput}'),
+            Text(device.audioBitstream),
+            Text(device.audioBits),
+          ],
+        ),
+        TableRow(
+          children: [
+            Text('V: ${device.videoInput}'),
+            Text(device.videoFormat),
+            Text(device.videoSpace),
+          ],
+        ),
       ],
     );
   }
@@ -85,12 +91,12 @@ class _SpeakerPresetRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         const Flexible(
           child: Text(
             'Speaker preset',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 15, fontWeight: .bold),
           ),
         ),
         MenuAnchor(
@@ -105,8 +111,7 @@ class _SpeakerPresetRow extends StatelessWidget {
               },
               child: Text(
                 device.speakerPreset,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 15, fontWeight: .bold),
               ),
             );
           },
@@ -140,11 +145,11 @@ class _LoudnessRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         const Text(
           'Loudness',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 15, fontWeight: .bold),
         ),
         Switch.adaptive(
           value: device.loudness,
@@ -162,12 +167,11 @@ class _MuteRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
-        const Text('Mute',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        const Text('Mute', style: TextStyle(fontSize: 15, fontWeight: .bold)),
         Switch.adaptive(
-          value: device.muted ? true : false,
+          value: device.muted,
           onChanged: (bool _) => addHaptic(device.toggleMute),
         ),
       ],
@@ -182,12 +186,13 @@ class _FrontDisplayBrightnessRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         Flexible(
-          child: Text('Front display brightness:  ${device.dim}%',
-              style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          child: Text(
+            'Front display brightness:  ${device.dim}%',
+            style: const TextStyle(fontSize: 15, fontWeight: .bold),
+          ),
         ),
         IconButton(
           onPressed: () => addHaptic(device.cycleFrontDisplayBrightness),
@@ -195,7 +200,7 @@ class _FrontDisplayBrightnessRow extends StatelessWidget {
             Icons.light_mode,
             semanticLabel: 'cycle front display brightness',
           ),
-        )
+        ),
       ],
     );
   }
@@ -216,7 +221,7 @@ class InfoPage extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: [
                 if (device.menuDisplayed) menuWarning(context),
                 const _NameRow(),

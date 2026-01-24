@@ -32,9 +32,9 @@ class _VolumeControlsState extends State<VolumeControls> {
 
     if (Platform.isAndroid) {
       FlutterAndroidVolumeKeydown.stream.listen((event) {
-        if (event == HardwareButton.volume_down) {
+        if (event == .volume_down) {
           volumeDown();
-        } else if (event == HardwareButton.volume_up) {
+        } else if (event == .volume_up) {
           volumeUp();
         } else {
           _log.warning('Unrecognized hardware button: $event');
@@ -66,14 +66,11 @@ class _VolumeControlsState extends State<VolumeControls> {
     _controlMainVolume =
         context.watch<PageIndexChangeNotifier>().pageIndex != 4;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: Text(
-            'Volume',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          padding: const .only(left: 10),
+          child: Text('Volume', style: Theme.of(context).textTheme.titleLarge),
         ),
         Row(
           children: [

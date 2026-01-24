@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -70,11 +69,9 @@ class MyApp extends StatelessWidget {
       title: isApple(context) ? 'Remote Control' : 'Emotiva Remote',
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
+        brightness: .dark,
         // This is necessary so that Cupertino widgets use our theme.
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          applyThemeToAll: true,
-        ),
+        cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
       ),
       home: const DiscoverySwitch(),
     );
@@ -103,24 +100,26 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
       future: _preferences,
       builder:
           (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-          case ConnectionState.waiting:
-            return const CircularProgressIndicator.adaptive();
-          case ConnectionState.active:
-          case ConnectionState.done:
-            if (snapshot.hasError) {
-              _log.severe(
-                  'Error fetching multi-device setting: ${snapshot.error}');
-              return const Text('Error fetching settings.');
+            switch (snapshot.connectionState) {
+              case .none:
+              case .waiting:
+                return const CircularProgressIndicator.adaptive();
+              case .active:
+              case .done:
+                if (snapshot.hasError) {
+                  _log.severe(
+                    'Error fetching multi-device setting: ${snapshot.error}',
+                  );
+                  return const Text('Error fetching settings.');
+                }
+                final p = snapshot.data!;
+                final multiDeviceEnable =
+                    p.getBool(settingMultiDevice) ?? false;
+                return multiDeviceEnable
+                    ? const MultiDeviceDiscovery()
+                    : const Discovery();
             }
-            final p = snapshot.data!;
-            final multiDeviceEnable = p.getBool(settingMultiDevice) ?? false;
-            return multiDeviceEnable
-                ? const MultiDeviceDiscovery()
-                : const Discovery();
-        }
-      },
+          },
     );
   }
 }
@@ -147,34 +146,36 @@ class _MultiDeviceSettingState extends State<MultiDeviceSetting> {
       future: _preferences,
       builder:
           (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-          case ConnectionState.waiting:
-            return const LinearProgressIndicator();
-          case ConnectionState.active:
-          case ConnectionState.done:
-            if (snapshot.hasError) {
-              _log.severe(
-                  'Error fetching multi-device setting: ${snapshot.error}');
-              return const Text('Error fetching settings.');
-            } else {
-              final p = snapshot.data!;
-              final currentSetting = p.getBool(settingMultiDevice) ?? false;
-              return TextButton.icon(
-                icon: currentSetting
-                    ? const Icon(Icons.check_box)
-                    : const Icon(Icons.check_box_outline_blank),
-                onPressed: () async {
-                  await p.setBool(settingMultiDevice, !currentSetting);
-                  _log.fine(
-                      'multi-device mode -> ${p.getBool(settingMultiDevice)}');
-                  setState(() {});
-                },
-                label: const Text('Multi-device mode'),
-              );
+            switch (snapshot.connectionState) {
+              case .none:
+              case .waiting:
+                return const LinearProgressIndicator();
+              case .active:
+              case .done:
+                if (snapshot.hasError) {
+                  _log.severe(
+                    'Error fetching multi-device setting: ${snapshot.error}',
+                  );
+                  return const Text('Error fetching settings.');
+                } else {
+                  final p = snapshot.data!;
+                  final currentSetting = p.getBool(settingMultiDevice) ?? false;
+                  return TextButton.icon(
+                    icon: currentSetting
+                        ? const Icon(Icons.check_box)
+                        : const Icon(Icons.check_box_outline_blank),
+                    onPressed: () async {
+                      await p.setBool(settingMultiDevice, !currentSetting);
+                      _log.fine(
+                        'multi-device mode -> ${p.getBool(settingMultiDevice)}',
+                      );
+                      setState(() {});
+                    },
+                    label: const Text('Multi-device mode'),
+                  );
+                }
             }
-        }
-      },
+          },
     );
   }
 }
@@ -200,7 +201,7 @@ class _MainViewState extends State<MainView> {
         device.unsubscribeAll();
         _log.info('Closing sockets for device.');
         await device.closeSockets();
-        return AppExitResponse.exit;
+        return .exit;
       },
     );
     device.subscribeAll();
@@ -228,10 +229,7 @@ class _MainViewState extends State<MainView> {
                     : const Text('Emotiva Remote'),
               ),
               leading: IconButton(
-                icon: const Icon(
-                  Icons.help,
-                  semanticLabel: 'show help',
-                ),
+                icon: const Icon(Icons.help, semanticLabel: 'show help'),
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const Help()),
@@ -243,17 +241,17 @@ class _MainViewState extends State<MainView> {
                 MenuAnchor(
                   builder:
                       (BuildContext context, MenuController controller, _) {
-                    return IconButton(
-                      onPressed: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
+                        return IconButton(
+                          onPressed: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          icon: const Icon(Icons.more_vert),
+                        );
                       },
-                      icon: const Icon(Icons.more_vert),
-                    );
-                  },
                   menuChildren: [
                     MenuItemButton(
                       child: const Text('Device discovery'),
@@ -326,30 +324,15 @@ class _MainViewState extends State<MainView> {
         ChangeNotifierProvider.value(
           value: _pageIndexModel,
           child: const VolumeControls(),
-        )
+        ),
       ],
       bottomNavigationBar: NavigationBar(
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.info),
-            label: 'Info',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.route),
-            label: 'Inputs',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.gamepad),
-            label: 'Menu',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.radio),
-            label: 'Tuner',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.location_on),
-            label: 'Zone 2',
-          ),
+          NavigationDestination(icon: Icon(Icons.info), label: 'Info'),
+          NavigationDestination(icon: Icon(Icons.route), label: 'Inputs'),
+          NavigationDestination(icon: Icon(Icons.gamepad), label: 'Menu'),
+          NavigationDestination(icon: Icon(Icons.radio), label: 'Tuner'),
+          NavigationDestination(icon: Icon(Icons.location_on), label: 'Zone 2'),
         ],
         selectedIndex: _pageIndexModel.pageIndex,
         onDestinationSelected: (int index) {
@@ -369,9 +352,7 @@ class _MainViewState extends State<MainView> {
   void navigateToDiscovery() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (context) => const DiscoverySwitch(),
-      ),
+      MaterialPageRoute(builder: (context) => const DiscoverySwitch()),
       (Route<dynamic> route) => false,
     );
   }
@@ -395,7 +376,7 @@ class DiscoveryError extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(padding),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: [
               Text(message),
               const SizedBox(height: 25.0),
@@ -403,9 +384,7 @@ class DiscoveryError extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const Discovery(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const Discovery()),
                     (Route<dynamic> route) => false,
                   );
                 },
@@ -457,7 +436,7 @@ class ScanningPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
             isApple(context)
                 ? const Text('Searching for a device...')
@@ -499,8 +478,9 @@ class _DiscoveryState extends State<Discovery> {
       // being displayed for such a short time that the user can't read it
       // (which would be janky), show it for at least 750ms.
       _futureDevice = waitAtLeast<emotiva.Device>(
-          future: emotiva.discover(3).then(_setupDevice),
-          duration: const Duration(milliseconds: 750));
+        future: emotiva.discover(3).then(_setupDevice),
+        duration: const Duration(milliseconds: 750),
+      );
     }
   }
 
@@ -518,7 +498,7 @@ class _DiscoveryState extends State<Discovery> {
     return FutureBuilder<emotiva.Device>(
       future: _futureDevice,
       builder: (BuildContext context, AsyncSnapshot<emotiva.Device> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
+        if (snapshot.connectionState == .done) {
           if (snapshot.hasError) {
             _log.severe('Error on device discovery: ${snapshot.error}');
             return DiscoveryError(error: snapshot.error!);
@@ -569,25 +549,27 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
       builder: (context, _) => Scaffold(
         floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ConnectionHelp(),
-                ),
-              );
-            },
-            child: const Icon(Icons.help)),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ConnectionHelp()),
+            );
+          },
+          child: const Icon(Icons.help),
+        ),
         body: SafeArea(
           bottom: false,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
-            children: <Widget>[
+            children:
+                <Widget>[
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: .spaceBetween,
                     children: [
-                      Text('Device selection',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        'Device selection',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       ElevatedButton(
                         onPressed: () {
                           _discover.close();
@@ -620,21 +602,23 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       return const [Text('No devices found so far...')];
     } else {
       return devices
-          .map((device) => Card(
-                child: SizedBox(
-                  width: 300,
-                  height: 75,
-                  child: ListTile(
-                    leading: const Icon(Icons.album),
-                    title: Text(device.name),
-                    subtitle: Text(device.address.address),
-                    onTap: () {
-                      _discover.close();
-                      _connect(device);
-                    },
-                  ),
+          .map(
+            (device) => Card(
+              child: SizedBox(
+                width: 300,
+                height: 75,
+                child: ListTile(
+                  leading: const Icon(Icons.album),
+                  title: Text(device.name),
+                  subtitle: Text(device.address.address),
+                  onTap: () {
+                    _discover.close();
+                    _connect(device);
+                  },
                 ),
-              ))
+              ),
+            ),
+          )
           .toList();
     }
   }

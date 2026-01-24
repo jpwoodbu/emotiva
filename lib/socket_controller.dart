@@ -56,31 +56,29 @@ class SocketController {
     if (_socket == null) {
       throw 'Streaming cannot be set up without first calling bind().';
     }
-    _subscription = _socket!.listen(
-      (event) async {
-        switch (event) {
-          case RawSocketEvent.read:
-            final datagram = _socket!.receive();
-            if (datagram == null) {
-              _log.warning('$event on port $port with a null datagram');
-              return;
-            }
-            // Drop packets not from the provided address.
-            if (datagram.address != address) {
-              _log.warning('Ignoring packet from ${datagram.address}');
-              return;
-            }
-            controller.add(datagram);
-          case RawSocketEvent.readClosed:
-          case RawSocketEvent.closed:
-            _log.info('$event on port $port');
-            await _subscription?.cancel();
-            await bind();
-          case RawSocketEvent.write:
-            _log.warning('$event on port $port');
-        }
-      },
-    );
+    _subscription = _socket!.listen((event) async {
+      switch (event) {
+        case .read:
+          final datagram = _socket!.receive();
+          if (datagram == null) {
+            _log.warning('$event on port $port with a null datagram');
+            return;
+          }
+          // Drop packets not from the provided address.
+          if (datagram.address != address) {
+            _log.warning('Ignoring packet from ${datagram.address}');
+            return;
+          }
+          controller.add(datagram);
+        case .readClosed:
+        case .closed:
+          _log.info('$event on port $port');
+          await _subscription?.cancel();
+          await bind();
+        case .write:
+          _log.warning('$event on port $port');
+      }
+    });
   }
 }
 
@@ -100,7 +98,7 @@ class SendSocketController {
   Future<void> bind() async {
     socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     _subscription = socket!.listen((event) async {
-      if (event == RawSocketEvent.closed) {
+      if (event == .closed) {
         _log.info('$event on sending socket');
         await _subscription?.cancel();
         await bind();

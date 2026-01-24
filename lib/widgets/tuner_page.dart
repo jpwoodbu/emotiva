@@ -13,18 +13,20 @@ class _EnableTuner extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.read<DeviceChanges>().device;
     final textStyle = TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.error);
+      fontWeight: .bold,
+      color: Theme.of(context).colorScheme.error,
+    );
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: [
           Text('Tuner controls unavailable.', style: textStyle),
           Text('Set the Main input to Tuner.', style: textStyle),
           const SizedBox(height: 20),
           ElevatedButton(
-              onPressed: () => addHaptic(device.setTuner),
-              child: const Text('Input -> Tuner')),
+            onPressed: () => addHaptic(device.setTuner),
+            child: const Text('Input -> Tuner'),
+          ),
         ],
       ),
     );
@@ -38,14 +40,16 @@ class _FrequencyRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         const Text(
           'Channel',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: .bold),
         ),
-        Text(device.tunerChannel,
-            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+        Text(
+          device.tunerChannel,
+          style: const TextStyle(fontSize: 25, fontWeight: .bold),
+        ),
       ],
     );
   }
@@ -58,14 +62,13 @@ class _SignalRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
-        const Text(
-          'Signal',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        const Text('Signal', style: TextStyle(fontSize: 15, fontWeight: .bold)),
+        Text(
+          device.tunerSignal,
+          style: const TextStyle(fontSize: 15, fontWeight: .bold),
         ),
-        Text(device.tunerSignal,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -78,14 +81,16 @@ class _ProgramRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         const Text(
           'Program',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 15, fontWeight: .bold),
         ),
-        Text(device.tunerProgram,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        Text(
+          device.tunerProgram,
+          style: const TextStyle(fontSize: 15, fontWeight: .bold),
+        ),
       ],
     );
   }
@@ -98,14 +103,14 @@ class _RDS extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         const Divider(),
         Text(
           device.tunerRds,
           overflow: TextOverflow.visible,
           softWrap: true,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+          style: const TextStyle(fontSize: 15, fontWeight: .w400),
         ),
         const Divider(),
       ],
@@ -121,29 +126,26 @@ class _BandRow extends StatelessWidget {
     final device = context.watch<DeviceChanges>().device;
     bool enabled = _tunerActiveInput(device);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
-        const Text(
-          'Band',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        ),
+        const Text('Band', style: TextStyle(fontSize: 15, fontWeight: .bold)),
         SegmentedButton<emotiva.TunerBand>(
           segments: [
             ButtonSegment(
-                value: emotiva.TunerBand.am,
-                label: const Text('AM'),
-                enabled: enabled),
+              value: .am,
+              label: const Text('AM'),
+              enabled: enabled,
+            ),
             ButtonSegment(
-                value: emotiva.TunerBand.fm,
-                label: const Text('FM'),
-                enabled: enabled),
+              value: .fm,
+              label: const Text('FM'),
+              enabled: enabled,
+            ),
           ],
           emptySelectionAllowed: true,
-          selected: device.tunerBand == emotiva.TunerBand.unknown
-              ? {}
-              : {device.tunerBand},
+          selected: device.tunerBand == .unknown ? {} : {device.tunerBand},
           onSelectionChanged: (selection) => addHaptic(device.toggleTunerBand),
-        )
+        ),
       ],
     );
   }
@@ -164,102 +166,108 @@ class _Controls extends StatelessWidget {
     if (!_tunerActiveInput(device)) opacity = 0.38;
     return Table(
       children: [
-        TableRow(children: [
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.channelUp)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_up,
-                size: arrowSize,
-                semanticLabel: 'preset up',
+        TableRow(
+          children: [
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.channelUp)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: arrowSize,
+                  semanticLabel: 'preset up',
+                ),
               ),
             ),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.seekHigher)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_up,
-                size: arrowSize,
-                semanticLabel: 'seek up',
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.seekHigher)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: arrowSize,
+                  semanticLabel: 'seek up',
+                ),
               ),
             ),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.frequencyHigher)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_up,
-                size: arrowSize,
-                semanticLabel: 'tune up',
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.frequencyHigher)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: arrowSize,
+                  semanticLabel: 'tune up',
+                ),
               ),
             ),
-          ),
-        ]),
-        TableRow(children: [
-          Opacity(
-            opacity: opacity,
-            child: const Center(child: Text('Preset')),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: const Center(child: Text('Seek')),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: const Center(child: Text('Tune')),
-          ),
-        ]),
-        TableRow(children: [
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.channelDown)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                size: arrowSize,
-                semanticLabel: 'preset down',
+          ],
+        ),
+        TableRow(
+          children: [
+            Opacity(
+              opacity: opacity,
+              child: const Center(child: Text('Preset')),
+            ),
+            Opacity(
+              opacity: opacity,
+              child: const Center(child: Text('Seek')),
+            ),
+            Opacity(
+              opacity: opacity,
+              child: const Center(child: Text('Tune')),
+            ),
+          ],
+        ),
+        TableRow(
+          children: [
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.channelDown)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: arrowSize,
+                  semanticLabel: 'preset down',
+                ),
               ),
             ),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.seekLower)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                size: arrowSize,
-                semanticLabel: 'seek down',
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.seekLower)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: arrowSize,
+                  semanticLabel: 'seek down',
+                ),
               ),
             ),
-          ),
-          Opacity(
-            opacity: opacity,
-            child: IconButton(
-              onPressed: _tunerActiveInput(device)
-                  ? () => addHaptic(device.frequencyLower)
-                  : null,
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                size: arrowSize,
-                semanticLabel: 'tune down',
+            Opacity(
+              opacity: opacity,
+              child: IconButton(
+                onPressed: _tunerActiveInput(device)
+                    ? () => addHaptic(device.frequencyLower)
+                    : null,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: arrowSize,
+                  semanticLabel: 'tune down',
+                ),
               ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ],
     );
   }
@@ -276,11 +284,11 @@ class TunerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Padding(
-      padding: const EdgeInsets.all(padding),
+      padding: const .all(padding),
       child: ListView(
         children: [
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               if (device.menuDisplayed) menuWarning(context),
               const _FrequencyRow(),
@@ -298,7 +306,7 @@ class TunerPage extends StatelessWidget {
               const _Controls(),
               if (!_tunerActiveInput(device)) const _EnableTuner(),
             ],
-          )
+          ),
         ],
       ),
     );
