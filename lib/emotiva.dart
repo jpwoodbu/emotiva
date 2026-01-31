@@ -70,7 +70,7 @@ Future<Device> discover(int timeoutSec) async {
 /// is called. [close] also tears down the listening socket.
 ///
 /// It is up to the caller of [stream] to deduplicate yielded devices. The
-/// [Device] objects can be added to a [Set] to acheve this.
+/// [Device] objects can be added to a [Set] to achieve this.
 class MultiDeviceDiscover {
   RawDatagramSocket? _socket;
   Timer? _pinger;
@@ -160,7 +160,7 @@ int _intFromElement(XmlNode node, String xpath) {
   } on FormatException {
     throw 'Error casting $text to int.';
   } catch (e) {
-    throw 'Unkonwn error casting $text to int: $e';
+    throw 'Unknown error casting $text to int: $e';
   }
 }
 
@@ -382,8 +382,8 @@ class Device {
   }
 
   // The hashCode and == operator override allow Device to be placed into a Set.
-  // This is useful when discoverying multiple Emotiva devices on a network.
-  // The assuption is that each unique device will have its own IP address.
+  // This is useful when discovering multiple Emotiva devices on a network.
+  // The assumption is that each unique device will have its own IP address.
   @override
   int get hashCode => address.address.hashCode;
 
@@ -438,7 +438,7 @@ class Device {
   /// Stream of messages arriving on the notify stream.
   Stream<String> notifyStream() => _decode(_notify.stream);
 
-  /// Stream of messages arriving on the menu notify streami.
+  /// Stream of messages arriving on the menu notify stream.
   ///
   /// A null assertion error is thrown if this is called when [menuNotifyPort]
   /// is null.
@@ -688,7 +688,7 @@ class Device {
           _sequenceNumber = serverSequence;
           updateAll();
         } else {
-          // The only case left is that serverSequence is <= _sequnceNumber.
+          // The only case left is that serverSequence is <= _sequenceNumber.
           if (pow(2, 32) - _sequenceNumber < 1000) {
             // My simple attempt at rollover detection. Emotiva documents that
             // the sequence number they produce is an unsigned int. If, somehow
@@ -800,7 +800,7 @@ class Device {
         case 'bass':
           bassTrim = _getDoubleAttribute(_valueAttribute(element.attributes));
         // "mode_*" fields indicate whether these modes are selectable on the
-        // device via the "visible" atttribute.
+        // device via the "visible" attribute.
         case 'mode_ref_stereo' ||
             'mode_stereo' ||
             'mode_music' ||
@@ -1166,7 +1166,7 @@ class FakeDevice extends Device {
     return fields;
   }
 
-  void _updateBuilder(builder, String field, String value) {
+  void _updateBuilder(XmlBuilder builder, String field, String value) {
     builder.element(
       'property',
       attributes: {
@@ -1878,7 +1878,7 @@ class FakeDevice extends Device {
 Future<FakeDevice> futureFakeDevice() async =>
     FakeDevice(InternetAddress('192.168.42.1'), 1, 2);
 
-// These enums represet the UI elements of the on-screen display menu.
+// These enums represent the UI elements of the on-screen display menu.
 
 /// Arrow direction. This would be named ArrowDirection except that I wanted to
 /// be consistent with reusing names of the attributes in the XML as described
@@ -1929,7 +1929,7 @@ class Menu {
   /// Provide the column/row position for an [arrow].
   ///
   /// A value of -1 means that [arrow] is not currently visible. If the [arrow] is
-  /// left or right, the returned value respresents which row should display the
+  /// left or right, the returned value represents which row should display the
   /// arrow. If the [arrow] is up or down, the returned value represents which
   /// column should display the arrow.
   ArrowPosition _arrowPosition(Arrow arrow) {

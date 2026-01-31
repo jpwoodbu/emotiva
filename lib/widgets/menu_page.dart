@@ -52,7 +52,7 @@ class _ArrowIcon extends StatelessWidget {
   }
 }
 
-/// This widget is used when the verticle arrows are over fixed width text.
+/// This widget is used when the vertical arrows are over fixed width text.
 /// Typically, the text is an input which can be changed by pressing the up/down
 /// controls to cycle through different characters. The vertical arrows indicate
 /// which character is currently editable and therefore needs to be able to
@@ -283,7 +283,7 @@ class _Controls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = context.read<DeviceChanges>().device;
-    // TODO(jpwoodbu) Dedupe this opacitity feature with its use in
+    // TODO(jpwoodbu) Dedupe this opacity feature with its use in
     // menu_page.dart.
 
     // opacity of 1.0 is the default. Reduce the opacity of these controls to
@@ -391,7 +391,7 @@ class _Controls extends StatelessWidget {
                   // are just too big without scaling them down. But making their
                   // size different reduces the row height, which causes the whole
                   // table to appear to scale before it must. The padding makes
-                  // the row approximiately the size it would have been had the
+                  // the row approximately the size it would have been had the
                   // icon size not been reduced (see below).
                   padding: .all(_buttonSize(constraints) * 0.2),
                   onPressed: device.menuAvailable()

@@ -12,5 +12,9 @@
   "files.watcherExclude": {
     "**/.fvm": true
   },
-  "dart.flutterSdkPath": ".fvm/versions/3.38.9"
+  "dart.flutterSdkPath": ".fvm/versions/3.38.9",
+  "cSpell.words": [
+    "aesebu",
+    "fira"
+  ]
 }

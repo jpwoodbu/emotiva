@@ -290,7 +290,7 @@ class _MainViewState extends State<MainView> {
                     ),
                     MenuItemButton(
                       child: const MultiDeviceSetting(),
-                      // MuiltiDeviceSettings has its own gesture behavior.
+                      // MultiDeviceSetting has its own gesture behavior.
                       // But onPressed needs to be non-null here to get the
                       // desired hover effect.
                       onPressed: () {},
@@ -302,7 +302,7 @@ class _MainViewState extends State<MainView> {
           : null,
       body: SafeArea(
         bottom: false,
-        // Using IndexedStack is critical. It preserves the existance (I think)
+        // Using IndexedStack is critical. It preserves the existence (I think)
         // of the widgets as the user navigates between them so that we don't
         // try to do something breaking like creating additional listeners for a
         // stream inside initState perhaps before the prior listeners have been

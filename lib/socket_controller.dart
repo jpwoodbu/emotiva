@@ -12,7 +12,7 @@ final _log = Logger('SocketController');
 /// The [stream] used by consumers of this class is not disrupted when the
 /// socket needs to be recreated.
 ///
-/// This class is meant for sockets which only receieve data. If you want to be
+/// This class is meant for sockets which only receive data. If you want to be
 /// able to send data, use [SendSocketController].
 class SocketController {
   /// The port on which to listen for inbound [Datagram]s.
