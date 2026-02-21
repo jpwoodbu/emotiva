@@ -13,8 +13,12 @@
     "**/.fvm": true
   },
   "dart.flutterSdkPath": ".fvm/versions/3.38.9",
-  "cSpell.words": [
-    "aesebu",
-    "fira"
-  ]
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:emotiva}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  }
 }

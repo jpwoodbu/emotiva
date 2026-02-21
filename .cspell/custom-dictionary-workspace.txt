@@ -1,0 +1,10 @@
+# Custom Dictionary Words
+WCPE
+acks
+aesebu
+bitstream
+emotiva
+fira
+hdpi
+janky
+subwoofer
