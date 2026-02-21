@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -549,13 +550,25 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
       builder: (context, _) => Scaffold(
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ConnectionHelp()),
-            );
+          onPressed: () async {
+            emotiva.Device? device;
+            if (isApple(context)) {
+              device = await showCupertinoDialog<emotiva.Device?>(
+                context: context,
+                builder: (BuildContext context) => const ManuallyConnect(),
+              );
+            } else {
+              device = await showDialog<emotiva.Device?>(
+                context: context,
+                builder: (BuildContext context) => const ManuallyConnect(),
+              );
+            }
+            if (device != null) {
+              _discover.close();
+              _connect(device);
+            }
           },
-          child: const Icon(Icons.help),
+          child: const Icon(Icons.input),
         ),
         body: SafeArea(
           bottom: false,
@@ -566,9 +579,22 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
                   Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
-                      Text(
-                        'Device selection',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Row(
+                        children: [
+                          Text(
+                            'Device selection',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ConnectionHelp(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.help),
+                          ),
+                        ],
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -631,5 +657,114 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
       ),
       (Route<dynamic> route) => false,
     );
+  }
+}
+
+class ManuallyConnect extends StatefulWidget {
+  const ManuallyConnect({super.key});
+
+  @override
+  State<ManuallyConnect> createState() => _ManuallyConnectState();
+}
+
+class _ManuallyConnectState extends State<ManuallyConnect> {
+  final _controller = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const hintText = 'Enter an IPv4 address';
+    const helperText =
+        'Experimental! Use only if device discovery does not work.';
+    const iosErrorStyle = TextStyle(color: Colors.red);
+    return AlertDialog.adaptive(
+      title: const Text('Manually connect'),
+      content: isApple(context)
+          ? Column(
+              children: [
+                // This logic imitates the behavior of the Material
+                // InputDecoration where helperText is only shown if hintText is
+                // null.
+                _errorText == null
+                    ? const Text(helperText, style: iosErrorStyle)
+                    : Text(_errorText!, style: iosErrorStyle),
+                const SizedBox(height: 12.0),
+                CupertinoTextField(
+                  controller: _controller,
+                  autofocus: true,
+                  keyboardType: const .numberWithOptions(decimal: true),
+                  placeholder: hintText,
+                ),
+              ],
+            )
+          : TextField(
+              controller: _controller,
+              autofocus: true,
+              keyboardType: .number,
+              decoration: InputDecoration(
+                helperText: helperText,
+                // This is a hack to avoid this important text getting
+                // truncated.
+                helperMaxLines: 100,
+                helperStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                hintText: hintText,
+                errorText: _errorText,
+              ),
+            ),
+      actions: [
+        isApple(context)
+            ? CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              )
+            : TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+        isApple(context)
+            ? CupertinoDialogAction(
+                onPressed: () => _onPressedConnect(),
+                child: const Text('Connect'),
+              )
+            : TextButton(
+                onPressed: () => _onPressedConnect(),
+                child: const Text('Connect'),
+              ),
+      ],
+    );
+  }
+
+  void _onPressedConnect() {
+    emotiva.Device? device;
+    final address = _controller.text;
+    try {
+      // Note that the 'name' field will never get set
+      device = emotiva.Device(
+        InternetAddress(address, type: InternetAddressType.IPv4),
+        // TODO(jpwoodbu) Is it OK to use the control and notify ports my RMC-1L
+        // reports? Maybe those are defaults?
+        7002,
+        7003,
+        // Since manually connecting is being added to work around issues with
+        // newer firmware, let's assume the control version is the newer version
+        // 3.0. The control version is a field only communicated through the
+        // transponder packet.
+      )..controlVersion = '3.0';
+    } catch (e) {
+      setState(() {
+        _errorText = 'Invalid address';
+      });
+    }
+    if (device != null) {
+      Navigator.pop<emotiva.Device>(context, device);
+    }
   }
 }

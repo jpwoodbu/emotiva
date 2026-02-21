@@ -190,10 +190,10 @@ Device parseTransponder(String data, InternetAddress address) {
         'fields. Your Emotiva processor may require a firmware update to work '
         'with this app.');
   }
-  final device = Device(address, controlPort, notifyPort);
-  device.model = model;
-  device.name = name;
-  device.controlVersion = controlVersion;
+  final device = Device(address, controlPort, notifyPort)
+    ..model = model
+    ..name = name
+    ..controlVersion = controlVersion;
   // Some fields aren't used by this library. And some fields are absent on some
   // devices in the fields. E.g. an XMC-1, perhaps running an older firmware.
   // For those fields, log warnings instead of hard failing.
