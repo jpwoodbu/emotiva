@@ -424,7 +424,35 @@ class DiscoveryError extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: errorColor),
               ),
-              onTap: () {},
+              onTap: () async {
+                emotiva.Device? device;
+                if (isApple(context)) {
+                  device = await showCupertinoDialog<emotiva.Device?>(
+                    context: context,
+                    builder: (BuildContext context) => const ManuallyConnect(),
+                  );
+                } else {
+                  device = await showDialog<emotiva.Device?>(
+                    context: context,
+                    builder: (BuildContext context) => const ManuallyConnect(),
+                  );
+                }
+                if (device != null) {
+                  if (context.mounted) {
+                    // TODO(jpwoodbu) How to detect connection failures since
+                    // this is all UDP? Ideally, on connection failure, we'd
+                    // show the connection failure page, which would give the
+                    // user an opportunity to input a different IP address.
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Discovery(providedDevice: device),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
+                  }
+                }
+              },
             ),
           ),
           Card(
