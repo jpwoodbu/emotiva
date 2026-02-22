@@ -27,6 +27,7 @@ import 'package:emotiva_remote/widgets/connection_help.dart';
 
 final _log = Logger('main');
 const String settingMultiDevice = 'multiDeviceEnabled';
+const String settingSavedAddress = 'savedAddress';
 
 Future<void> main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
@@ -116,9 +117,17 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
                 final p = snapshot.data!;
                 final multiDeviceEnable =
                     p.getBool(settingMultiDevice) ?? false;
+                final savedAddress = p.getString(settingSavedAddress);
+                emotiva.Device? savedDevice;
+                if (savedAddress != null) {
+                  savedDevice = manualDevice(InternetAddress(savedAddress));
+                  _log.fine(
+                    'Attempting to connect to saved address: $savedAddress',
+                  );
+                }
                 return multiDeviceEnable
                     ? const MultiDeviceDiscovery()
-                    : const Discovery();
+                    : Discovery(providedDevice: savedDevice);
             }
           },
     );
@@ -369,61 +378,92 @@ class DiscoveryError extends StatelessWidget {
     // This is the default message when error is not a String. It was likely a
     // TimeoutException.
     String message = isApple(context)
-        ? 'No device was found.'
-        : 'No Emotiva device was found.';
+        ? 'No device was found'
+        : 'No Emotiva device was found';
     if (error is String) message = error.toString();
+    final errorColor = Theme.of(context).colorScheme.error;
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            mainAxisAlignment: .center,
-            children: [
-              Text(message),
-              const SizedBox(height: 25.0),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Discovery()),
-                    (Route<dynamic> route) => false,
-                  );
-                },
-                child: const Text('Try again'),
+      appBar: AppBar(
+        title: const Text('Connection error'),
+        centerTitle: true,
+        leading: const Icon(Icons.warning),
+      ),
+      body: ListView(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                message,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: errorColor),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Discovery(useFake: true),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
-                },
-                child: const Text('Demo mode'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ConnectionHelp(),
-                    ),
-                  );
-                },
-                child: const Text('Troubleshooting tips'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => LogConsole.open(context),
-                child: const Text('Debug logs'),
-              ),
-            ],
+            ),
           ),
-        ),
+          Card(
+            child: ListTile(
+              title: const Text('Try again'),
+              leading: const Icon(Icons.refresh),
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Discovery()),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Manual connection'),
+              leading: const Icon(Icons.input),
+              trailing: Text(
+                'Experimental!',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: errorColor),
+              ),
+              onTap: () {},
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Demo mode'),
+              leading: const Icon(Icons.play_circle_outline),
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Discovery(useFake: true),
+                  ),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Troubleshooting tips'),
+              leading: const Icon(Icons.help),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConnectionHelp(),
+                  ),
+                );
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Debug logs'),
+              leading: const Icon(Icons.info),
+              onTap: () => LogConsole.open(context),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -742,29 +782,36 @@ class _ManuallyConnectState extends State<ManuallyConnect> {
     );
   }
 
-  void _onPressedConnect() {
+  void _onPressedConnect() async {
     emotiva.Device? device;
     final address = _controller.text;
     try {
-      // Note that the 'name' field will never get set
-      device = emotiva.Device(
+      device = manualDevice(
         InternetAddress(address, type: InternetAddressType.IPv4),
-        // TODO(jpwoodbu) Is it OK to use the control and notify ports my RMC-1L
-        // reports? Maybe those are defaults?
-        7002,
-        7003,
-        // Since manually connecting is being added to work around issues with
-        // newer firmware, let's assume the control version is the newer version
-        // 3.0. The control version is a field only communicated through the
-        // transponder packet.
-      )..controlVersion = '3.0';
+      );
     } catch (e) {
       setState(() {
         _errorText = 'Invalid address';
       });
     }
+
     if (device != null) {
-      Navigator.pop<emotiva.Device>(context, device);
+      final p = await SharedPreferences.getInstance();
+      await p.setString(settingSavedAddress, address);
+      if (mounted) {
+        Navigator.pop<emotiva.Device>(context, device);
+      }
     }
   }
 }
+
+emotiva.Device manualDevice(InternetAddress address) =>
+    // Note that the 'name' field will never get set
+    // TODO(jpwoodbu) Is it OK to use the control and notify ports my RMC-1L
+    // reports? Maybe those are defaults?
+    emotiva.Device(address, 7002, 7003)
+      // Since manually connecting is being added to work around issues with
+      // newer firmware, let's assume the control version is the newer version
+      // 3.0. The control version is a field only communicated through the
+      // transponder packet.
+      ..controlVersion = '3.0';
