@@ -117,17 +117,9 @@ class _DiscoverySwitchState extends State<DiscoverySwitch> {
                 final p = snapshot.data!;
                 final multiDeviceEnable =
                     p.getBool(settingMultiDevice) ?? false;
-                final savedAddress = p.getString(settingSavedAddress);
-                emotiva.Device? savedDevice;
-                if (savedAddress != null) {
-                  savedDevice = manualDevice(InternetAddress(savedAddress));
-                  _log.fine(
-                    'Attempting to connect to saved address: $savedAddress',
-                  );
-                }
                 return multiDeviceEnable
                     ? const MultiDeviceDiscovery()
-                    : Discovery(providedDevice: savedDevice);
+                    : const Discovery();
             }
           },
     );
@@ -381,7 +373,6 @@ class DiscoveryError extends StatelessWidget {
         ? 'No device was found'
         : 'No Emotiva device was found';
     if (error is String) message = error.toString();
-    final errorColor = Theme.of(context).colorScheme.error;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connection error'),
@@ -395,9 +386,9 @@ class DiscoveryError extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 message,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: errorColor),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           ),
@@ -416,41 +407,20 @@ class DiscoveryError extends StatelessWidget {
           ),
           Card(
             child: ListTile(
-              title: const Text('Manual connection'),
+              title: const Text('Enable multi-device mode'),
               leading: const Icon(Icons.input),
-              trailing: Text(
-                'Experimental!',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: errorColor),
-              ),
+              subtitle: const Text('This is required to try manually connecting'),
               onTap: () async {
-                emotiva.Device? device;
-                if (isApple(context)) {
-                  device = await showCupertinoDialog<emotiva.Device?>(
-                    context: context,
-                    builder: (BuildContext context) => const ManuallyConnect(),
+                final p = await SharedPreferences.getInstance();
+                await p.setBool(settingMultiDevice, true);
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MultiDeviceDiscovery(),
+                    ),
+                    (Route<dynamic> route) => false,
                   );
-                } else {
-                  device = await showDialog<emotiva.Device?>(
-                    context: context,
-                    builder: (BuildContext context) => const ManuallyConnect(),
-                  );
-                }
-                if (device != null) {
-                  if (context.mounted) {
-                    // TODO(jpwoodbu) How to detect connection failures since
-                    // this is all UDP? Ideally, on connection failure, we'd
-                    // show the connection failure page, which would give the
-                    // user an opportunity to input a different IP address.
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Discovery(providedDevice: device),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                  }
                 }
               },
             ),
@@ -605,87 +575,167 @@ class MultiDeviceDiscovery extends StatefulWidget {
 
 class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
   late emotiva.MultiDeviceDiscover _discover;
+  late Future<SharedPreferences> _sharedPreferences;
 
   @override
   void initState() {
     super.initState();
     _discover = emotiva.MultiDeviceDiscover();
+    _sharedPreferences = SharedPreferences.getInstance();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (BuildContext _) => MultiDeviceDiscoveryChanges(_discover),
-      builder: (context, _) => Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            emotiva.Device? device;
-            if (isApple(context)) {
-              device = await showCupertinoDialog<emotiva.Device?>(
-                context: context,
-                builder: (BuildContext context) => const ManuallyConnect(),
-              );
-            } else {
-              device = await showDialog<emotiva.Device?>(
-                context: context,
-                builder: (BuildContext context) => const ManuallyConnect(),
-              );
-            }
-            if (device != null) {
-              _discover.close();
-              _connect(device);
-            }
-          },
-          child: const Icon(Icons.input),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
-            children:
-                <Widget>[
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Device selection',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          IconButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ConnectionHelp(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.help),
-                          ),
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _discover.close();
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const Discovery(useFake: true),
-                            ),
-                            (Route<dynamic> route) => false,
-                          );
-                        },
-                        child: const Text('Demo mode'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15.0),
-                  const LinearProgressIndicator(),
-                  const SizedBox(height: 15.0),
-                ] +
-                _devices(context.watch<MultiDeviceDiscoveryChanges>().devices),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Device discovery'),
+        centerTitle: true,
+        // TODO(jpwoodbu) Make this clickable.
+        leading: IconButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ConnectionHelp()),
           ),
+          icon: const Icon(Icons.help),
+        ),
+        actions: [
+          MenuAnchor(
+            builder: (context, controller, _) {
+              return IconButton(
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                icon: const Icon(Icons.more_vert),
+              );
+            },
+            menuChildren: [
+              MenuItemButton(
+                child: const Text('Disable multi-device mode'),
+                onPressed: () async {
+                  final p = await SharedPreferences.getInstance();
+                  await p.setBool(settingMultiDevice, false);
+                  _log.fine(
+                    'multi-device mode -> ${p.getBool(settingMultiDevice)}',
+                  );
+                  _discover.close();
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Discovery(),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
+                  }
+                },
+              ),
+              MenuItemButton(
+                child: const Text('Demo mode'),
+                onPressed: () {
+                  _discover.close();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Discovery(useFake: true),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          emotiva.Device? device;
+          if (isApple(context)) {
+            device = await showCupertinoDialog<emotiva.Device?>(
+              context: context,
+              builder: (BuildContext context) => const ManuallyConnect(),
+            );
+          } else {
+            device = await showDialog<emotiva.Device?>(
+              context: context,
+              builder: (BuildContext context) => const ManuallyConnect(),
+            );
+          }
+          if (device != null) {
+            _discover.close();
+            _connect(device);
+          }
+        },
+        child: const Icon(Icons.input),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: FutureBuilder(
+          future: _sharedPreferences,
+          builder: (context, asyncSnapshot) {
+            emotiva.Device? manuallyAddedDevice;
+            switch (asyncSnapshot.connectionState) {
+              case .active:
+              case .waiting:
+              case .none:
+                return const LinearProgressIndicator();
+              case .done:
+                if (!asyncSnapshot.hasData) {
+                  _log.severe(
+                    'Error fetching saved address: ${asyncSnapshot.error}',
+                  );
+                } else {
+                  final savedAddress = asyncSnapshot.data!.getString(
+                    settingSavedAddress,
+                  );
+                  if (savedAddress != null) {
+                    try {
+                      manuallyAddedDevice = manualDevice(
+                        InternetAddress(savedAddress),
+                      );
+                    } catch (e) {
+                      _log.severe(e);
+                    }
+                  }
+                }
+            }
+            return ChangeNotifierProvider(
+              create: (BuildContext _) =>
+                  MultiDeviceDiscoveryChanges(_discover),
+              builder: (context, _) => ListView(
+                padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 25.0),
+                children:
+                    [
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: 15.0),
+                      if (manuallyAddedDevice != null)
+                        DeviceCard(
+                          device: manuallyAddedDevice!,
+                          onTap: () {
+                            _discover.close();
+                            _connect(manuallyAddedDevice!);
+                          },
+                          onLongPress: () async {
+                            final shouldRemove =
+                                await _confirmRemoveManuallyAddedDevice();
+                            if (shouldRemove == true) {
+                              asyncSnapshot.data!.remove(settingSavedAddress);
+                              setState(() {
+                                manuallyAddedDevice = null;
+                              });
+                            }
+                          },
+                        ),
+                    ] +
+                    _devices(
+                      context.watch<MultiDeviceDiscoveryChanges>().devices,
+                    ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -693,24 +743,21 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
 
   List<Widget> _devices(Set<emotiva.Device> devices) {
     if (devices.isEmpty) {
-      return const [Text('No devices found so far...')];
+      return const [
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text('No devices found so far...'),
+        ),
+      ];
     } else {
       return devices
           .map(
-            (device) => Card(
-              child: SizedBox(
-                width: 300,
-                height: 75,
-                child: ListTile(
-                  leading: const Icon(Icons.album),
-                  title: Text(device.name),
-                  subtitle: Text(device.address.address),
-                  onTap: () {
-                    _discover.close();
-                    _connect(device);
-                  },
-                ),
-              ),
+            (d) => DeviceCard(
+              device: d,
+              onTap: () {
+                _discover.close();
+                _connect(d);
+              },
             ),
           )
           .toList();
@@ -724,6 +771,67 @@ class _MultiDeviceDiscoveryState extends State<MultiDeviceDiscovery> {
         builder: (context) => Discovery(providedDevice: device),
       ),
       (Route<dynamic> route) => false,
+    );
+  }
+
+  Future<bool?> _confirmRemoveManuallyAddedDevice() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog.adaptive(
+        title: const Text('Remove device'),
+        content: const Text('Remove manually added device?'),
+        actions: [
+          isApple(context)
+              ? CupertinoDialogAction(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                )
+              : TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+          isApple(context)
+              ? CupertinoDialogAction(
+                  onPressed: () => Navigator.pop(context, true),
+                  isDestructiveAction: true,
+                  child: const Text('Remove'),
+                )
+              : TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Remove'),
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class DeviceCard extends StatelessWidget {
+  final emotiva.Device device;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+
+  const DeviceCard({
+    super.key,
+    required this.device,
+    required this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: SizedBox(
+        width: 300,
+        height: 75,
+        child: ListTile(
+          leading: const Icon(Icons.album),
+          title: Text(device.name),
+          subtitle: Text(device.address.address),
+          onTap: onTap,
+          onLongPress: onLongPress,
+        ),
+      ),
     );
   }
 }
@@ -842,4 +950,5 @@ emotiva.Device manualDevice(InternetAddress address) =>
       // newer firmware, let's assume the control version is the newer version
       // 3.0. The control version is a field only communicated through the
       // transponder packet.
-      ..controlVersion = '3.0';
+      ..controlVersion = '3.0'
+      ..name = 'Manual';
