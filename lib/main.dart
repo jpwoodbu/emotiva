@@ -944,8 +944,9 @@ class _ManuallyConnectState extends State<ManuallyConnect> {
 emotiva.Device manualDevice(InternetAddress address) =>
     // Note that the 'name' field will never get set
     // TODO(jpwoodbu) Is it OK to use the control and notify ports my RMC-1L
-    // reports? Maybe those are defaults?
+    // reports? Maybe those are defaults? Same for the menuNotifyPort below.
     emotiva.Device(address, 7002, 7003)
+      ..menuNotifyPort = 7005
       // Since manually connecting is being added to work around issues with
       // newer firmware, let's assume the control version is the newer version
       // 3.0. The control version is a field only communicated through the

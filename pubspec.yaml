@@ -2,7 +2,7 @@ name: emotiva_remote
 description: A remote control for Emotiva processors.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.7.9+2026022201
+version: 1.7.10+2026022301
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
