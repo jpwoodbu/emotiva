@@ -1928,10 +1928,10 @@ class Menu {
 
   /// Provide the column/row position for an [arrow].
   ///
-  /// A value of -1 means that [arrow] is not currently visible. If the [arrow] is
-  /// left or right, the returned value represents which row should display the
-  /// arrow. If the [arrow] is up or down, the returned value represents which
-  /// column should display the arrow.
+  /// A value of -1 means that [arrow] is not currently visible. If the [arrow]
+  /// is left or right, the returned value represents which row should display
+  /// the arrow. If the [arrow] is up or down, the returned value represents
+  /// which column should display the arrow.
   ArrowPosition _arrowPosition(Arrow arrow) {
     for (final row in rows) {
       for (final column in row.columns) {

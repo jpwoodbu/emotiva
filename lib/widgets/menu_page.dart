@@ -53,14 +53,14 @@ class _ArrowIcon extends StatelessWidget {
 }
 
 /// This widget is used when the vertical arrows are over fixed width text.
-/// Typically, the text is an input which can be changed by pressing the up/down
-/// controls to cycle through different characters. The vertical arrows indicate
-/// which character is currently editable and therefore needs to be able to
-/// offset horizontally to align with the editable character. The icon version
-/// of this widget is both wider than a single character and, with the font
-/// config being used, would be very tricky to position in line with the
-/// editable character. This is why a character from the same font is used to
-/// render the arrows in this widget.
+/// Typically, the text is an input on the Emotiva device which can be changed
+/// by pressing the up/down controls to cycle through different characters. The
+/// vertical arrows indicate which character is currently editable and therefore
+/// needs to be able to offset horizontally to align with the editable
+/// character. The icon version of this widget is both wider than a single
+/// character and, with the font config being used, would be very tricky to
+/// position in line with the editable character. This is why a character from
+/// the same font is used to render the arrows in this widget.
 class _ArrowText extends StatelessWidget {
   const _ArrowText({required emotiva.Arrow arrow, required int offset})
     : _arrow = arrow,
@@ -186,11 +186,13 @@ TableRow _verticalArrow(emotiva.ArrowPosition arrowPosition) {
         );
       } else {
         // TODO(jpwoodbu) Should I pass the icon data instead of the arrow?
+        // TODO(jpwoodbu) It seems the offset may be important when the
+        // fixedWidth propert is not set, according to an email from Emotiva.
         children.add(_ArrowIcon(arrow: arrowPosition.arrow, size: height));
       }
     } else {
       // Setting this height makes sure the menu table doesn't move on the
-      // screen if the up arrow is not visible.
+      // screen if the arrow is not visible.
       children.add(const SizedBox(height: height));
     }
   }
@@ -220,6 +222,9 @@ class _OnScreenDisplay extends StatelessWidget {
         ),
       );
     }
+    // If the menu is not meant to be displayed, or we don't have enough rows to
+    // display the menu correctly, show an empty display with the top and bottom
+    // horizontal borders.
     if (!device.menuDisplayed || device.menuContents.rows.length < 7) {
       const rowHeight = 25.0;
       return Padding(
