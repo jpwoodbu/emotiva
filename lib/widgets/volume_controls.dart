@@ -43,21 +43,16 @@ class _VolumeControlsState extends State<VolumeControls> {
     }
   }
 
-  void volumeDown() {
+  void volumeDelta(double delta) {
     if (_controlMainVolume) {
-      _mainVolumeFunction(-1.0);
+      _mainVolumeFunction(delta);
     } else {
-      _zone2VolumeFunction(-1.0);
+      _zone2VolumeFunction(delta);
     }
   }
 
-  void volumeUp() {
-    if (_controlMainVolume) {
-      _mainVolumeFunction(1.0);
-    } else {
-      _zone2VolumeFunction(1.0);
-    }
-  }
+  void volumeDown() => volumeDelta(-1.0);
+  void volumeUp() => volumeDelta(1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +65,40 @@ class _VolumeControlsState extends State<VolumeControls> {
       children: [
         Padding(
           padding: const .only(left: 10),
-          child: Text('Volume', style: Theme.of(context).textTheme.titleLarge),
+          child: TextButton.icon(
+            label: Text(
+              'Volume',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            icon: const Icon(Icons.tune),
+            onPressed: () {
+              showAdaptiveDialog(
+                context: context,
+                builder: (context) {
+                  // DO NOT use the adaptive() constructor here. This control
+                  // does not layout well using the Cupertino AlertDialog.
+                  return AlertDialog(
+                    title: const Text('Coarse volume'),
+                    content: CorseVolumeButtons(
+                      volumeFunction: (double delta) {
+                        addHaptic(() => volumeDelta(delta));
+                      },
+                    ),
+                    // Add vertical padding to reduce the chance of a touch
+                    // miss; e.g. the close button. Eliminate horizontal padding
+                    // to reduce the chance of an unnecessary wrap.
+                    contentPadding: const .fromLTRB(0.0, 12.0, 0.0, 12.0),
+                    actions: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ),
         Row(
           children: [
@@ -92,6 +120,36 @@ class _VolumeControlsState extends State<VolumeControls> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class CorseVolumeButtons extends StatelessWidget {
+  final Function(double) volumeFunction;
+  const CorseVolumeButtons({required this.volumeFunction, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: .center,
+      children: [
+        TextButton(
+          onPressed: () => volumeFunction(-10.0),
+          child: const Text('-10'),
+        ),
+        TextButton(
+          onPressed: () => volumeFunction(-5.0),
+          child: const Text('-5'),
+        ),
+        TextButton(
+          onPressed: () => volumeFunction(5.0),
+          child: const Text('+5'),
+        ),
+        TextButton(
+          onPressed: () => volumeFunction(10.0),
+          child: const Text('+10'),
         ),
       ],
     );
