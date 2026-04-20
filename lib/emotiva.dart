@@ -147,6 +147,7 @@ class MultiDeviceDiscover {
 
 String _textFromElement(XmlNode node, String xpath) {
   try {
+    // ignore: experimental_member_use
     return node.xpath(xpath).first.innerText.trim();
   } catch (e) {
     throw 'Error trying to fetch $xpath: $e';
