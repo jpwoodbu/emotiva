@@ -17,9 +17,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "one.woodbury.emotiva_remote"
     compileSdk = flutter.compileSdkVersion
-    // This NDK version is needed by many of our deps and flutter.ndkVersion
-    // seems to be set at version 26.x as of Flutter 3.32.1.
-    ndkVersion = "27.0.12077973"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
