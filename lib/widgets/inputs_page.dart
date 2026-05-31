@@ -61,7 +61,7 @@ Future<T?> showCustomBottomSheet<T>({
         child: Padding(
           // Bottom padding is not needed for a bottom sheet. And the bottom
           // margin should be sufficiently handled by the SafeArea wrapper.
-          padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0.0),
+          padding: const .fromLTRB(padding, padding, padding, 0.0),
           child: IntrinsicWidth(
             child: Column(
               mainAxisSize: .min,
@@ -536,7 +536,7 @@ class _TrimControls extends StatelessWidget {
         device.power)) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 15.0),
+          padding: const .only(bottom: 15.0),
           child: Text(
             'Speaker and EQ trim configuration unavailable in the current mode.',
             style: TextStyle(
@@ -759,7 +759,7 @@ class _Inputs extends StatelessWidget {
                 onPressed: () => _sourceSelector(context, device),
                 icon: const Icon(Icons.person),
                 label: const Text('Source'),
-                style: const ButtonStyle(alignment: Alignment.centerLeft),
+                style: const ButtonStyle(alignment: .centerLeft),
               ),
             ),
             Padding(
@@ -877,7 +877,7 @@ class InputsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final device = context.watch<DeviceChanges>().device;
     return Padding(
-      padding: const EdgeInsets.all(padding),
+      padding: const .all(padding),
       child: ListView(
         children: [
           if (device.menuDisplayed) menuWarning(context),

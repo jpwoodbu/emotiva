@@ -21,9 +21,7 @@ double _buttonSize(BoxConstraints constraints) {
 }
 
 class _ArrowIcon extends StatelessWidget {
-  const _ArrowIcon({required emotiva.Arrow arrow, required double size})
-    : _arrow = arrow,
-      _size = size;
+  const _ArrowIcon({required this._arrow, required this._size});
 
   final emotiva.Arrow _arrow;
   final double _size;
@@ -31,7 +29,7 @@ class _ArrowIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     IconData icon;
-    var alignment = Alignment.centerLeft;
+    Alignment alignment = .centerLeft;
     switch (_arrow) {
       case .up:
         icon = Icons.keyboard_arrow_up;
@@ -41,7 +39,7 @@ class _ArrowIcon extends StatelessWidget {
         icon = Icons.keyboard_arrow_left;
       case .right:
         icon = Icons.keyboard_arrow_right;
-        alignment = Alignment.centerRight;
+        alignment = .centerRight;
       default:
         icon = Icons.error;
     }
@@ -62,9 +60,7 @@ class _ArrowIcon extends StatelessWidget {
 /// position in line with the editable character. This is why a character from
 /// the same font is used to render the arrows in this widget.
 class _ArrowText extends StatelessWidget {
-  const _ArrowText({required emotiva.Arrow arrow, required int offset})
-    : _arrow = arrow,
-      _offset = offset;
+  const _ArrowText({required this._arrow, required this._offset});
 
   final emotiva.Arrow _arrow;
   final int _offset;
@@ -187,7 +183,7 @@ TableRow _verticalArrow(emotiva.ArrowPosition arrowPosition) {
       } else {
         // TODO(jpwoodbu) Should I pass the icon data instead of the arrow?
         // TODO(jpwoodbu) It seems the offset may be important when the
-        // fixedWidth propert is not set, according to an email from Emotiva.
+        // fixedWidth property is not set, according to an email from Emotiva.
         children.add(_ArrowIcon(arrow: arrowPosition.arrow, size: height));
       }
     } else {

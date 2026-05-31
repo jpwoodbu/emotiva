@@ -6,9 +6,7 @@ class VolumeRow extends StatelessWidget {
   final double _fontSize;
   final bool _zone2;
 
-  const VolumeRow({super.key, double fontSize = 15.0, bool zone2 = false})
-    : _fontSize = fontSize,
-      _zone2 = zone2;
+  const VolumeRow({super.key, this._fontSize = 15.0, this._zone2 = false});
 
   @override
   Widget build(BuildContext context) {
