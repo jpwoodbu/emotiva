@@ -12,7 +12,7 @@
   "files.watcherExclude": {
     "**/.fvm": true
   },
-  "dart.flutterSdkPath": ".fvm/versions/3.44.3",
+  "dart.flutterSdkPath": ".fvm/versions/3.44.4",
   "cSpell.customDictionaries": {
     "custom-dictionary-workspace": {
       "name": "custom-dictionary-workspace",
