@@ -55,9 +55,15 @@ Future<T?> showCustomBottomSheet<T>({
     builder: (BuildContext context) {
       // SafeArea is needed because this widget doesn't inherit the SafeArea
       // properties from the main app. And without SafeArea, it's been observed
-      // that the Android navigation buttons overlap some of the key parts of
-      // this sheet.
+      // that the Android navigation buttons at the bottom of the screen overlap
+      // some of the key parts of this sheet. Disabling the safe area effect on
+      // all but the bottom side prevents what seems like a bug which adds
+      // additional padding (at least on the left and right side) if there's a
+      // camera punch out on that side.
       return SafeArea(
+        left: false,
+        right: false,
+        top: false,
         child: Padding(
           // Bottom padding is not needed for a bottom sheet. And the bottom
           // margin should be sufficiently handled by the SafeArea wrapper.
