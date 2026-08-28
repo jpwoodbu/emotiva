@@ -145,23 +145,25 @@ class MultiDeviceDiscover {
   }
 }
 
-String _textFromElement(XmlNode node, String xpath) {
-  try {
-    // ignore: experimental_member_use
-    return node.xpath(xpath).first.innerText.trim();
-  } catch (e) {
-    throw 'Error trying to fetch $xpath: $e';
+extension _XmlNodeXPathExtension on XmlNode {
+  String textAt(String xpath) {
+    try {
+      // ignore: experimental_member_use
+      return this.xpath(xpath).first.innerText.trim();
+    } catch (e) {
+      throw FormatException('Error trying to fetch $xpath: $e');
+    }
   }
-}
 
-int _intFromElement(XmlNode node, String xpath) {
-  var text = _textFromElement(node, xpath);
-  try {
-    return int.parse(text);
-  } on FormatException {
-    throw 'Error casting $text to int.';
-  } catch (e) {
-    throw 'Unknown error casting $text to int: $e';
+  int intAt(String xpath) {
+    final text = textAt(xpath);
+    try {
+      return int.parse(text);
+    } on FormatException {
+      throw FormatException('Error casting $text to int.');
+    } catch (e) {
+      throw FormatException('Unknown error casting $text to int: $e');
+    }
   }
 }
 
@@ -180,11 +182,11 @@ Device parseTransponder(String data, InternetAddress address) {
   int controlPort;
   int notifyPort;
   try {
-    model = _textFromElement(root, 'model');
-    name = _textFromElement(root, 'name');
-    controlVersion = _textFromElement(root, './control/version');
-    controlPort = _intFromElement(root, './control/controlPort');
-    notifyPort = _intFromElement(root, './control/notifyPort');
+    model = root.textAt('model');
+    name = root.textAt('name');
+    controlVersion = root.textAt('./control/version');
+    controlPort = root.intAt('./control/controlPort');
+    notifyPort = root.intAt('./control/notifyPort');
   } catch (e) {
     _log.severe(e);
     throw ('The response from your Emotiva processor is missing some required '
@@ -201,12 +203,12 @@ Device parseTransponder(String data, InternetAddress address) {
   try {
     // menuNotifyPort is not available on processors using protocol versions <
     // 2.1.
-    device.menuNotifyPort = _intFromElement(root, './control/menuNotifyPort');
-    device.infoPort = _intFromElement(root, './control/infoPort');
-    device.dataRevision = _textFromElement(root, 'dataRevision');
-    device.setupPortTcp = _intFromElement(root, './control/setupPortTCP');
-    device.setupXmlVersion = _intFromElement(root, './control/setupXMLVersion');
-    device.keepAlive = _intFromElement(root, './control/keepAlive');
+    device.menuNotifyPort = root.intAt('./control/menuNotifyPort');
+    device.infoPort = root.intAt('./control/infoPort');
+    device.dataRevision = root.textAt('dataRevision');
+    device.setupPortTcp = root.intAt('./control/setupPortTCP');
+    device.setupXmlVersion = root.intAt('./control/setupXMLVersion');
+    device.keepAlive = root.intAt('./control/keepAlive');
   } catch (e) {
     _log.warning('Missing optional element in transponder packet: $e');
   }
