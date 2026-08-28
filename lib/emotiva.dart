@@ -38,7 +38,7 @@ Future<Device> discover(int timeoutSec) async {
   final ping = _pingRequest();
   await for (final event in stream) {
     switch (event) {
-      case RawSocketEvent.write:
+      case .write:
         final bytesSent = socket.send(
           ping.codeUnits,
           InternetAddress(_broadcastAddress),
@@ -48,15 +48,15 @@ Future<Device> discover(int timeoutSec) async {
           throw 'Unable to send broadcast ping.';
         }
         _log.info('sent: $ping');
-      case RawSocketEvent.read:
+      case .read:
         final datagram = socket.receive();
         socket.close();
         final data = String.fromCharCodes(datagram!.data);
         _log.info('received: $data');
         final device = parseTransponder(data, datagram.address);
         return device;
-      case RawSocketEvent.closed:
-      case RawSocketEvent.readClosed:
+      case .closed:
+      case .readClosed:
         break;
     }
   }
@@ -90,18 +90,18 @@ class MultiDeviceDiscover {
   }
 
   void _ping() {
-    final socket = _socket;
-    if (socket == null) return;
-    final ping = _pingRequest();
-    final bytesSent = socket.send(
-      ping.codeUnits,
-      InternetAddress(_broadcastAddress),
-      _pingPort,
-    );
-    if (bytesSent == 0) {
-      _log.severe('Unable to send broadcast ping.');
-    } else {
-      _log.info('sent: $ping');
+    if (_socket case RawDatagramSocket socket) {
+      final ping = _pingRequest();
+      final bytesSent = socket.send(
+        ping.codeUnits,
+        InternetAddress(_broadcastAddress),
+        _pingPort,
+      );
+      if (bytesSent == 0) {
+        _log.severe('Unable to send broadcast ping.');
+      } else {
+        _log.info('sent: $ping');
+      }
     }
   }
 
@@ -1265,15 +1265,11 @@ class FakeDevice extends Device {
     updatedFields.add('source');
   }
 
-  double _sanitizeTrimValue(double trim) {
-    if (trim > 24.0) {
-      return 24.0;
-    } else if (trim < -24.0) {
-      return -24.0;
-    } else {
-      return trim;
-    }
-  }
+  double _clampTrimValue(double trim) => switch (trim) {
+    > 24.0 => 24.0,
+    < -24.0 => -24.0,
+    _ => trim,
+  };
 
   void _parseControlRequest(Iterable<XmlElement> elements) {
     Set<String> updatedFields = {};
@@ -1464,24 +1460,24 @@ class FakeDevice extends Device {
           updatedFields.add('speaker_preset');
         case 'center_trim_set':
           final rawTrim = double.parse(_getValue(element));
-          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          final sanitizedTrim = _clampTrimValue(rawTrim);
           // Divide by 2 because this normally happens inside the Emotiva
           // device.
           centerTrim = sanitizedTrim / 2;
           updatedFields.add('center');
         case 'subwoofer_trim_set':
           final rawTrim = double.parse(_getValue(element));
-          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          final sanitizedTrim = _clampTrimValue(rawTrim);
           subwooferTrim = sanitizedTrim / 2;
           updatedFields.add('subwoofer');
         case 'surround_trim_set':
           final rawTrim = double.parse(_getValue(element));
-          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          final sanitizedTrim = _clampTrimValue(rawTrim);
           surroundTrim = sanitizedTrim / 2;
           updatedFields.add('surround');
         case 'back_trim_set':
           final rawTrim = double.parse(_getValue(element));
-          final sanitizedTrim = _sanitizeTrimValue(rawTrim);
+          final sanitizedTrim = _clampTrimValue(rawTrim);
           backTrim = sanitizedTrim / 2;
           updatedFields.add('back');
         case 'treble_up':
@@ -1671,126 +1667,62 @@ class FakeDevice extends Device {
     _notify.controller.add(_encode(response));
   }
 
-  String _getValueForField(String field) {
-    switch (field) {
-      case 'power':
-        return power ? 'On' : 'False';
-      case 'source':
-        return source;
-      case 'mode':
-        return mode;
-      case 'volume':
-        if (muted) {
-          return 'Mute';
-        }
-        return volume.toString();
-      case 'loudness':
-        return loudness ? 'On' : 'Off';
-      case 'audio_input':
-        return audioInput;
-      case 'audio_bitstream':
-        return audioBitstream;
-      case 'audio_bits':
-        return audioBits;
-      case 'video_input':
-        return videoInput;
-      case 'video_format':
-        return videoFormat;
-      case 'video_space':
-        return videoSpace;
-      case 'dim':
-        return dim.toString();
-      case 'speaker_preset':
-        return speakerPreset;
-      case 'center':
-        if (!visibility[field]!) return 'None';
-        return centerTrim.toString();
-      case 'width':
-        if (!visibility[field]!) return 'None';
-        return widthTrim.toString();
-      case 'subwoofer':
-        if (!visibility[field]!) return 'None';
-        return subwooferTrim.toString();
-      case 'surround':
-        if (!visibility[field]!) return 'None';
-        return surroundTrim.toString();
-      case 'back':
-        if (!visibility[field]!) return 'None';
-        return backTrim.toString();
-      case 'height':
-        if (!visibility[field]!) return 'None';
-        return heightTrim.toString();
-      case 'treble':
-        return trebleTrim.toString();
-      case 'bass':
-        return bassTrim.toString();
-      case 'selected_mode':
-        return selectedMode;
-      case 'selected_movie_music':
-        return selectedMovieMusic;
-      case 'input_1':
-        return names['input_1']!;
-      case 'input_2':
-        return names['input_2']!;
-      case 'input_3':
-        return names['input_3']!;
-      case 'input_4':
-        return names['input_4']!;
-      case 'input_5':
-        return names['input_5']!;
-      case 'input_6':
-        return names['input_6']!;
-      case 'input_7':
-        return names['input_7']!;
-      case 'input_8':
-        return names['input_8']!;
-      case 'mode_ref_stereo':
-        return 'Reference Stereo';
-      case 'mode_stereo':
-        return 'Stereo';
-      case 'mode_music':
-        return 'Music';
-      case 'mode_movie':
-        return 'Movie';
-      case 'mode_direct':
-        return 'Direct';
-      case 'mode_dolby':
-        return 'Dolby Surround';
-      case 'mode_dts':
-        return 'dtsX';
-      case 'mode_all_stereo':
-        return 'All Stereo';
-      case 'mode_auto':
-        return 'Auto';
-      case 'mode_surround':
-        return 'Dolby Surround';
-      case 'menu':
-        return menuDisplayed ? 'On' : 'Off';
-      case 'menu_update':
-        return '';
-      case 'zone2_power':
-        return zone2Power ? 'On' : 'Off';
-      case 'zone2_volume':
-        if (zone2Muted) {
-          return 'Mute';
-        }
-        return zone2Volume.toString();
-      case 'zone2_input':
-        return zone2Input;
-      case 'tuner_band':
-        return tunerBand.name.toUpperCase();
-      case 'tuner_channel':
-        return tunerChannel;
-      case 'tuner_signal':
-        return tunerSignal;
-      case 'tuner_RDS':
-        return tunerRds;
-      case 'tuner_program':
-        return tunerProgram;
-      default:
-        throw 'Unsupported field: $field';
-    }
-  }
+  String _getValueForField(String field) => switch (field) {
+    'power' => power ? 'On' : 'False',
+    'source' => source,
+    'mode' => mode,
+    'volume' => muted ? 'Mute' : volume.toString(),
+    'loudness' => loudness ? 'On' : 'Off',
+    'audio_input' => audioInput,
+    'audio_bitstream' => audioBitstream,
+    'audio_bits' => audioBits,
+    'video_input' => videoInput,
+    'video_format' => videoFormat,
+    'video_space' => videoSpace,
+    'dim' => dim.toString(),
+    'speaker_preset' => speakerPreset,
+    'center' => (visibility[field] ?? false) ? centerTrim.toString() : 'None',
+    'width' => (visibility[field] ?? false) ? widthTrim.toString() : 'None',
+    'subwoofer' =>
+      (visibility[field] ?? false) ? subwooferTrim.toString() : 'None',
+    'surround' =>
+      (visibility[field] ?? false) ? surroundTrim.toString() : 'None',
+    'back' => (visibility[field] ?? false) ? backTrim.toString() : 'None',
+    'height' => (visibility[field] ?? false) ? heightTrim.toString() : 'None',
+    'treble' => trebleTrim.toString(),
+    'bass' => bassTrim.toString(),
+    'selected_mode' => selectedMode,
+    'selected_movie_music' => selectedMovieMusic,
+    'input_1' => names['input_1']!,
+    'input_2' => names['input_2']!,
+    'input_3' => names['input_3']!,
+    'input_4' => names['input_4']!,
+    'input_5' => names['input_5']!,
+    'input_6' => names['input_6']!,
+    'input_7' => names['input_7']!,
+    'input_8' => names['input_8']!,
+    'mode_ref_stereo' => 'Reference Stereo',
+    'mode_stereo' => 'Stereo',
+    'mode_music' => 'Music',
+    'mode_movie' => 'Movie',
+    'mode_direct' => 'Direct',
+    'mode_dolby' => 'Dolby Surround',
+    'mode_dts' => 'dtsX',
+    'mode_all_stereo' => 'All Stereo',
+    'mode_auto' => 'Auto',
+    'mode_surround' => 'Dolby Surround',
+    'menu' => menuDisplayed ? 'On' : 'Off',
+    'menu_update' => '',
+    'zone2_power' => zone2Power ? 'On' : 'Off',
+    'zone2_volume' => zone2Muted ? 'Mute' : zone2Volume.toString(),
+    'zone2_input' => zone2Input,
+    'tuner_band' => tunerBand.name.toUpperCase(),
+    'tuner_channel' => tunerChannel,
+    'tuner_signal' => tunerSignal,
+    'tuner_RDS' => tunerRds,
+    'tuner_program' => tunerProgram,
+    _ => throw 'Unsupported field: $field',
+  };
 
   String _getVisibilityForField(String field) {
     bool visible = visibility[field] ?? true;
@@ -1917,14 +1849,7 @@ class Row {
   Row(this.number);
 }
 
-class ArrowPosition {
-  final Arrow arrow;
-  final int track;
-  final int offset;
-  final bool fixedWidth;
-
-  const ArrowPosition(this.arrow, this.track, this.offset, this.fixedWidth);
-}
+typedef ArrowPosition = ({Arrow arrow, int track, int offset, bool fixedWidth});
 
 class Menu {
   List<Row> rows = [];
@@ -1941,20 +1866,20 @@ class Menu {
         switch (arrow) {
           case Arrow.up || Arrow.down:
             if (column.arrow == arrow) {
-              return ArrowPosition(
-                arrow,
-                column.number,
-                column.offset ?? 0,
-                column.fixedWidth,
+              return (
+                arrow: arrow,
+                track: column.number,
+                offset: column.offset ?? 0,
+                fixedWidth: column.fixedWidth,
               );
             }
           case Arrow.left || Arrow.right:
             if (column.arrow == arrow) {
-              return ArrowPosition(
-                arrow,
-                row.number,
-                column.offset ?? 0,
-                column.fixedWidth,
+              return (
+                arrow: arrow,
+                track: row.number,
+                offset: column.offset ?? 0,
+                fixedWidth: column.fixedWidth,
               );
             }
           case Arrow.no:
@@ -1962,7 +1887,7 @@ class Menu {
         }
       }
     }
-    return const ArrowPosition(Arrow.no, -1, 0, false);
+    return const (arrow: .no, track: -1, offset: 0, fixedWidth: false);
   }
 
   ArrowPosition upArrow() => _arrowPosition(Arrow.up);

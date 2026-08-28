@@ -44,8 +44,8 @@ Future<T> waitAtLeast<T>({
   required Future<T> future,
   required Duration duration,
 }) async {
-  final results = await Future.wait([future, Future.delayed(duration)]);
-  return Future<T>.value(results[0]);
+  final (result, _) = await (future, Future.delayed(duration)).wait;
+  return result;
 }
 
 bool isApple(BuildContext context) {
