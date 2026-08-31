@@ -227,14 +227,15 @@ String _convertTrim(double trim) {
 }
 
 /// A model of an Emotiva device.
-class Device {
-  InternetAddress address;
+class Device(
+  var InternetAddress address,
+  var int controlPort,
+  var int notifyPort,
+) {
   String model = '';
   String dataRevision = '';
   String name = '';
   String controlVersion = '';
-  int controlPort;
-  int notifyPort;
   int infoPort = 0;
   int setupPortTcp = 0;
   int setupXmlVersion = 0;
@@ -370,19 +371,16 @@ class Device {
   // Sequence numbers sent bn Emotiva are an unsigned int. -1 indicates we've
   // not yet gotten a real sequence number.
   int _sequenceNumber = -1;
-  // TODO(jpwoodbu) Do we really need to listen on this port? The docs say we
-  // do, but from what I've seen in logging, we do not. I think this is only the
-  // port number we need to use to send control commands to the processor.
-  late SocketController _control;
-  late SocketController _notify;
+  // late SocketController _control;
+  // late SocketController _notify;
   int? _menuNotifyPort;
   SocketController? _menuNotify;
   final _sender = SendSocketController();
-
-  Device(this.address, this.controlPort, this.notifyPort) {
-    _control = SocketController(address, controlPort);
-    _notify = SocketController(address, notifyPort);
-  }
+  // TODO(jpwoodbu) Do we really need to listen on this port? The docs say we
+  // do, but from what I've seen in logging, we do not. I think this is only the
+  // port number we need to use to send control commands to the processor.
+  final _control = SocketController(address, controlPort);
+  final _notify = SocketController(address, notifyPort);
 
   // The hashCode and == operator override allow Device to be placed into a Set.
   // This is useful when discovering multiple Emotiva devices on a network.
@@ -1820,33 +1818,21 @@ Future<FakeDevice> futureFakeDevice() async =>
 /// in the Emotiva API docs.
 enum Arrow { no, up, down, right, left }
 
-class Column {
-  int number = 0;
-  bool highlight = false;
-  Arrow arrow = Arrow.no;
-  bool fixedWidth = false;
+class Column([
+  var int number = 0,
+  var bool highlight = false,
+  var Arrow arrow = .no,
+  var bool fixedWidth = false,
+]) {
   // The offset seems to be only informational. It's only used when fixedWidth
   // is true and the contents of "value" already includes the offset padding.
   int? offset;
   bool? checkbox;
-  String value;
-
-  Column(
-    this.number,
-    this.highlight,
-    this.arrow,
-    this.fixedWidth, {
-    this.offset,
-    this.checkbox,
-    this.value = '',
-  });
+  String value = '';
 }
 
-class Row {
-  int number = 0;
+class Row([var int number = 0]) {
   List<Column> columns = [];
-
-  Row(this.number);
 }
 
 typedef ArrowPosition = ({Arrow arrow, int track, int offset, bool fixedWidth});

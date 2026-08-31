@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:emotiva_remote/util.dart';
 
-class InfoSection {
-  final String title;
-  final String body;
-
-  const InfoSection(this.title, this.body);
-}
+class const InfoSection(final String title, final String body);
 
 class InformationPage extends StatelessWidget {
   final String title;
