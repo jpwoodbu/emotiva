@@ -23,6 +23,14 @@ Compatibility with the new LX processors is unlikely. Emotiva has released the
 [Emotiva Emersa Control](https://play.google.com/store/apps/details?id=com.emotiva.emersa)
 app for the LX processors.
 
+## License
+
+The source code in this repository is licensed under the GNU General Public
+License v3.0 (see LICENSE). Official compiled builds distributed through the
+Apple App Store and Google Play Store are published by the copyright holder
+under a separate commercial license and the respective storefront End User
+License Agreements.
+
 ## Trademarks & Brand Assets
 
 - **Emotiva**: Emotiva, processor model names (such as XMC-1, XMC-2, RMC-1, and
