@@ -19,6 +19,8 @@ dependencies:
   shared_preferences: ^2.5.1
   flutter_android_volume_keydown: ^1.0.0
   logging_flutter: ^3.0.0
+  material_ui: ^1.11.1
+  cupertino_ui: ^1.1.7
 
 dev_dependencies:
   flutter_test:
